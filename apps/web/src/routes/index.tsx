@@ -2,7 +2,9 @@
  * Default terminal layout — shown on first load.
  * Phase 2: Split view with watchlist (left) and chart (right).
  */
-export default function IndexPage() {
+import type { JSX } from 'react';
+
+export default function IndexPage(): JSX.Element {
   return (
     <div
       style={{

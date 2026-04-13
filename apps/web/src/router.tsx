@@ -6,7 +6,7 @@
  * - index.tsx   → Default panel layout
  * - chart/$symbol.tsx → Chart view for a specific symbol
  */
-import { createRootRoute, createRoute, createRouter } from '@tanstack/react-router';
+import { createRootRoute, createRoute } from '@tanstack/react-router';
 import { lazy, Suspense } from 'react';
 
 // Root layout — always rendered, wraps all routes
