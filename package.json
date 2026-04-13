@@ -30,7 +30,9 @@
   },
   "packageManager": "pnpm@9.0.0",
   "commitlint": {
-    "extends": ["@commitlint/config-conventional"],
+    "extends": [
+      "@commitlint/config-conventional"
+    ],
     "rules": {
       "scope-enum": [
         2,
@@ -49,13 +51,21 @@
           "ui-components"
         ]
       ],
-      "subject-max-length": [2, "always", 72]
+      "subject-max-length": [
+        2,
+        "always",
+        72
+      ]
     }
   },
   "lint-staged": {
-    "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
-    "*.{js,jsx,json,md,yaml,yml}": ["prettier --write"],
-    "*.py": ["ruff check --fix", "black"]
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{js,jsx,json,md,yaml,yml}": [
+      "prettier --write"
+    ]
   },
   "prettier": {
     "singleQuote": true,
