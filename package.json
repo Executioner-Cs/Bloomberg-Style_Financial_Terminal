@@ -1,0 +1,67 @@
+{
+  "name": "bloomberg-terminal",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Bloomberg-style financial terminal — solo developer project",
+  "scripts": {
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "test:unit": "turbo run test:unit",
+    "test:integration": "turbo run test:integration",
+    "dev": "turbo run dev --parallel",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.0.0",
+    "turbo": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "commitlint": {
+    "extends": ["@commitlint/config-conventional"],
+    "rules": {
+      "scope-enum": [
+        2,
+        "always",
+        [
+          "api",
+          "worker",
+          "ws-gateway",
+          "web",
+          "db",
+          "infra",
+          "docs",
+          "deps",
+          "plugins",
+          "types",
+          "ui-components"
+        ]
+      ],
+      "subject-max-length": [2, "always", 72]
+    }
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
+    "*.{js,jsx,json,md,yaml,yml}": ["prettier --write"],
+    "*.py": ["ruff check --fix", "black"]
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "printWidth": 100,
+    "semi": true,
+    "tabWidth": 2
+  }
+}
