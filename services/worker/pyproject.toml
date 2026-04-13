@@ -1,6 +1,11 @@
 [build-system]
-requires = ["hatchling"]
+# hatchling >= 1.21.0 required for prepare_metadata_for_build_editable support
+requires = ["hatchling>=1.21.0"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+# Explicitly declare the package root — hatchling cannot auto-discover a bare src/ layout
+packages = ["src"]
 
 [project]
 name = "terminal-worker"
