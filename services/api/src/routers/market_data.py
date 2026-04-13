@@ -3,6 +3,7 @@ Market data router — OHLCV bars and latest quotes.
 
 Contract: routers call services only. No DB queries here.
 """
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Query

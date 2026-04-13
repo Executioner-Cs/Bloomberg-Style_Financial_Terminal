@@ -4,6 +4,7 @@ FastAPI application factory for the Bloomberg Terminal API.
 Why this exists: Central place to configure the app, register middleware,
 and mount all routers. Keeps main.py thin — all logic lives in routers/services.
 """
+
 from __future__ import annotations
 
 import logging

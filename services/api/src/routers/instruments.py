@@ -3,6 +3,7 @@ Instruments router — search and fetch tradeable securities.
 
 Contract: routers call services only. No DB queries here.
 """
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Query

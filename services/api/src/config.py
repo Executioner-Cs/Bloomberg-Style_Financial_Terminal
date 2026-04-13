@@ -5,6 +5,7 @@ Why this exists: All configuration is type-validated at startup.
 If a required variable is missing, the app refuses to start with a clear error.
 No hardcoded values, no fallback secrets. Environment variables only.
 """
+
 from __future__ import annotations
 
 from pydantic import field_validator

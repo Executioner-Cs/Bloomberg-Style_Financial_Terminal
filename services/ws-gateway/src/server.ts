@@ -6,14 +6,13 @@
  * This service does ONE thing: route price/alert messages between
  * Redis Pub/Sub and browser WebSocket clients.
  */
-import Fastify from 'fastify';
+import Fastify, { type FastifyInstance } from 'fastify';
 import fastifyWebsocket from '@fastify/websocket';
 import fastifyCors from '@fastify/cors';
 
 const PORT = parseInt(process.env['WS_GATEWAY_PORT'] ?? '3001', 10);
-const REDIS_URL = process.env['REDIS_URL'] ?? 'redis://localhost:6379/0';
 
-async function buildServer() {
+async function buildServer(): Promise<FastifyInstance> {
   const server = Fastify({
     logger: {
       level: process.env['LOG_LEVEL'] ?? 'info',
@@ -28,7 +27,7 @@ async function buildServer() {
   await server.register(fastifyWebsocket);
 
   // Health check — used by Docker and load balancers
-  server.get('/health', async () => {
+  server.get('/health', () => {
     return { status: 'ok', service: 'ws-gateway' };
   });
 
@@ -36,9 +35,9 @@ async function buildServer() {
   server.get('/ws', { websocket: true }, (connection) => {
     server.log.info('Client connected');
 
-    connection.on('message', (message) => {
+    connection.on('message', (rawMessage: Buffer) => {
       // TODO(#5): Route client subscribe/unsubscribe events
-      server.log.debug({ message: message.toString() }, 'Client message');
+      server.log.debug({ message: rawMessage.toString() }, 'Client message');
     });
 
     connection.on('close', () => {
@@ -46,7 +45,7 @@ async function buildServer() {
       // TODO(#5): Clean up subscriptions for this connection
     });
 
-    connection.on('error', (err) => {
+    connection.on('error', (err: Error) => {
       server.log.error({ err }, 'WebSocket error');
     });
   });
@@ -64,7 +63,7 @@ buildServer()
       }
     });
   })
-  .catch((err) => {
+  .catch((err: unknown) => {
     console.error(err);
     process.exit(1);
   });

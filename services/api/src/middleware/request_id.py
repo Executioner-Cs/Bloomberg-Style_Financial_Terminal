@@ -5,6 +5,7 @@ Why: Every response includes X-Request-ID so that generic API error messages
 ("something went wrong") can be correlated to detailed server logs.
 Users can report this ID to support without exposing internal details.
 """
+
 from __future__ import annotations
 
 import uuid

@@ -7,6 +7,7 @@ inconsistencies, key collisions, and painful refactors. One source of truth.
 Convention: keys are functions that return strings, so callers always pass
 required parameters and can't accidentally use a bare template string.
 """
+
 from __future__ import annotations
 
 

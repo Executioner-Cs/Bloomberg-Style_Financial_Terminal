@@ -5,6 +5,7 @@ Why this exists: Every external API client needs retry logic, exponential
 backoff, timeout handling, and User-Agent headers. DRY principle — one
 implementation used by marketstack.py, edgar.py, fred.py, etc.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -36,6 +37,7 @@ class IntegrationError(Exception):
 
 class RateLimitError(IntegrationError):
     """Raised when an external API returns HTTP 429 Too Many Requests."""
+
     pass
 
 
