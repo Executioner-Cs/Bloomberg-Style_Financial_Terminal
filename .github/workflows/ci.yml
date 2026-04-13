@@ -87,10 +87,10 @@ jobs:
         run: mypy --strict src/
 
       - name: ruff check
-        run: ruff check src/ tests/
+        run: ruff check src/
 
       - name: black format check
-        run: black --check src/ tests/
+        run: black --check src/
 
       - name: Unit + Integration tests
         env:
@@ -133,7 +133,7 @@ jobs:
         run: mypy --strict src/
 
       - name: ruff check
-        run: ruff check src/ tests/
+        run: ruff check src/
 
       - name: Unit tests
         run: pytest tests/

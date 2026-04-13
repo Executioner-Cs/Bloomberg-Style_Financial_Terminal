@@ -44,6 +44,7 @@
           "web",
           "db",
           "infra",
+          "ci",
           "docs",
           "deps",
           "plugins",
