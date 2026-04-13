@@ -111,4 +111,4 @@ class Settings(BaseSettings):
 
 
 # Singleton — import this everywhere
-settings = Settings()  # type: ignore[call-arg]  # pydantic-settings reads from env
+settings = Settings()

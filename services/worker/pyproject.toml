@@ -49,6 +49,12 @@ target-version = ["py312"]
 python_version = "3.12"
 strict = true
 
+[[tool.mypy.overrides]]
+# celery does not ship a py.typed marker or type stubs and has no plans to do so.
+# ignore_missing_imports suppresses the [import-untyped] error for this package only.
+module = ["celery", "celery.*"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
