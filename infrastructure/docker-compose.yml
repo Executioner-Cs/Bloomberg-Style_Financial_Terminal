@@ -1,0 +1,231 @@
+# ============================================================
+# Bloomberg Terminal — Local Development Stack
+# Usage: docker compose up
+# All services start on first run. Use docker compose up -d for detached.
+# ============================================================
+
+version: "3.9"
+
+services:
+
+  # ----------------------------------------------------------
+  # PostgreSQL 16 — Relational store
+  # Users, watchlists, portfolios, filings, news, fundamentals
+  # ----------------------------------------------------------
+  postgres:
+    image: pgvector/pgvector:pg16  # Includes pgvector extension for future semantic search
+    container_name: terminal-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: terminal
+      POSTGRES_USER: terminal
+      POSTGRES_PASSWORD: terminal_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init/postgres:/docker-entrypoint-initdb.d  # Init scripts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U terminal -d terminal"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ----------------------------------------------------------
+  # ClickHouse — Time-series store for OHLCV data
+  # Columnar, 10-50x compression, sub-second analytics queries
+  # ----------------------------------------------------------
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.3-alpine
+    container_name: terminal-clickhouse
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_DB: terminal
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ports:
+      - "9000:9000"   # Native TCP (used by Python clickhouse-driver)
+      - "8123:8123"   # HTTP interface (used for health checks + HTTP queries)
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./init/clickhouse:/docker-entrypoint-initdb.d
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ----------------------------------------------------------
+  # Redis 7 Stack — Cache, Pub/Sub, Celery broker, RediSearch
+  # ----------------------------------------------------------
+  redis:
+    image: redis/redis-stack:7.4.0-v0
+    container_name: terminal-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"   # Redis
+      - "8001:8001"   # RedisInsight (browser-based UI)
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ----------------------------------------------------------
+  # FastAPI — Main REST API
+  # Python 3.12, async, all business logic and data serving
+  # ----------------------------------------------------------
+  api:
+    build:
+      context: ..
+      dockerfile: infrastructure/docker/Dockerfile.api
+    container_name: terminal-api
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://terminal:terminal_dev@postgres:5432/terminal
+      SYNC_DATABASE_URL: postgresql://terminal:terminal_dev@postgres:5432/terminal
+      CLICKHOUSE_HOST: clickhouse
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../services/api/src:/app/src  # Hot reload in dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # ----------------------------------------------------------
+  # Celery Worker — Background tasks
+  # EOD ingestion, EDGAR crawling, alert evaluation, FRED polling
+  # ----------------------------------------------------------
+  worker:
+    build:
+      context: ..
+      dockerfile: infrastructure/docker/Dockerfile.worker
+    container_name: terminal-worker
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://terminal:terminal_dev@postgres:5432/terminal
+      SYNC_DATABASE_URL: postgresql://terminal:terminal_dev@postgres:5432/terminal
+      CLICKHOUSE_HOST: clickhouse
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+    volumes:
+      - ../services/worker/src:/app/src
+    depends_on:
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A src.celery_app worker --loglevel=info --concurrency=4
+
+  # ----------------------------------------------------------
+  # Celery Beat — Task scheduler
+  # Triggers EOD ingestion, quota reports, alert evaluation
+  # ----------------------------------------------------------
+  beat:
+    build:
+      context: ..
+      dockerfile: infrastructure/docker/Dockerfile.worker
+    container_name: terminal-beat
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+    volumes:
+      - ../services/worker/src:/app/src
+    depends_on:
+      - redis
+    command: celery -A src.celery_app beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+
+  # ----------------------------------------------------------
+  # WebSocket Gateway — Node.js + Fastify
+  # Handles all client WebSocket connections, routes price updates
+  # Connects to Binance/Coinbase WS feeds and Redis Pub/Sub
+  # ----------------------------------------------------------
+  ws-gateway:
+    build:
+      context: ..
+      dockerfile: infrastructure/docker/Dockerfile.ws-gateway
+    container_name: terminal-ws-gateway
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      WS_GATEWAY_PORT: 3001
+      WS_GATEWAY_INTERNAL_API_URL: http://api:8000
+    ports:
+      - "3001:3001"
+    volumes:
+      - ../services/ws-gateway/src:/app/src  # Hot reload in dev
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # ----------------------------------------------------------
+  # MinIO — S3-compatible local object storage
+  # Used for filing documents and future notebook artifacts
+  # ----------------------------------------------------------
+  minio:
+    image: minio/minio:RELEASE.2024-03-15T01-07-19Z
+    container_name: terminal-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"   # API (conflicts with ClickHouse native? Use 9001 if needed)
+      - "9090:9090"   # Console UI
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9090"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles:
+      - storage  # Only starts with: docker compose --profile storage up
+
+volumes:
+  postgres_data:
+    driver: local
+  clickhouse_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
+
+networks:
+  default:
+    name: terminal-network

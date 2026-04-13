@@ -1,0 +1,42 @@
+# ============================================================
+# Bloomberg Terminal — Celery Worker + Beat
+# Shared image for both worker and beat containers
+# ============================================================
+
+FROM python:3.12-slim AS builder
+
+WORKDIR /build
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY services/worker/pyproject.toml .
+
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir .
+
+FROM python:3.12-slim AS runtime
+
+RUN groupadd --gid 1001 app && \
+    useradd --uid 1001 --gid app --shell /bin/bash --create-home app
+
+WORKDIR /app
+
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY services/worker/src ./src
+
+RUN chown -R app:app /app
+USER app
+
+# Default command — overridden in docker-compose.yml for beat vs worker
+CMD ["celery", "-A", "src.celery_app", "worker", "--loglevel=info", "--concurrency=4"]
