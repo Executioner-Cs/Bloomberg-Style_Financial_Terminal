@@ -17,9 +17,20 @@ router = APIRouter(prefix="/market-data")
 )
 async def get_ohlcv(
     symbol: str,
-    timeframe: str = Query(default="1D", description="Timeframe: 1m 5m 15m 1H 4H 1D 1W"),
-    from_date: str | None = Query(default=None, alias="from", description="Start ISO 8601"),
-    to_date: str | None = Query(default=None, alias="to", description="End ISO 8601"),
+    timeframe: str = Query(
+        default="1D",
+        description="Timeframe: 1m 5m 15m 1H 4H 1D 1W",
+    ),
+    from_date: str | None = Query(
+        default=None,
+        alias="from",
+        description="Start date (ISO 8601)",
+    ),
+    to_date: str | None = Query(
+        default=None,
+        alias="to",
+        description="End date (ISO 8601)",
+    ),
 ) -> dict[str, object]:
     # TODO(#3): Wire up market_data_service
     return {"symbol": symbol, "timeframe": timeframe, "bars": []}

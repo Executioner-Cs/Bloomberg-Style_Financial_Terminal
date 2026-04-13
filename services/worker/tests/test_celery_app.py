@@ -1,0 +1,52 @@
+"""
+Tests for Celery application configuration.
+
+Validates that the app is correctly named, serializers are set to JSON,
+and the Beat schedule contains all required ingestion tasks.
+"""
+from __future__ import annotations
+
+from src.celery_app import app
+
+
+def test_celery_app_name() -> None:
+    """App must be named 'terminal' — used as the Celery worker namespace."""
+    assert app.main == "terminal"
+
+
+def test_celery_serializers_are_json() -> None:
+    """All serializers must be JSON — binary formats are not allowed."""
+    assert app.conf.task_serializer == "json"
+    assert app.conf.result_serializer == "json"
+    assert "json" in app.conf.accept_content
+
+
+def test_celery_timezone_is_utc() -> None:
+    """Timezone must be UTC to avoid DST-related schedule drift."""
+    assert app.conf.timezone == "UTC"
+    assert app.conf.enable_utc is True
+
+
+def test_beat_schedule_contains_required_tasks() -> None:
+    """Beat schedule must define all data ingestion and alert tasks."""
+    schedule = app.conf.beat_schedule
+    required = {
+        "market-data-eod-ingest",
+        "edgar-filing-check",
+        "fred-macro-refresh",
+        "news-refresh",
+        "alert-evaluation",
+        "api-quota-report",
+    }
+    missing = required - set(schedule.keys())
+    assert not missing, f"Missing Beat tasks: {missing}"
+
+
+def test_beat_schedule_tasks_have_queues() -> None:
+    """Every Beat task must declare an explicit queue — no default queue leakage."""
+    schedule = app.conf.beat_schedule
+    for task_name, task_config in schedule.items():
+        assert "options" in task_config, f"{task_name} missing 'options'"
+        assert "queue" in task_config["options"], (
+            f"{task_name} missing queue in options"
+        )
