@@ -1,50 +1,518 @@
-# CLAUDE.md — Bloomberg Terminal Project Rules
-# Last updated: 2026-04-13 (added branching and commit workflow)
-# This file governs ALL AI-assisted code generation in this project.
-# Read it entirely before writing a single line of code.
+# CLAUDE.md — Bloomberg Terminal Engineering Governance
+# Last updated: 2026-04-13
+# Authority: This document governs ALL code — human-written or AI-generated.
+# Scope: Every file, every commit, every decision in this repository.
+# Compliance: Non-negotiable. Violations block merges. No exceptions granted.
 
 ---
 
-## CRITICAL PRINCIPLE
+## GOVERNING PRINCIPLE
 
-This is a production financial application built by a solo developer.
-There is NO tech debt budget. Every shortcut taken now is a maintenance
-burden with no team to absorb it.
+This is a production-grade financial terminal built without a team.
+That constraint does not lower the bar. It raises it.
 
-**When in doubt: do it right or do not do it yet.**
+A team has reviewers to catch shortcuts. A solo developer does not.
+Therefore every decision must be correct the first time:
+architecturally sound, fully documented, tested, and traceable.
+
+**There is no tech debt budget. There is no "we'll fix it later."
+Do it right, or do not do it yet.**
 
 ---
 
-## LANGUAGE & TYPING
+## PART I — NON-NEGOTIABLE ENGINEERING RULES
+
+These four rules govern all work in this repository without exception.
+No feature, hotfix, experiment, or scaffolding is exempt.
+
+---
+
+### RULE 1 — NO HARDCODED VALUES OR ARBITRARY CONFIGURATION
+
+Hardcoded components, magic numbers, ad-hoc ports, unexplained timeouts,
+convenience-based limits, and undocumented configuration choices are
+**strictly prohibited**.
+
+Every value that appears in code must originate from exactly one of:
+
+1. A documented architectural decision (ADR)
+2. A configuration file sourced from environment variables
+3. A named constant with a comment citing its specification or rationale
+4. A clearly justified design rationale committed to documentation before the code
+
+If you cannot point to the source of a value, the value does not belong in the code.
+
+**The standard is:** any engineer reading this codebase five years from now
+must be able to understand *why* every number exists without asking anyone.
+
+---
+
+### RULE 2 — PORT ALLOCATION MUST FOLLOW DOCUMENTED POLICY
+
+Port selection is a permanent architectural decision.
+It affects firewall rules, load balancer config, Docker networking,
+developer mental models, and production infrastructure.
+It is never a casual choice.
+
+**Mandatory requirements for every port in use:**
+
+- The port must be listed in the Port Registry (see Part II of this document)
+- The port must have a written justification in the registry
+- If the port assignment required a decision (i.e., multiple options existed),
+  an ADR must document why this port was chosen over alternatives
+- Port assignments communicated verbally or assumed from convention are rejected
+
+**What is not a valid justification:**
+
+- "It's the default"
+- "3000 was taken"
+- "It's common for Node apps"
+- "I didn't think about it"
+
+**What is a valid justification:**
+
+- "ClickHouse's IANA-registered HTTP port is 8123. Deviation would break
+  client driver defaults and require explicit override in all consumers."
+- "Port 3001 is assigned to the WS gateway per the project's Node.js service
+  range (3001–3099). Port 3000 is excluded from this range because it is the
+  universal Node.js process default, creating ambiguity in multi-service
+  environments where other tools may bind it."
+
+---
+
+### RULE 3 — MANDATORY PLAN MODE BEFORE ANY IMPLEMENTATION
+
+No code is written before a plan is approved.
+This applies to every change — features, bug fixes, refactors, scaffolds,
+configuration changes, schema migrations, and CI pipeline edits.
+
+**A plan must define:**
+
+- **Intent**: What is being built and why
+- **Scope boundary**: What is explicitly out of scope for this change
+- **Constraints**: Performance budgets, API contracts, dependency limits
+- **Dependencies**: What must exist before this work can begin
+- **Risks**: What could go wrong, and the mitigation
+- **Architectural alignment**: How this fits into the existing system design
+- **Conflict check**: Does this change anything another part of the system relies on
+
+A plan is approved when it is reviewed and confirmed in this session before
+any file is created or modified.
+
+**No exceptions. No "quick changes". No stubs "just to see if it works".**
+
+---
+
+### RULE 4 — ZERO TOLERANCE FOR UNPLANNED OR ILLOGICAL CHANGES
+
+Any implementation that:
+
+- deviates from the approved plan without re-approval
+- introduces behavior not described in the plan
+- uses values without documented rationale
+- bypasses the planning step for any reason
+- contradicts an existing ADR without creating a superseding ADR
+
+**will be reverted and the work restarted from plan mode.**
+
+Expedience is not a justification. A missed deadline caused by a planning
+gap is preferable to an architectural defect that requires a rewrite.
+
+---
+
+## PART II — DESIGN BEFORE CODE
+
+### Mandatory Design Checklist
+
+This checklist must be completed and confirmed **before a single line of
+implementation code is written**. Documentation, ADRs, and schema definitions
+are the only artifacts permitted before the checklist is signed off.
+
+```
+DESIGN CHECKLIST — complete every item before coding begins
+
+Intent
+  [ ] One-sentence statement of what this change accomplishes
+  [ ] One-sentence statement of what this change does NOT accomplish
+  [ ] Confirmed: this change is the smallest meaningful unit of work
+
+Architectural Alignment
+  [ ] Reviewed the relevant ADRs for this domain
+  [ ] Confirmed this change does not violate any existing ADR
+  [ ] If it supersedes an ADR: new ADR drafted before implementation begins
+  [ ] Confirmed layer boundaries are respected:
+        router → service → repository (no skipping)
+        React component → hook → TanStack Query (no direct fetches)
+  [ ] Confirmed no new circular dependencies are introduced
+
+Data Contracts
+  [ ] All new API endpoints have a schema defined (request + response)
+  [ ] All new Pydantic models have been defined with field descriptions
+  [ ] All new TypeScript types have been defined
+  [ ] All new database columns have been added to the migration (not ad-hoc)
+  [ ] All new cache keys have been added to cache/keys.py
+
+Configuration
+  [ ] Every new value is sourced from an env var or named constant
+  [ ] Every new env var is added to .env.example with a comment
+  [ ] No new port is introduced without an entry in the Port Registry
+  [ ] No new timeout, limit, or threshold is hardcoded
+
+Dependencies
+  [ ] What must be built before this work can start — listed explicitly
+  [ ] No new package is introduced without a justification comment
+  [ ] If the package is new to the project: ADR or documented rationale
+
+Testing Plan
+  [ ] Unit tests identified: which functions, which edge cases
+  [ ] Integration tests identified: which endpoints, which database interactions
+  [ ] E2E tests identified: which user flows are affected
+  [ ] Coverage thresholds confirmed: will all minimums still be met?
+
+Risks
+  [ ] Performance impact assessed (does this touch a hot path?)
+  [ ] Security impact assessed (does this touch auth, input validation, output?)
+  [ ] Regression risk assessed (what working behavior could this break?)
+  [ ] Migration risk assessed (does this change existing data shapes?)
+
+Documentation
+  [ ] ADR required? (new technology choice, breaking change, port assignment)
+  [ ] Runbook update required? (new data source, new UI panel)
+  [ ] CHANGELOG.md update required? (user-facing change)
+  [ ] Endpoint docstring/JSDoc prepared before implementation
+
+Sign-off
+  [ ] All items above are checked
+  [ ] Plan has been reviewed and approved in this session
+  [ ] Branch name proposed and confirmed
+  [ ] First commit's content and message have been agreed
+```
+
+---
+
+## PART III — PORT ALLOCATION POLICY
+
+### Policy Statement
+
+Port assignments in this project are architectural decisions.
+They are permanent, documented, and require justification.
+No port may be used in any configuration file, environment variable,
+or code without an entry in the registry below.
+
+### Port Range Allocation
+
+The project divides the unprivileged port space (1024–65535) into
+named ranges by service category. A service MUST use a port from
+its designated range unless an ADR documents the exception.
+
+| Range       | Category                              | Rationale                                              |
+|-------------|---------------------------------------|--------------------------------------------------------|
+| 3001–3099   | Node.js application services          | Node.js services occupy this range. 3000 is excluded — it is the universal Node.js process default, causing ambiguity with external tooling (Next.js, CRA, Nodemon). 3001 is the first unambiguous project-defined Node service port. |
+| 5100–5199   | Frontend dev servers                  | Vite's default is 5173; this range is reserved for frontend tooling. Does not conflict with any standard system service. |
+| 5400–5499   | PostgreSQL                            | IANA-registered range. 5432 is the PostgreSQL default; deviation would break all driver defaults and require explicit override everywhere. |
+| 6300–6400   | Redis and Redis-adjacent              | IANA-registered. 6379 is the Redis default. 6380 is reserved for Redis replicas or Sentinel. |
+| 8000–8099   | Python REST APIs (ASGI/WSGI)          | Python ecosystem convention for application servers. Avoids 8080 (de facto reverse proxy / Tomcat / Jenkins default) and 8888 (Jupyter Notebook default). |
+| 8100–8199   | ClickHouse                            | ClickHouse's IANA-registered HTTP interface occupies 8123. Native TCP protocol occupies 9000. Interserver replication uses 9009. These are not configurable without rebuild. |
+| 8001        | RedisInsight (admin GUI)              | Redis Labs' official management UI default. Adjacent to Redis at 6379 only during local dev; not exposed in production. |
+| 9000–9099   | ClickHouse native protocol + admin    | ClickHouse native TCP (9000), interserver (9009). Also MinIO S3 API (9090) under the optional `storage` Docker profile. |
+| 9001        | MinIO Console                         | MinIO's web console default. Optional profile only. |
+
+### Port Registry — All Registered Ports
+
+Every port used anywhere in this project must appear here.
+Adding a port without updating this registry is a violation of Rule 1.
+
+| Port | Service | Protocol | Environment | Justification |
+|------|---------|----------|-------------|---------------|
+| 3001 | WS Gateway (Node.js + Fastify) | HTTP/WS | dev + prod | Node.js service range (3001–3099). Port 3000 excluded per range policy — it is the universal Node.js default and causes ambiguity. 3001 is the first clean port in the project-defined Node service range. ADR-003 documents the WS gateway architectural decision. |
+| 5173 | Vite dev server (React SPA) | HTTP | dev only | Vite's assigned default. Universally understood in the Vite ecosystem. Falls within the project's frontend dev server range (5100–5199). Not exposed in production — Nginx serves the built bundle. |
+| 5432 | PostgreSQL 16 | TCP | dev + prod | IANA-registered PostgreSQL default. Deviation would require explicit override in every SQLAlchemy connection string, Alembic config, and pg_dump command. No benefit justifies the overhead. |
+| 6379 | Redis 7 Stack | TCP | dev + prod | IANA-registered Redis default. All Redis client libraries default to this port. Deviation requires explicit override everywhere. |
+| 8000 | FastAPI REST API | HTTP | dev + prod | Python ASGI convention. First available port in the 8000–8099 Python API range that avoids conflicts with 8080 (proxy tools, Jenkins, Tomcat) and 8888 (Jupyter). |
+| 8001 | RedisInsight GUI | HTTP | dev only | Redis Labs' official GUI tool default. Local development only; blocked at the firewall boundary in all other environments. |
+| 8123 | ClickHouse HTTP interface | HTTP | dev + prod | ClickHouse's IANA-registered HTTP port. Used by the Python clickhouse-driver and all HTTP-based clients. Not configurable without recompiling ClickHouse. |
+| 9000 | ClickHouse native TCP | TCP | dev + prod | ClickHouse's IANA-registered native protocol port. Used for high-throughput bulk INSERT operations. Not configurable without recompiling ClickHouse. |
+| 9001 | MinIO Console | HTTP | dev optional | MinIO's web console default. Only active under `--profile storage`. Not present in production. |
+| 9009 | ClickHouse interserver replication | TCP | dev + prod | ClickHouse's default interserver replication port. Required even in single-node setup when ClickHouse is configured for potential cluster expansion. |
+| 9090 | MinIO S3 API | HTTP | dev optional | MinIO's S3-compatible API default. Only active under `--profile storage`. Maps to AWS S3 in production. |
+
+### Adding a New Port
+
+Before assigning any new port:
+
+1. Identify the service category and locate its designated range in the table above
+2. Verify the candidate port does not conflict with any registered port
+3. Add the port to the registry with a complete justification entry
+4. If the port falls outside all defined ranges, create an ADR before proceeding
+5. Update the relevant `docker-compose.yml` service entry
+6. Update `.env.example` with the port variable and a comment
+
+**No port may appear in any file before step 3 is complete.**
+
+---
+
+## PART IV — HARDCODING VIOLATIONS
+
+### Definition
+
+A hardcoded value is any literal that:
+
+- represents a configuration choice (port, timeout, URL, limit, key)
+- will need to change between environments (dev, test, staging, production)
+- must change if the architecture changes
+- has no named constant or documentation explaining its origin
+
+### Violation Examples — What Is Forbidden
+
+The following patterns are violations. Each one would block a PR.
+
+```typescript
+// VIOLATION: port hardcoded — source is unknown, cannot change without grep-and-replace
+const wsTarget = 'ws://localhost:3001';
+
+// VIOLATION: timeout is a magic number — why 5000? what does it represent?
+setTimeout(retry, 5000);
+
+// VIOLATION: URL is hardcoded — breaks in every environment except the author's machine
+fetch('http://localhost:8000/api/v1/instruments');
+
+// VIOLATION: limit is a magic number — what is this limit for? what defines it?
+if (results.length > 100) throw new Error('Too many results');
+
+// VIOLATION: retry count is hardcoded — why 3? where is this policy documented?
+for (let attempt = 0; attempt < 3; attempt++) { ... }
+
+// VIOLATION: API version is a string literal scattered through the codebase
+const url = `/api/v1/market-data/${symbol}/ohlcv`;
+
+// VIOLATION: credential pattern — even in tests
+const apiKey = 'test-key-12345';
+```
+
+```python
+# VIOLATION: port hardcoded in Python service config
+app.run(host="0.0.0.0", port=8000)  # where does 8000 come from?
+
+# VIOLATION: URL assembled from string literals
+url = f"http://localhost:3001/health"
+
+# VIOLATION: rate limit magic number — not sourced from config
+if request_count > 300:
+    raise RateLimitError()
+
+# VIOLATION: timeout with no justification
+async with httpx.AsyncClient(timeout=30.0) as client: ...
+
+# VIOLATION: cache TTL with no justification or reference to ToS
+redis.setex(key, 3600, value)
+```
+
+### Correct Patterns — What Is Required
+
+```typescript
+// CORRECT: proxy targets come from env, read at config time
+const apiProxyTarget = env['VITE_DEV_API_PROXY_TARGET'] ?? fallback;
+
+// CORRECT: named constant with comment explaining the policy
+/** 5 second base retry delay — doubles on each attempt per exponential backoff policy */
+const BASE_RETRY_DELAY_MS = 5_000;
+
+// CORRECT: URL constructed from typed constants
+import { API_BASE_URL, API_V1_PREFIX } from '@/lib/api/constants';
+fetch(`${API_BASE_URL}${API_V1_PREFIX}/instruments`);
+
+// CORRECT: limits sourced from config
+import { MAX_SCREENER_RESULTS } from '@/lib/config';
+if (results.length > MAX_SCREENER_RESULTS) throw new QueryLimitError();
+```
+
+```python
+# CORRECT: port sourced from settings, which reads from env
+uvicorn.run(app, host="0.0.0.0", port=settings.api_port)
+
+# CORRECT: URL assembled from settings
+url = f"{settings.ws_gateway_internal_url}/health"
+
+# CORRECT: rate limit sourced from settings, which validates at startup
+if request_count > settings.rate_limit_free_tier_per_hour:
+    raise RateLimitError()
+
+# CORRECT: timeout from settings with a comment on where the value comes from
+# Marketstack ToS requires responses within 30s; we timeout at 25s to leave margin.
+async with httpx.AsyncClient(timeout=settings.marketstack_timeout_seconds) as client: ...
+
+# CORRECT: cache TTL from settings, respecting ToS minimum cache window
+# Alpha Vantage ToS: minimum 60s cache. We use 300s (5min) for safety margin.
+await redis.setex(cache_key, settings.alpha_vantage_cache_ttl_seconds, serialized)
+```
+
+### CI Enforcement of Hardcoding Policy
+
+The following patterns are detected by the `scripts/check-hardcoding.sh` script,
+which runs as a required CI check and blocks merge on any match:
+
+```
+BLOCKED PATTERNS (checked in TypeScript/TSX files):
+  - localhost:[0-9]{4,5}  (hardcoded local URLs)
+  - 'http://[^']*'        (string literal HTTP URLs)
+  - "http://[^"]*"        (string literal HTTP URLs)
+  - ws://[^'"]*           (string literal WebSocket URLs)
+  - port: [0-9]{4,5}      (hardcoded port in config objects)
+  - timeout: [0-9]+       (numeric timeout literals)
+
+BLOCKED PATTERNS (checked in Python files):
+  - localhost:[0-9]{4,5}
+  - port=[0-9]{4,5}
+  - timeout=[0-9]+\.[0-9]  (float timeout literals)
+  - ttl=[0-9]+             (integer TTL literals)
+
+EXEMPTIONS (lines containing these strings are excluded from pattern checks):
+  - # noqa: hardcoded — must be accompanied by a comment on the preceding line
+    citing the ADR or specification that justifies the literal value.
+    This exemption is for values that are genuinely fixed by external
+    specification (e.g., IANA port assignments, protocol constants).
+```
+
+---
+
+## PART V — CI ENFORCEMENT
+
+### What CI Checks Are Required
+
+Every pull request must pass all of the following checks before merge is permitted.
+No check may be skipped. No bypass flags (`--no-verify`, `--force`) are permitted.
+
+#### Tier 1 — Code Quality (blocks merge immediately on failure)
+
+| Check | Command | Failure means |
+|-------|---------|---------------|
+| TypeScript typecheck | `pnpm run typecheck` | Type errors in any changed TS/TSX file |
+| ESLint | `pnpm run lint` | Lint errors or warnings (zero-warning policy) |
+| Python mypy | `mypy --strict services/api services/worker` | Type errors in any changed Python file |
+| Python ruff | `ruff check .` | Any lint warning in changed Python files |
+| Python black | `black --check .` | Formatting inconsistency in changed Python files |
+
+#### Tier 2 — Tests (blocks merge on failure)
+
+| Check | Command | Failure means |
+|-------|---------|---------------|
+| Frontend unit tests | `pnpm --filter web test:ci` | Any test failure |
+| Frontend coverage | `pnpm --filter web test:coverage` | Any threshold below minimums |
+| Python unit tests | `pytest services/api/tests/unit` | Any test failure |
+| Python integration tests | `pytest services/api/tests/integration` | Any test failure |
+| Python coverage | `pytest --cov --cov-fail-under=80` | Coverage below threshold |
+| E2E tests | `pnpm exec playwright test` | Any E2E scenario failure |
+
+#### Tier 3 — Security (blocks merge on HIGH or CRITICAL findings)
+
+| Check | Command | Failure means |
+|-------|---------|---------------|
+| npm audit | `npm audit --audit-level=high` | HIGH or CRITICAL vulnerability |
+| pip-audit | `pip-audit --vulnerability-service pypi` | HIGH or CRITICAL vulnerability |
+| Secret scan | `git diff --name-only origin/develop | xargs scripts/check-secrets.sh` | Any credential pattern detected |
+| Hardcoding scan | `scripts/check-hardcoding.sh` | Any blocked pattern detected (see Part IV) |
+
+#### Tier 4 — Architecture Governance (blocks merge on violation)
+
+| Check | Tool | Failure means |
+|-------|------|---------------|
+| Conventional commit format | commitlint | Commit message violates format |
+| Branch naming | GitHub Actions branch name check | Branch name violates policy |
+| PR requires plan approval label | GitHub Actions label check | PR is missing the `plan-approved` label |
+| Port registry consistency | `scripts/check-port-registry.sh` | A port appears in config but not in CLAUDE.md registry |
+| ADR required check | `scripts/check-adr-required.sh` | PR touches a port, adds a dependency, or changes an API contract without a new ADR file |
+| No direct-to-main commit | Branch protection rule | Any commit directly to `main` or `develop` |
+| No force push | Branch protection rule | Any force push to any protected branch |
+
+#### Tier 5 — Performance (advisory on PR, blocking on regression)
+
+| Check | Tool | Failure means |
+|-------|------|---------------|
+| Lighthouse CI | `lhci autorun` | FCP > 1.5s, TTI > 3.5s, or LCP > 2.5s |
+| Bundle size | `pnpm run build --reporter json` | Initial chunk > 200KB gzipped |
+| Performance regression | Comparison to base branch Lighthouse score | Score drops by more than 5 points |
+
+### PR Template Requirements
+
+Every PR must include a completed PR template. A PR with an incomplete
+template will not be reviewed. The template enforces:
+
+```markdown
+## Plan Approval
+- [ ] This PR was planned in a session before any code was written
+- [ ] The `plan-approved` label has been applied
+
+## Design Checklist (from CLAUDE.md Part II)
+- [ ] All Design Before Code checklist items confirmed complete
+
+## Hardcoding Compliance
+- [ ] No hardcoded URLs, ports, timeouts, or limits introduced
+- [ ] Every new configuration value is sourced from env vars or named constants
+- [ ] If any `# noqa: hardcoded` exemptions were used: justification cited in PR description
+
+## Port Registry
+- [ ] No new ports introduced, OR
+- [ ] New ports have been added to the Port Registry in CLAUDE.md with full justification
+
+## ADR Compliance
+- [ ] No architectural decisions made, OR
+- [ ] New ADR(s) created and linked here: [ADR-XXX](docs/architecture/decisions/ADR-XXX.md)
+
+## Testing
+- [ ] All new code has tests at the required coverage level (CLAUDE.md Part VII)
+- [ ] All existing tests still pass
+
+## Documentation
+- [ ] .env.example updated for any new env vars
+- [ ] CHANGELOG.md updated (if user-facing change)
+- [ ] Runbook(s) updated (if new data source or UI panel)
+```
+
+### Branch Protection Configuration
+
+The following settings are enforced at the repository level and cannot
+be overridden by any contributor:
+
+- **`main`**: Requires 1 PR approval, all status checks passing, no force push,
+  no direct commits, linear history required
+- **`develop`**: Requires all status checks passing, no force push, no direct commits
+- **All branches**: Secret scanning enabled, dependency review on PRs
+
+---
+
+## PART VI — LANGUAGE AND TYPING
 
 ### TypeScript (ALL frontend and ws-gateway code)
-- `"strict": true` in tsconfig.json — NON-NEGOTIABLE. No exceptions.
-- `noUncheckedIndexedAccess: true` — array access returns T | undefined
+
+- `"strict": true` in every tsconfig — NON-NEGOTIABLE
+- `noUncheckedIndexedAccess: true` — array[index] returns `T | undefined`
 - `exactOptionalPropertyTypes: true` — optional means explicitly optional
-- NEVER use `any`. Use `unknown` and narrow with type guards.
-- NEVER use `@ts-ignore`. Fix the type error.
-- `@ts-expect-error` allowed ONLY with a comment explaining why, on its own line.
-- NEVER cast with `as` unless you own the data shape AND add a runtime assertion.
-- All exported functions must have explicit return type annotations.
-- Use `satisfies` operator for config objects.
-- Prefer `type` over `interface` for data shapes; `interface` for extension points.
-- Use discriminated unions for all state machines and event types.
+- NEVER use `any` — use `unknown` and narrow with type guards
+- NEVER use `@ts-ignore` — fix the type error
+- `@ts-expect-error` allowed ONLY with an explanatory comment on the preceding line
+- NEVER use `as` casts unless you own the data shape AND add a runtime assertion
+- All exported functions must have explicit return type annotations
+- Use `satisfies` operator for config objects — do not cast them
+- Prefer `type` for data shapes; `interface` for extension points
+- Use discriminated unions for all state machines and event types
 
 ### Python (ALL api and worker code)
-- Python 3.12+ — use modern syntax: `X | Y` unions, `match` statements.
-- `from __future__ import annotations` at top of every module.
-- Type hints REQUIRED on every function parameter and return value.
-- NO `Any` from typing — use proper types or bounded `TypeVar`.
-- Pydantic v2 for ALL data validation — never validate manually with if/isinstance.
-- `mypy --strict` must pass. Configured in `pyproject.toml` under `[tool.mypy]`.
-- `ruff` for linting (replaces flake8 + isort + pylint). Zero warnings allowed.
-- `black` for formatting — 88 character line length.
+
+- Python 3.12+ — use `X | Y` unions, `match` statements, `TypeAlias`
+- `from __future__ import annotations` at the top of every module
+- Type hints required on every function parameter and return value
+- NO `Any` from typing — use proper types or bounded `TypeVar`
+- Pydantic v2 for ALL data validation — never write manual isinstance checks
+- `mypy --strict` must pass — configured in `pyproject.toml`
+- `ruff` for linting — zero warnings, zero errors
+- `black` for formatting — 88 character line length
 
 ---
 
-## FILE NAMING CONVENTIONS
+## PART VII — FILE NAMING CONVENTIONS
 
 ### TypeScript / React
+
 - React components: `PascalCase.tsx` (e.g., `ChartPanel.tsx`)
 - Hooks: `use-kebab-case.ts` (e.g., `use-market-data.ts`)
 - Utility functions: `kebab-case.ts` (e.g., `currency-format.ts`)
@@ -55,43 +523,76 @@ burden with no team to absorb it.
 - E2E tests: `apps/web/e2e/specs/kebab-case.spec.ts`
 
 ### Python
+
 - All files: `snake_case.py`
-- Routers: noun-plural (e.g., `instruments.py`, `watchlists.py`)
-- Services: noun-singular + `_service` (e.g., `market_data_service.py`)
-- Repositories: noun-singular + `_repository` (e.g., `ohlcv_repository.py`)
-- Integrations: provider name (e.g., `marketstack.py`, `edgar.py`)
+- Routers: noun-plural (`instruments.py`, `watchlists.py`)
+- Services: noun-singular + `_service` (`market_data_service.py`)
+- Repositories: noun-singular + `_repository` (`ohlcv_repository.py`)
+- Integrations: provider name (`marketstack.py`, `edgar.py`)
 - Tests: `test_` prefix matching source file
 
 ### General
-- No abbreviations in file names (ok: `api`, `url`, `id`, `ws`)
-- No `utils.ts` / `helpers.py` dumping grounds — name files after what they DO
+
+- No abbreviations except: `api`, `url`, `id`, `ws`, `db`
+- No `utils.ts` / `helpers.py` — name files after what they do
 - One primary export per file
 
 ---
 
-## DIRECTORY RULES
-- NEVER create files in root of `services/api/src/` — use correct subdirectory
-- NEVER put business logic in `routers/` — routers call services only
-- NEVER put database queries in services — service calls repository, always
+## PART VIII — DIRECTORY AND LAYER RULES
+
+- NEVER create files in the root of `services/api/src/` — use the correct subdirectory
+- NEVER put business logic in `routers/` — routers accept requests and call services only
+- NEVER put database queries in services — services call repositories only
 - NEVER import from `apps/web/` into `packages/` — packages have zero app dependencies
 - NEVER put API calls directly in React components — use hooks with TanStack Query
+- NEVER skip the router → service → repository chain for any reason
+
+The layer boundary is an architectural constraint, not a guideline.
+A router that queries a database directly is a defect, not a shortcut.
 
 ---
 
-## COMMIT MESSAGE FORMAT (Conventional Commits — enforced by commitlint)
+## PART IX — COMMIT AND BRANCH DISCIPLINE
+
+### Branch Naming
+
+Format: `<type>/<scope>/<short-description>`
+
+- `feat/web/rsi-indicator`
+- `fix/api/ohlcv-timezone`
+- `perf/db/filing-index`
+- `chore/deps/pydantic-v2-upgrade`
+
+Rules:
+- All lowercase, hyphens only (no underscores, no dots)
+- Max 50 characters
+- NEVER commit directly to `main` or `develop`
+- `main` — production deployments only, merged via PR with CI passing
+- `develop` — integration branch
+- Feature branches cut from `develop`, merged back via PR
+
+### Branch Discipline
+
+- One branch = one meaningful unit of work
+- Propose the branch name before starting — the name enforces the scope
+- If you cannot describe the branch in one short phrase, it is too broad; split it
+- Branch is always cut from `develop`, never from `main`
+
+### Commit Message Format (Conventional Commits — enforced by commitlint)
 
 Format: `<type>(<scope>): <imperative description>`
 
 **Types:**
-- `feat`     — new user-visible feature
-- `fix`      — bug fix
-- `perf`     — performance improvement
-- `refactor` — code change, no feature/bug
-- `test`     — adding or correcting tests
-- `docs`     — documentation only
-- `ci`       — CI/CD pipeline changes
-- `chore`    — build process, dependency updates
-- `revert`   — reverts a previous commit
+- `feat` — new user-visible feature
+- `fix` — bug fix
+- `perf` — performance improvement
+- `refactor` — code change with no feature or bug
+- `test` — adding or correcting tests
+- `docs` — documentation only
+- `ci` — CI/CD pipeline changes
+- `chore` — build process, dependency updates
+- `revert` — reverts a previous commit
 
 **Scopes (must be one of):**
 `api`, `worker`, `ws-gateway`, `web`, `db`, `infra`, `docs`, `deps`, `plugins`, `types`, `ui-components`
@@ -100,118 +601,92 @@ Format: `<type>(<scope>): <imperative description>`
 ```
 feat(web): add RSI indicator to chart panel
 fix(api): correct OHLCV timezone handling for non-UTC exchanges
-perf(db): add index on filings.filed_at for pagination query
+perf(db): add composite index on ohlcv symbol+timeframe+ts
 feat(worker): implement EDGAR 8-K RSS ingestion task
 ```
 
 **Rules:**
 - Imperative present tense: "add" not "added", "fix" not "fixes"
-- Max 72 characters for subject line
+- Max 72 characters for the subject line
 - Body required for breaking changes and non-obvious fixes
-- BREAKING CHANGE: footer required when API contracts change
-- FORBIDDEN: "WIP", "fix stuff", "updates", "misc changes", "temp"
+- BREAKING CHANGE footer required when API contracts change
+- FORBIDDEN subject lines: "WIP", "fix stuff", "updates", "misc", "temp", "changes"
+
+### Commit Discipline
+
+- One commit = one verified, stable step forward
+- Every commit must leave the codebase in a fully passing state:
+  - Backend: health endpoint returns 200, affected endpoint returns expected response
+  - Frontend: page renders with zero console errors, affected interaction works
+  - Infra: `docker compose up` succeeds with all containers healthy
+- NEVER commit code that has not been manually verified to work
+- NEVER batch unrelated changes — one logical unit per commit
+
+### Pre-Push Requirements
+
+- All commits on the branch pass CI checks locally
+- `git diff` reviewed — no secrets, no API keys in the diff
+- Branch is scoped to exactly what the branch name describes
 
 ---
 
-## BRANCH NAMING
+## PART X — ABSOLUTE PROHIBITIONS
 
-Format: `<type>/<scope>/<short-description>`
+### Architecture Violations
 
-Examples:
-- `feat/web/rsi-indicator`
-- `fix/api/ohlcv-timezone`
-- `perf/db/filing-index`
-- `chore/deps/pydantic-v2-upgrade`
-
-**Rules:**
-- All lowercase, hyphens only (no underscores, no dots)
-- Max 50 characters total
-- NEVER commit directly to `main` or `develop`
-- `main` — production deployments only (CI deploys on merge)
-- `develop` — integration branch
-- Feature branches cut from `develop`, merged back via PR
-
----
-
-## BRANCHING AND COMMIT WORKFLOW
-
-### Branch discipline
-- One branch = one meaningful unit of work. Never mix unrelated changes.
-- Propose the branch name before starting — the name enforces the scope.
-- If you cannot describe the branch in one short phrase, it is too broad. Split it.
-- Branch is cut from `develop`. Never from `main`.
-
-### Commit discipline
-- One commit = one verified, stable step forward.
-- Every commit must leave the codebase in a fully passing state.
-  - Backend: health check passes, affected endpoint returns expected response.
-  - Frontend: page renders, zero console errors, affected interaction works.
-  - Infra: `docker compose up` comes up clean with no errors.
-- NEVER commit code that has not been manually verified to work.
-- NEVER batch unrelated changes into one commit — one logical change per commit.
-
-### Before every commit
-- Run the pre-commit checklist from the section below.
-- Explicitly verify: does this change break anything that was working before?
-- If unsure about regression: test the affected flow end-to-end before committing.
-
-### Before every push
-- All commits on the branch pass CI checks locally (typecheck, lint, tests).
-- No secrets or API keys in the diff (`git diff` reviewed before push).
-- Branch is scoped to exactly what the branch name describes — nothing extra.
-
----
-
-## ABSOLUTE PROHIBITIONS
-
-### Architecture violations
-- NEVER call an external API from a router — always through service → cache check first
-- NEVER store secrets in code, config files, or git history. Env vars only.
-- NEVER disable CORS in production — configure it explicitly with an allowlist
-- NEVER use `SELECT *` in ClickHouse — always name columns explicitly
-- NEVER write raw SQL strings in Python — use SQLAlchemy ORM or `text()` with bound parameters
+- NEVER call an external API from a router — always service → cache → integration
+- NEVER store secrets in code, config files, or git history
+- NEVER disable CORS in production — configure an explicit allowlist
+- NEVER use `SELECT *` in ClickHouse — always name columns
+- NEVER write raw SQL strings — use SQLAlchemy ORM or `text()` with bound parameters
 - NEVER concatenate user input into SQL, Redis commands, or cache keys
-- NEVER use synchronous HTTP calls in FastAPI routes — use `httpx.AsyncClient`
+- NEVER use synchronous HTTP in FastAPI routes — use `httpx.AsyncClient`
 - NEVER use `time.sleep()` in async Python — use `asyncio.sleep()`
 - NEVER swallow exceptions with bare `except:` or `except Exception: pass`
 
-### Frontend violations
+### Frontend Violations
+
 - NEVER use `useEffect` for derived state — use `useMemo`
-- NEVER use `useEffect` to sync two pieces of state — consolidate into one source of truth
+- NEVER use `useEffect` to sync two state slices — consolidate into one source
 - NEVER call `setState` inside render
 - NEVER use inline styles for layout — use Tailwind utility classes
-- NEVER use `!important` in CSS — signals a specificity architecture failure
-- NEVER import more than 3 `../` levels deep — use path alias `@/`
+- NEVER use `!important` in CSS
+- NEVER import more than 3 `../` levels deep — use the `@/` path alias
 - NEVER put API calls directly in components — hook → TanStack Query
 - NEVER store sensitive data in `localStorage` or `sessionStorage`
 
-### Data & security violations
-- NEVER log raw API keys, tokens, or passwords — even in DEBUG logs
-- NEVER expose internal error messages to API responses (use generic message + request_id)
+### Data and Security Violations
+
+- NEVER log raw API keys, tokens, or passwords
+- NEVER expose internal error messages in API responses — use message + request_id
 - NEVER skip Pydantic validation on POST/PUT endpoints
-- NEVER hardcode rate limits in code — source from `config.py` / env vars
+- NEVER hardcode rate limits — source from `config.py` and env vars
 - NEVER commit API keys even in test files — mock them
 
-### Tech debt patterns (BANNED)
+### Tech Debt Patterns (BANNED)
+
 - NEVER add a TODO without a GitHub issue number: `# TODO(#123): description`
 - NEVER copy-paste more than 5 lines — extract a function
-- NEVER write a function longer than 50 lines — extract helpers
-- NEVER write a file longer than 400 lines — split the module
-- NEVER add a dependency without a comment in package.json/pyproject.toml explaining why
+- NEVER write a function longer than 50 lines
+- NEVER write a file longer than 400 lines
+- NEVER add a dependency without a justification comment in package.json or pyproject.toml
 
 ---
 
-## TESTING REQUIREMENTS
+## PART XI — TESTING REQUIREMENTS
 
-### Coverage minimums (enforced in CI — build fails below threshold)
-- Python services layer: 80% line coverage
-- Python repositories layer: 70% line coverage
-- Python routers: 60% (integration tests cover the rest)
-- React hooks: 80% line coverage
-- React components: 60% (E2E covers the rest)
-- Utility functions (both languages): 90% line coverage
+### Coverage Minimums (enforced in CI — build fails below threshold)
 
-### Required test types for every new feature
+| Layer | Minimum |
+|-------|---------|
+| Python services | 80% line coverage |
+| Python repositories | 70% line coverage |
+| Python routers | 60% (integration tests cover the rest) |
+| React hooks | 80% line coverage |
+| React components | 60% (E2E covers the rest) |
+| Utility functions (both languages) | 90% line coverage |
+
+### Required Test Types for Every New Feature
 
 **Unit tests** (no I/O, all dependencies mocked):
 - Every service method with a non-trivial branch
@@ -220,243 +695,267 @@ Examples:
 - Every TypeScript function with type-guarded branches
 
 **Integration tests** (real database, no external HTTP):
-- Every FastAPI endpoint (use `httpx.AsyncClient` + test database)
+- Every FastAPI endpoint (`httpx.AsyncClient` + test database)
 - Every repository query with representative data
 
-**E2E tests** (Playwright, real browser):
+**E2E tests** (Playwright):
 - Chart loads and renders candlesticks
 - Watchlist: add/remove symbol
 - Command palette: open, find symbol, navigate to chart
 - Alert: create and receive notification
 - Screener: build filter, run, inspect results
 
-### Test naming conventions
-- Python: `test_<function_name>_<scenario>` (e.g., `test_get_ohlcv_returns_empty_for_unknown_symbol`)
-- TypeScript: `describe("<ComponentName>") > it("should <behavior>")` pattern
+### Test Naming Conventions
 
-### Test prohibitions
-- NEVER use `time.sleep()` in tests — use mocks or async patterns
+- Python: `test_<function_name>_<scenario>`
+  e.g., `test_get_ohlcv_returns_empty_for_unknown_symbol`
+- TypeScript: `describe("<ComponentName>") > it("should <behavior>")`
+
+### Test Prohibitions
+
+- NEVER use `time.sleep()` — use mocks or async patterns
 - NEVER test implementation details — test behavior and outputs
-- NEVER share mutable state between tests — each test fully independent
+- NEVER share mutable state between tests
 - NEVER make real HTTP calls in unit or integration tests — mock all external APIs
 
 ---
 
-## PERFORMANCE BUDGETS (Lighthouse CI in GitHub Actions)
+## PART XII — PERFORMANCE BUDGETS
 
-### Frontend
-- First Contentful Paint: < 1.5s (simulated 4G)
-- Time to Interactive: < 3.5s
-- Largest Contentful Paint: < 2.5s
-- Total Blocking Time: < 200ms
-- Initial JS bundle: < 200KB gzipped
-- Total JS (async included): < 1MB gzipped
+### Frontend (Lighthouse CI)
+
+| Metric | Budget |
+|--------|--------|
+| First Contentful Paint | < 1.5s (simulated 4G) |
+| Time to Interactive | < 3.5s |
+| Largest Contentful Paint | < 2.5s |
+| Total Blocking Time | < 200ms |
+| Initial JS bundle | < 200KB gzipped |
+| Total JS (async included) | < 1MB gzipped |
 
 ### API
-- P50 response time for cached endpoints: < 50ms
-- P99 response time for cached endpoints: < 200ms
-- P50 response time for ClickHouse OHLCV queries (1Y daily): < 100ms
-- P99 response time for ClickHouse OHLCV queries: < 500ms
-- Screener endpoint (uncached, complex query): < 2s P99
 
-### Real-time
-- WebSocket message fan-out latency (server receive → client receive): < 50ms
-- Price update frequency: throttled to 1 update/second per symbol per client
+| Metric | Budget |
+|--------|--------|
+| P50, cached endpoints | < 50ms |
+| P99, cached endpoints | < 200ms |
+| P50, ClickHouse OHLCV (1Y daily) | < 100ms |
+| P99, ClickHouse OHLCV | < 500ms |
+| Screener, uncached complex query | < 2s P99 |
+
+### Real-Time
+
+| Metric | Budget |
+|--------|--------|
+| WS fan-out latency (server receive → client receive) | < 50ms |
+| Price update frequency (per symbol per client) | max 1/second |
 
 ---
 
-## SECURITY RULES
+## PART XIII — SECURITY RULES
 
 ### Authentication
+
 - JWT access tokens: 15-minute expiry
-- Refresh tokens: 7-day expiry, rotated on each use, stored in httpOnly Secure cookie
-- API keys: stored as SHA-256 hash in database, shown to user exactly once
+- Refresh tokens: 7-day expiry, rotated on each use, httpOnly Secure cookie
+- API keys: SHA-256 hashed in DB, shown to user exactly once
 - Passwords: bcrypt minimum cost factor 12
 
-### Input validation
-- All user-supplied strings: enforce max length limits in Pydantic schemas
+### Input Validation
+
+- All user-supplied strings: enforce max length in Pydantic schemas
 - Symbol validation: regex `^[A-Z0-9./\-]{1,20}$`
 - Date range limits: max 10 years for OHLCV requests
-- Screener: max 10 filters per query, max 5 sort fields
+- Screener: max 10 filters, max 5 sort fields per query
 
-### Rate limiting
-- Anonymous: 60 requests/hour per IP
-- Free tier: 300 requests/hour per user
-- Pro tier: 3000 requests/hour per user
-- WebSocket subscriptions: max 50 symbols per connection
+### Rate Limiting
 
-### HTTP Security Headers (set by Nginx)
+| Tier | Limit |
+|------|-------|
+| Anonymous | 60 requests/hour per IP |
+| Free tier | 300 requests/hour per user |
+| Pro tier | 3000 requests/hour per user |
+| WebSocket | max 50 symbol subscriptions per connection |
+
+All limits sourced from `config.py` — never hardcoded.
+
+### HTTP Security Headers (Nginx)
+
 - `Strict-Transport-Security: max-age=31536000; includeSubDomains`
 - `X-Content-Type-Options: nosniff`
 - `X-Frame-Options: DENY`
-- `Content-Security-Policy`: explicitly defined allowlist, no `unsafe-inline`, no `unsafe-eval`
+- `Content-Security-Policy`: explicit allowlist, no `unsafe-inline`, no `unsafe-eval`
 - `Referrer-Policy: strict-origin-when-cross-origin`
 
-### Dependency security
-- `npm audit` and `pip-audit` run in CI — HIGH/CRITICAL vulnerabilities block merge
+### Dependency Security
+
+- `npm audit` and `pip-audit` in CI — HIGH/CRITICAL blocks merge
 - `dependabot` configured for automated patch PRs
-- Docker base images: always pin to SHA digest, not floating tags
+- Docker base images: pinned to SHA digest, not floating tags
 
 ---
 
-## DOCUMENTATION REQUIREMENTS
+## PART XIV — DOCUMENTATION REQUIREMENTS
 
-### Code documentation
+### Code Documentation
+
 - Every public function/class/method: docstring (Python) or JSDoc (TypeScript)
-- Docstrings explain WHY, not WHAT (the code explains what)
-- Complex algorithms: comment citing source/reference paper
+- Docstrings explain WHY, not WHAT
+- Complex algorithms: comment citing source or reference
 - Every Pydantic model field: `description` parameter
 - Every FastAPI endpoint: `summary`, `description`, `response_model`
 
 ### Architecture Decision Records (ADRs)
+
 - Location: `docs/architecture/decisions/`
-- Required when: choosing between two viable tech options, making a breaking change
+- Required when: choosing between viable options, making a breaking change,
+  assigning a new port, introducing a new external dependency
 - Format: Title · Status · Context · Decision · Consequences
-- ADRs are IMMUTABLE — create a new ADR to supersede, never edit old ones
+- ADRs are IMMUTABLE — create a superseding ADR; never edit old ones
 
 ### Runbooks
+
 - New external data source: update `docs/runbooks/adding-data-source.md`
 - New UI panel: update `docs/runbooks/adding-ui-panel.md`
-- Runbooks must be step-by-step, verifiable, written by the person doing the work
+- Step-by-step, verifiable, written by the person doing the work
 
 ### Changelog
-- `CHANGELOG.md` updated in every PR that changes user-facing behavior
+
+- `CHANGELOG.md` updated in every PR with a user-facing change
 - Format: Keep a Changelog (https://keepachangelog.com)
 
 ---
 
-## HOW TO ADD A NEW DATA SOURCE
+## PART XV — HOW TO ADD A NEW DATA SOURCE
 
-Follow this checklist in order. Do NOT skip steps.
+Follow in order. No steps skipped.
 
-1. **Read the ToS first.** Document rate limits, caching requirements, attribution
-   requirements, and redistribution restrictions. Create an ADR if a policy affects architecture.
+1. **Read the ToS.** Document rate limits, caching minimums, attribution requirements,
+   redistribution restrictions. Create an ADR if any policy affects architecture.
 
 2. **Create the integration client** in `services/api/src/integrations/<provider>.py`:
-   - Subclass `BaseIntegrationClient` (provides retry, backoff, timeout)
+   - Subclass `BaseIntegrationClient` (retry, backoff, timeout included)
    - All methods fully type-annotated, returning Pydantic schemas
-   - Include `User-Agent` header with contact info where required (SEC EDGAR requires this)
-   - Implement rate limit tracking with Redis counters
-   - Unit tests with `httpx` mock transport — ZERO real HTTP calls in tests
+   - `User-Agent` header with contact info where required (EDGAR requires this)
+   - Rate limit tracking with Redis counters
+   - All timeouts and retry counts sourced from settings — never hardcoded
+   - Unit tests with `httpx` mock transport — zero real HTTP calls in tests
 
-3. **Add required environment variables** to:
-   - `.env.example` with description comment
-   - `services/api/src/config.py` as a `pydantic-settings` field
-   - CI secrets documentation in `docs/runbooks/`
+3. **Add env vars** to `.env.example` (with comment) and `config.py` (pydantic-settings field).
 
 4. **Create the ingestion task** in `services/worker/src/tasks/`:
-   - Explicit Celery task name, `max_retries`, `time_limit`
-   - Idempotent logic — re-running must not create duplicates
+   - Explicit Celery task name, `max_retries`, `time_limit` — all from settings
+   - Idempotent: re-running must not duplicate data
    - Add to Celery Beat schedule in `celery_app.py`
 
-5. **Add a cache layer** in the consuming service:
-   - Determine appropriate TTL (respect ToS caching minimums)
-   - Add cache key constant to `services/api/src/cache/keys.py`
-   - Cache-aside pattern: check cache → miss → fetch → store → return
+5. **Add cache layer** in the consuming service:
+   - TTL respects ToS minimum (sourced from settings)
+   - Cache key added to `services/api/src/cache/keys.py`
+   - Cache-aside pattern: check → miss → fetch → store → return
 
 6. **Expose via REST endpoint** following existing router patterns.
 
-7. **Add integration test** with a VCR cassette (record real response once, replay in CI).
+7. **Add integration test** with a VCR cassette (record once, replay in CI).
 
-8. **Update** `docs/runbooks/adding-data-source.md` with this provider's specifics.
+8. **Update** `docs/runbooks/adding-data-source.md`.
 
 ---
 
-## HOW TO ADD A NEW UI PANEL
+## PART XVI — HOW TO ADD A NEW UI PANEL
 
-Follow this checklist in order.
+Follow in order. No steps skipped.
 
-1. **Define the panel's data contract first.** What REST endpoints or WebSocket channels
-   does it consume? If endpoints don't exist, build them first (backend before frontend).
+1. **Define the data contract first.** What endpoints or WS channels does it need?
+   Build backend before frontend.
 
 2. **Create the panel directory**: `apps/web/src/panels/<panel-name>-panel/`
    Required files:
    - `index.tsx` — barrel export
-   - `<PanelName>Panel.tsx` — root panel component
+   - `<PanelName>Panel.tsx` — root component
    - `<PanelName>Panel.test.tsx` — component tests
-   - Sub-components in the same directory
 
-3. **Panel component interface** (ALL panels MUST accept these props):
+3. **Panel interface** (all panels must accept exactly these props):
    ```typescript
    interface PanelProps {
-     panelId: string;    // Unique instance ID for layout state
-     isActive: boolean;  // Whether this panel has keyboard focus
+     panelId: string;    // unique instance ID for layout state
+     isActive: boolean;  // whether this panel has keyboard focus
      onClose: () => void;
    }
    ```
 
-4. **Data fetching**: TanStack Query hooks only. Create `use<PanelName>Data()` in same directory.
-   No direct `fetch()` calls inside components, ever.
+4. **Data fetching**: TanStack Query hooks only. Create `use<PanelName>Data()` in the panel directory. No direct `fetch()` calls.
 
 5. **Keyboard navigation**: Every panel must be fully keyboard-navigable.
-   Register panel-specific shortcuts with `useKeyboardShortcuts` when `isActive === true`.
+   Register shortcuts with `useKeyboardShortcuts` when `isActive === true`.
 
-6. **Loading and error states**: Every panel MUST render `<PanelSkeleton>` during loading
-   and `<PanelError>` on failure. Use components from `packages/ui-components`.
+6. **Loading and error states**: `<PanelSkeleton>` and `<PanelError>` from `packages/ui-components`.
 
-7. **Register the panel** in `apps/web/src/panels/index.ts` (panel registry).
+7. **Register** in `apps/web/src/panels/index.ts`.
 
-8. **Register in command palette**: Panel must be openable via Ctrl+K search.
+8. **Register in command palette**: openable via Ctrl+K.
 
 9. **Add E2E test** in `apps/web/e2e/specs/<panel-name>.spec.ts`.
 
-10. **Update runbook**: `docs/runbooks/adding-ui-panel.md`.
+10. **Update** `docs/runbooks/adding-ui-panel.md`.
 
 ---
 
-## PLUGIN DEVELOPMENT RULES
+## PART XVII — PLUGIN DEVELOPMENT RULES
 
-1. **Plugins are isolated.** They CANNOT import from the main application source.
-   They consume ONLY the `PluginAPI` provided at runtime.
-
-2. **Bundles are self-contained.** Bundle all dependencies into `dist/bundle.js`.
-   Do not rely on globals from the host application.
-
-3. **Permissions are declared, not assumed.** If your plugin needs `market-data:read`,
-   declare it in `manifest.json`. The host will refuse to load plugins with undeclared permissions.
-
-4. **Plugin storage is namespaced.** `PluginAPI.storage` keys are automatically prefixed
-   with the plugin ID. Plugins cannot access each other's storage.
-
-5. **Plugins handle errors gracefully.** A plugin crash must NOT crash the terminal.
-   All plugin code runs inside a React Error Boundary.
-
-6. **Performance budget.** A plugin panel must not cause the page to drop below
-   30fps for more than 500ms.
-
-7. **Plugin versioning.** Plugins declare `minApiVersion`. The host checks compatibility
-   on load and shows a deprecation warning or refuses to load incompatible versions.
-
-8. **Forbidden without exception.** `eval()`, `Function()` constructor, dynamic script injection.
-   These are blocked by CSP regardless.
-
-9. **Plugin PRs require:** manifest.json review, security review of permissions requested,
-   performance test results, plugin README.md.
+1. Plugins are isolated — cannot import from main application source
+2. Bundles are self-contained — all dependencies bundled into `dist/bundle.js`
+3. Permissions are declared in `manifest.json` — host refuses undeclared permissions
+4. Storage is namespaced — keys auto-prefixed with plugin ID
+5. Plugin crashes must not crash the terminal — all code inside React Error Boundary
+6. Performance budget: must not drop page below 30fps for more than 500ms
+7. Plugins declare `minApiVersion` — host checks compatibility on load
+8. Forbidden without exception: `eval()`, `Function()` constructor, dynamic script injection
+9. Plugin PRs require: manifest review, security review, performance results, plugin README
 
 ---
 
-## ENVIRONMENT VARIABLES DISCIPLINE
+## PART XVIII — ENVIRONMENT VARIABLES DISCIPLINE
 
-- ALL environment variables MUST be declared in `.env.example` with a comment
-- NEVER use default values for secrets in production config — fail loudly if missing
-- FastAPI app MUST REFUSE to start if required environment variables are missing
+- ALL env vars declared in `.env.example` with a comment
+- NEVER use default values for secrets in production — fail loudly if missing
+- FastAPI app MUST REFUSE to start if required env vars are absent
 - Separate env files per environment: `.env.development`, `.env.test`
-- `.env` (actual secrets) is ALWAYS in `.gitignore` — no exceptions
+- `.env` is ALWAYS in `.gitignore`
 - Use `pydantic-settings` BaseSettings for all config parsing and validation
 
 ---
 
-## PRE-COMMIT SELF-REVIEW CHECKLIST
+## PART XIX — PRE-COMMIT SELF-REVIEW CHECKLIST
 
-Before every commit, verify ALL of the following:
+Before every commit, verify every item. No exceptions.
 
-- [ ] `pnpm run typecheck` passes (zero TypeScript errors)
-- [ ] `pnpm run lint` passes (zero ESLint errors, zero ruff warnings)
+**Governance**
+- [ ] This change was planned before any code was written
+- [ ] Every value in the diff originates from env vars, named constants, or documented rationale
+- [ ] No new port introduced without a Port Registry entry in CLAUDE.md
+- [ ] No architectural decision made without an ADR
+
+**Code Quality**
+- [ ] `pnpm run typecheck` passes — zero TypeScript errors
+- [ ] `pnpm run lint` passes — zero ESLint errors or warnings
 - [ ] `mypy --strict` passes on all changed Python files
+- [ ] `ruff check .` and `black --check .` pass
+
+**Testing**
 - [ ] All new code has tests at the required coverage level
+- [ ] All existing tests still pass
+- [ ] No real HTTP calls introduced in unit or integration tests
+
+**Configuration**
 - [ ] New env vars documented in `.env.example`
-- [ ] Performance-sensitive code has been benchmarked
-- [ ] No secrets, API keys, or PII in the diff
+- [ ] No secrets, API keys, or PII in the diff (`git diff` reviewed)
+
+**Documentation**
 - [ ] `CHANGELOG.md` updated if this is a user-facing change
 - [ ] ADR created if an architectural decision was made
+- [ ] Runbook updated if a new data source or UI panel was added
+
+**Commit**
 - [ ] Commit message follows Conventional Commits format
+- [ ] Commit scope is one of the approved scopes
+- [ ] This commit leaves the codebase in a fully passing, verifiable state
