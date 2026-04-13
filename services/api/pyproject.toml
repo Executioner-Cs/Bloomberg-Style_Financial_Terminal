@@ -65,7 +65,8 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "B", "C4", "SIM", "RUF"]
-ignore = []
+# B008: FastAPI uses Query(), Depends(), Body() as parameter defaults by design
+ignore = ["B008"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["src"]

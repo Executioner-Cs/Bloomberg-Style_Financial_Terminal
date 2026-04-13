@@ -170,7 +170,7 @@ jobs:
         run: |
           pip install pip-audit
           pip install -e .
-          pip-audit --severity high
+          pip-audit
 
   # ----------------------------------------------------------------
   # Commitlint — enforce Conventional Commits on PRs
