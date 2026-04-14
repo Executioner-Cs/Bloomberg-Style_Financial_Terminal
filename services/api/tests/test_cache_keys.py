@@ -4,6 +4,7 @@ Tests for cache key functions (src/cache/keys.py).
 Cache keys are the contract between the API layer and Redis. These tests
 confirm key format, required parameters, and that no two keys collide.
 """
+
 from __future__ import annotations
 
 import src.cache.keys as keys
