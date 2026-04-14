@@ -88,6 +88,12 @@ plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin"]
 module = ["clickhouse_connect", "clickhouse_connect.*"]
 ignore_missing_imports = true
 
+# redis-py asyncio helpers (from_url, etc.) are not fully typed.
+# The redis package ships partial stubs; from_url is unannotated.
+[[tool.mypy.overrides]]
+module = ["redis", "redis.*"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
