@@ -64,7 +64,7 @@ def _instrument(symbol: str = "BITCOIN") -> InstrumentResponse:
     )
 
 
-BASE_URL = "http://test"
+BASE_URL = "https://test"
 
 
 # ---------------------------------------------------------------------------

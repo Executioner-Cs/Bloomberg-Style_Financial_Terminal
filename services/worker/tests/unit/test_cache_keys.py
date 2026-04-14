@@ -78,8 +78,8 @@ def test_rate_limit_user_key_format() -> None:
 
 
 def test_rate_limit_ip_key_format() -> None:
-    key = keys.rate_limit_ip("192.168.1.1", "hourly")
-    assert key == "ratelimit:ip:192.168.1.1:hourly"
+    key = keys.rate_limit_ip("203.0.113.1", "hourly")
+    assert key == "ratelimit:ip:203.0.113.1:hourly"
 
 
 def test_pubsub_price_channel() -> None:

@@ -27,7 +27,7 @@ async def client() -> AsyncClient:  # type: ignore[misc]
     """Async HTTP client wired to the ASGI app — no real server started."""
     async with AsyncClient(
         transport=ASGITransport(app=app),
-        base_url="http://test",
+        base_url="https://test",
     ) as ac:
         yield ac
 
@@ -83,7 +83,7 @@ async def test_list_instruments_pagination_params() -> None:
     app.dependency_overrides[instruments_router._build_service] = lambda: mock_service
     try:
         async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
+            transport=ASGITransport(app=app), base_url="https://test"
         ) as ac:
             response = await ac.get("/api/v1/instruments?limit=10&offset=20")
     finally:
@@ -110,7 +110,7 @@ async def test_get_instrument_by_symbol() -> None:
     app.dependency_overrides[instruments_router._build_service] = lambda: mock_service
     try:
         async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
+            transport=ASGITransport(app=app), base_url="https://test"
         ) as ac:
             response = await ac.get("/api/v1/instruments/AAPL")
     finally:
@@ -135,7 +135,7 @@ async def test_get_ohlcv_returns_symbol_and_timeframe() -> None:
     app.dependency_overrides[market_data_router._build_service] = lambda: mock_service
     try:
         async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
+            transport=ASGITransport(app=app), base_url="https://test"
         ) as ac:
             response = await ac.get("/api/v1/market-data/AAPL/ohlcv?timeframe=1D")
     finally:
@@ -155,7 +155,7 @@ async def test_get_quote_returns_symbol() -> None:
     app.dependency_overrides[market_data_router._build_service] = lambda: mock_service
     try:
         async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
+            transport=ASGITransport(app=app), base_url="https://test"
         ) as ac:
             response = await ac.get("/api/v1/market-data/BTCUSD/quote")
     finally:
@@ -173,7 +173,7 @@ async def test_get_bulk_quotes_returns_quotes_map() -> None:
     app.dependency_overrides[market_data_router._build_service] = lambda: mock_service
     try:
         async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
+            transport=ASGITransport(app=app), base_url="https://test"
         ) as ac:
             response = await ac.get(
                 "/api/v1/market-data/bulk-quotes?symbols=AAPL&symbols=MSFT"
