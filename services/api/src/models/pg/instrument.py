@@ -12,7 +12,7 @@ from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, String, func
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, MappedAsDataclass, mapped_column
 
 
 class Base(DeclarativeBase):
@@ -30,7 +30,8 @@ class Instrument(MappedAsDataclass, Base):
 
     __tablename__ = "instruments"
 
-    # MappedAsDataclass generates __init__ — non-default fields must precede default fields.
+    # MappedAsDataclass generates __init__.
+    # Non-default fields must precede default fields (dataclass ordering rule).
     symbol: Mapped[str] = mapped_column(
         String(20),
         nullable=False,
@@ -52,7 +53,7 @@ class Instrument(MappedAsDataclass, Base):
         UUID(as_uuid=True),
         primary_key=True,
         default_factory=uuid.uuid4,
-        doc="Surrogate key. UUID avoids int sequence contention in multi-region setups.",
+        doc="Surrogate key. UUID avoids int sequence contention in multi-region.",
     )
     exchange: Mapped[str | None] = mapped_column(
         String(50),
