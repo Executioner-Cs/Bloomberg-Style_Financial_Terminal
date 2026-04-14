@@ -1,0 +1,198 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ----------------------------------------------------------------
+  # TypeScript — typecheck + lint + unit tests (all JS packages)
+  # ----------------------------------------------------------------
+  typescript:
+    name: TypeScript (typecheck + lint + test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        # version is read from packageManager field in package.json — do not set it here
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck all packages
+        run: pnpm run typecheck
+
+      - name: Lint all packages
+        run: pnpm run lint
+
+      - name: Unit tests
+        run: pnpm run test:unit
+
+  # ----------------------------------------------------------------
+  # Python — mypy + ruff + unit tests (api service)
+  # ----------------------------------------------------------------
+  python-api:
+    name: Python API (mypy + ruff + test)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: terminal_test
+          POSTGRES_USER: terminal
+          POSTGRES_PASSWORD: terminal_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: services/api
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: mypy --strict
+        run: mypy --strict src/
+
+      - name: ruff check
+        run: ruff check src/
+
+      - name: black format check
+        run: black --check src/
+
+      - name: Unit + Integration tests
+        env:
+          APP_ENV: development
+          JWT_SECRET_KEY: test-secret-key-for-ci-only
+          DATABASE_URL: postgresql+asyncpg://terminal:terminal_test@localhost:5432/terminal_test
+          SYNC_DATABASE_URL: postgresql://terminal:terminal_test@localhost:5432/terminal_test
+          CLICKHOUSE_HOST: localhost
+          REDIS_URL: redis://localhost:6379/0
+          EDGAR_USER_AGENT: Bloomberg-Terminal-CI/1.0 ci@test.com
+        run: pytest --cov=src --cov-report=xml
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: services/api/coverage.xml
+          flags: api
+
+  # ----------------------------------------------------------------
+  # Python — mypy + ruff + tests (worker service)
+  # ----------------------------------------------------------------
+  python-worker:
+    name: Python Worker (mypy + ruff + test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/worker
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: mypy --strict
+        run: mypy --strict src/
+
+      - name: ruff check
+        run: ruff check src/
+
+      - name: Unit tests
+        run: pytest tests/
+
+  # ----------------------------------------------------------------
+  # Security audit
+  # ----------------------------------------------------------------
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        # version is read from packageManager field in package.json — do not set it here
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install JS dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: npm audit (high+critical only)
+        run: pnpm audit --audit-level=high
+
+      - name: pip-audit (api)
+        working-directory: services/api
+        run: |
+          pip install pip-audit
+          pip install -e .
+          pip-audit
+
+  # ----------------------------------------------------------------
+  # Commitlint — enforce Conventional Commits on PRs
+  # ----------------------------------------------------------------
+  commitlint:
+    name: Commit Message Lint
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        # version is read from packageManager field in package.json — do not set it here
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Validate PR commits
+        run: pnpm dlx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
