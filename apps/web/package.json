@@ -32,6 +32,7 @@
   "devDependencies": {
     "@ag-grid-community/core": "^31.2.0",
     "@ag-grid-community/react": "^31.2.0",
+    "@playwright/test": "^1.44.0",
     "@terminal/eslint-config": "workspace:*",
     "@terminal/types": "workspace:*",
     "@testing-library/jest-dom": "^6.4.0",
