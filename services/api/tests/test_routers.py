@@ -1,17 +1,25 @@
 """
-Router tests — verifies every stub endpoint returns the expected shape.
+Router smoke tests — health, middleware, and stub endpoint shape.
 
-All routes in Phase 0 are stubs (no DB, no cache). These tests:
-  - Confirm the route exists and returns HTTP 200
-  - Confirm the response payload matches the documented contract shape
-  - Confirm RequestIDMiddleware injects X-Request-ID on every response
+Phase 1: instruments and market-data routers are wired to real services.
+Those endpoints are fully tested in tests/integration/test_market_data_endpoints.py.
+This file covers health, request ID middleware, and stub-only routers.
 """
+
 from __future__ import annotations
+
+from unittest.mock import AsyncMock
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 
 from src.main import app
+from src.routers import instruments as instruments_router
+from src.routers import market_data as market_data_router
+from src.schemas.instruments import InstrumentListResponse, InstrumentResponse
+from src.schemas.market_data import OHLCVResponse, QuoteResponse
+from src.services.instrument_service import InstrumentService
+from src.services.market_data_service import MarketDataService
 
 
 @pytest.fixture
@@ -61,22 +69,26 @@ async def test_request_id_generated_when_absent(client: AsyncClient) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Instruments
+# Instruments — now wired to service (uses dependency_overrides for isolation)
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.asyncio
-async def test_list_instruments_empty_stub(client: AsyncClient) -> None:
-    response = await client.get("/api/v1/instruments")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["instruments"] == []
-    assert data["total"] == 0
+async def test_list_instruments_pagination_params() -> None:
+    """limit/offset query params are forwarded to the service layer."""
+    mock_service = AsyncMock(spec=InstrumentService)
+    mock_service.list_instruments.return_value = InstrumentListResponse(
+        instruments=[], total=0, limit=10, offset=20
+    )
+    app.dependency_overrides[instruments_router._build_service] = lambda: mock_service
+    try:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as ac:
+            response = await ac.get("/api/v1/instruments?limit=10&offset=20")
+    finally:
+        app.dependency_overrides.pop(instruments_router._build_service, None)
 
-
-@pytest.mark.asyncio
-async def test_list_instruments_pagination_params(client: AsyncClient) -> None:
-    response = await client.get("/api/v1/instruments?limit=10&offset=20")
     assert response.status_code == 200
     data = response.json()
     assert data["limit"] == 10
@@ -84,39 +96,93 @@ async def test_list_instruments_pagination_params(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_instrument_by_symbol(client: AsyncClient) -> None:
-    response = await client.get("/api/v1/instruments/AAPL")
+async def test_get_instrument_by_symbol() -> None:
+    """GET /instruments/{symbol} routes correctly and returns instrument shape."""
+    mock_service = AsyncMock(spec=InstrumentService)
+    mock_service.get_instrument.return_value = InstrumentResponse(
+        symbol="AAPL",
+        name="Apple Inc.",
+        asset_class="equity",
+        exchange="NASDAQ",
+        currency="USD",
+        is_active=True,
+    )
+    app.dependency_overrides[instruments_router._build_service] = lambda: mock_service
+    try:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as ac:
+            response = await ac.get("/api/v1/instruments/AAPL")
+    finally:
+        app.dependency_overrides.pop(instruments_router._build_service, None)
+
     assert response.status_code == 200
     assert response.json()["symbol"] == "AAPL"
 
 
 # ---------------------------------------------------------------------------
-# Market data
+# Market data — now wired to service (uses dependency_overrides for isolation)
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.asyncio
-async def test_get_ohlcv_returns_symbol_and_empty_bars(client: AsyncClient) -> None:
-    response = await client.get("/api/v1/market-data/AAPL/ohlcv?timeframe=1D")
+async def test_get_ohlcv_returns_symbol_and_timeframe() -> None:
+    """GET /market-data/{symbol}/ohlcv returns correct symbol/timeframe fields."""
+    mock_service = AsyncMock(spec=MarketDataService)
+    mock_service.get_ohlcv.return_value = OHLCVResponse(
+        symbol="AAPL", timeframe="1D", bars=[], source="test"
+    )
+    app.dependency_overrides[market_data_router._build_service] = lambda: mock_service
+    try:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as ac:
+            response = await ac.get("/api/v1/market-data/AAPL/ohlcv?timeframe=1D")
+    finally:
+        app.dependency_overrides.pop(market_data_router._build_service, None)
+
     assert response.status_code == 200
     data = response.json()
     assert data["symbol"] == "AAPL"
     assert data["timeframe"] == "1D"
-    assert data["bars"] == []
 
 
 @pytest.mark.asyncio
-async def test_get_quote_returns_symbol(client: AsyncClient) -> None:
-    response = await client.get("/api/v1/market-data/BTCUSD/quote")
+async def test_get_quote_returns_symbol() -> None:
+    """GET /market-data/{symbol}/quote returns correct symbol field."""
+    mock_service = AsyncMock(spec=MarketDataService)
+    mock_service.get_quote.return_value = QuoteResponse(symbol="BTCUSD", price=None)
+    app.dependency_overrides[market_data_router._build_service] = lambda: mock_service
+    try:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as ac:
+            response = await ac.get("/api/v1/market-data/BTCUSD/quote")
+    finally:
+        app.dependency_overrides.pop(market_data_router._build_service, None)
+
     assert response.status_code == 200
     assert response.json()["symbol"] == "BTCUSD"
 
 
 @pytest.mark.asyncio
-async def test_get_bulk_quotes_returns_empty_map(client: AsyncClient) -> None:
-    response = await client.get("/api/v1/market-data/bulk-quotes?symbols=AAPL&symbols=MSFT")
+async def test_get_bulk_quotes_returns_quotes_map() -> None:
+    """GET /market-data/bulk-quotes returns quotes dict."""
+    mock_service = AsyncMock(spec=MarketDataService)
+    mock_service.get_bulk_quotes.return_value = {}
+    app.dependency_overrides[market_data_router._build_service] = lambda: mock_service
+    try:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as ac:
+            response = await ac.get(
+                "/api/v1/market-data/bulk-quotes?symbols=AAPL&symbols=MSFT"
+            )
+    finally:
+        app.dependency_overrides.pop(market_data_router._build_service, None)
+
     assert response.status_code == 200
-    assert response.json() == {"quotes": {}}
+    assert "quotes" in response.json()
 
 
 # ---------------------------------------------------------------------------
