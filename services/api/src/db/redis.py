@@ -21,12 +21,13 @@ from src.config import settings
 _client: aioredis.Redis | None = None
 
 
-async def get_redis() -> aioredis.Redis:
+def get_redis() -> aioredis.Redis:
     """
     FastAPI dependency that returns the shared async Redis client.
 
     The client manages its own connection pool internally.
-    Lazily initialized on first request.
+    Lazily initialized on first request. No network I/O happens here —
+    connections are established on first use by the Redis client.
 
     Usage in a service:
         async def my_service(redis: aioredis.Redis = Depends(get_redis)):

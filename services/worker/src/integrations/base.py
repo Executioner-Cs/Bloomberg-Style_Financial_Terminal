@@ -64,7 +64,7 @@ class BaseIntegrationClient:
             "Accept": "application/json",
         }
 
-    async def _get_client(self) -> httpx.AsyncClient:
+    def _get_client(self) -> httpx.AsyncClient:
         """Lazily create and return the shared HTTP client."""
         if self._client is None or self._client.is_closed:
             self._client = httpx.AsyncClient(
@@ -86,7 +86,7 @@ class BaseIntegrationClient:
         Raises IntegrationError on unrecoverable failures.
         Raises RateLimitError on HTTP 429.
         """
-        client = await self._get_client()
+        client = self._get_client()
         backoff = INITIAL_BACKOFF_SECONDS
 
         for attempt in range(max_retries + 1):
