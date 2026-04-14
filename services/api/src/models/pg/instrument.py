@@ -12,14 +12,14 @@ from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, String, func
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, MappedAsDataclass, Mapped, mapped_column
 
 
 class Base(DeclarativeBase):
     """Shared declarative base for all PostgreSQL models."""
 
 
-class Instrument(Base):
+class Instrument(MappedAsDataclass, Base):
     """
     Represents a tradeable instrument across all asset classes.
 
@@ -30,12 +30,7 @@ class Instrument(Base):
 
     __tablename__ = "instruments"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-        doc="Surrogate key. UUID avoids int sequence contention in multi-region setups.",
-    )
+    # MappedAsDataclass generates __init__ — non-default fields must precede default fields.
     symbol: Mapped[str] = mapped_column(
         String(20),
         nullable=False,
@@ -52,9 +47,17 @@ class Instrument(Base):
         nullable=False,
         doc="Asset class: 'equity', 'crypto', 'fx', or 'macro'.",
     )
+    # Fields with defaults follow — required by dataclass ordering rules.
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default_factory=uuid.uuid4,
+        doc="Surrogate key. UUID avoids int sequence contention in multi-region setups.",
+    )
     exchange: Mapped[str | None] = mapped_column(
         String(50),
         nullable=True,
+        default=None,
         doc="Exchange identifier. NULL for crypto (multi-exchange) and macro series.",
     )
     currency: Mapped[str] = mapped_column(
@@ -73,11 +76,13 @@ class Instrument(Base):
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
+        init=False,
         doc="Row creation timestamp (UTC).",
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
+        init=False,
         doc="Last upsert timestamp (UTC). Updated by InstrumentRepository on write.",
     )
