@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@': resolve(__dirname, './src'),
         '@terminal/types': resolve(__dirname, '../../packages/types/src'),
+        '@terminal/ui-components': resolve(__dirname, '../../packages/ui-components/src'),
       },
     },
     server: {
