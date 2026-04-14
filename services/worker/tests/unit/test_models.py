@@ -40,14 +40,14 @@ def test_ohlcv_row_creation() -> None:
     row = _make_row()
     assert row.symbol == "BITCOIN"
     assert row.timeframe == "1D"
-    assert row.close == 41000.0
+    assert row.close == pytest.approx(41000.0)
     assert row.source == "coingecko"
     assert row.adj_close is None
 
 
 def test_ohlcv_row_with_adj_close() -> None:
     row = _make_row(adj_close=40900.0)
-    assert row.adj_close == 40900.0
+    assert row.adj_close == pytest.approx(40900.0)
 
 
 def test_ohlcv_row_is_frozen() -> None:
@@ -84,11 +84,11 @@ def test_to_clickhouse_dict_values() -> None:
     assert d["symbol"] == "ETHEREUM"
     assert d["timeframe"] == "4H"
     assert d["ts"] == ts
-    assert d["open"] == 3000.0
-    assert d["high"] == 3100.0
-    assert d["low"] == 2950.0
-    assert d["close"] == 3050.0
-    assert d["volume"] == 200.0
+    assert d["open"] == pytest.approx(3000.0)
+    assert d["high"] == pytest.approx(3100.0)
+    assert d["low"] == pytest.approx(2950.0)
+    assert d["close"] == pytest.approx(3050.0)
+    assert d["volume"] == pytest.approx(200.0)
     assert d["source"] == "coingecko"
     assert d["adj_close"] is None
 
@@ -96,7 +96,7 @@ def test_to_clickhouse_dict_values() -> None:
 def test_to_clickhouse_dict_with_adj_close() -> None:
     row = _make_row(adj_close=40800.0)
     d = row.to_clickhouse_dict()
-    assert d["adj_close"] == 40800.0
+    assert d["adj_close"] == pytest.approx(40800.0)
 
 
 # ---------------------------------------------------------------------------
