@@ -55,6 +55,7 @@ docker-compose.override.yml
 
 # --- AI Tools -----------------------------------------------
 .claude/
+.cursor/
 
 # --- Editors ------------------------------------------------
 .vscode/settings.json
