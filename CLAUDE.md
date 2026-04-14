@@ -1049,20 +1049,39 @@ long sessions to stay within context budgets.
 violates this project's commitlint rules (Conventional Commits enforced in CI).
 All commit messages must follow `type(scope): imperative description` — see Part IX.
 
-### Not installed — anthropics/frontend-design
+### frontend-design — Anti-Generic UI/UX (Anthropic Official)
 
-The repository `anthropics/frontend-design` (referenced in external guides) does not
-exist as a public GitHub repository. No skill was installed. The design philosophy
-(bold typography, avoiding generic Inter/purple-gradient patterns) is already expressed
-through the terminal's CSS variable system in `apps/web/src/index.css`.
+Installed via: `curl` from `anthropics/skills` repo (skills.sh)
+Skill: `~/.claude/skills/frontend-design/SKILL.md` | Trigger: `/frontend-design`
 
-### Not installed — Trail of Bits CodeQL / Snyk
+Creates distinctive, production-grade interfaces. Avoids generic AI aesthetics
+(Inter font, purple gradients, overused component patterns). Enforces bold
+typography, intentional color palettes, and purposeful motion.
 
-Trail of Bits' Claude Code skill repository and Snyk Studio integration require
-paid licenses and API keys not yet provisioned. Add in a future session when keys
-are available.
+**When to use:** Automatically activates when building or styling web UI,
+React components, dashboards, or pages. Invoke with `/frontend-design` when
+designing new panels. The terminal's existing CSS palette (#0a0a0f, #f59e0b,
+JetBrains Mono) already follows this philosophy — maintain consistency with it.
+
+### Trail of Bits Security Skills
+
+Marketplace: `claude plugin marketplace add trailofbits/skills`
+Installed plugins: `semgrep-rule-creator`, `static-analysis`, `variant-analysis`
+
+- **`semgrep-rule-creator@trailofbits`** — write Semgrep rules to detect
+  vulnerability patterns across the codebase
+- **`static-analysis@trailofbits`** — SAST: trace data flows, flag unsafe
+  patterns in Python and TypeScript
+- **`variant-analysis@trailofbits`** — given one vulnerability, find all
+  similar variants across the entire codebase
+
+**When to use:** Before any PR touching auth, input validation, DB queries,
+API endpoints, or dependency upgrades. Use alongside `/owasp-security`.
+
+### Not installed — Snyk
+
+Requires a paid API key. Add in a future session when provisioned.
 
 ### Not installed — Chrome DevTools MCP
 
-Chrome DevTools MCP integration requires a running MCP server process. Add in a
-future session when the E2E testing infrastructure (Playwright + Docker) is active.
+Requires a running MCP server. Add when E2E infrastructure is active.
