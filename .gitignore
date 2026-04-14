@@ -53,6 +53,9 @@ backups/
 # (keep docker-compose files, ignore local overrides)
 docker-compose.override.yml
 
+# --- AI Tools -----------------------------------------------
+.claude/
+
 # --- Editors ------------------------------------------------
 .vscode/settings.json
 .idea/

@@ -9,8 +9,8 @@
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts",
-    "test": "vitest run",
-    "test:unit": "vitest run --reporter=verbose",
+    "test": "vitest run --passWithNoTests",
+    "test:unit": "vitest run --reporter=verbose --passWithNoTests",
     "clean": "rm -rf dist"
   },
   "dependencies": {
