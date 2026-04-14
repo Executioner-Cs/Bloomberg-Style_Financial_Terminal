@@ -65,6 +65,20 @@ class Settings(BaseSettings):
     stockdata_api_key: str = ""
     fred_api_key: str = ""
 
+    # CoinGecko
+    # Base URL overridable via env so tests can point at a mock server.
+    coingecko_base_url: str = "https://api.coingecko.com/api/v3"
+    # Timeout for CoinGecko HTTP calls. 15s leaves margin over typical ~2s response.
+    coingecko_timeout_seconds: float = 15.0
+    # Top-N coins by market cap to ingest. Default 50 covers all major assets.
+    coingecko_top_n_coins: int = 50
+    # CoinGecko /coins/markets page size hard limit — defined by their API spec.
+    coingecko_markets_per_page_max: int = 250
+    # OHLCV cache TTL. CoinGecko free tier updates daily — 3600s (1h) is safe.
+    ohlcv_cache_ttl_seconds: int = 3600
+    # Quote snapshot TTL. Short enough to feel live, conservative to avoid rate limits.
+    quote_cache_ttl_seconds: int = 60
+
     # Rate limits (sourced from env, never hardcoded in business logic)
     marketstack_monthly_limit: int = 100
     alpha_vantage_daily_limit: int = 25

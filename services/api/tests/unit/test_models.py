@@ -8,13 +8,12 @@ No database connection required — these test the Python model definitions only
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
 from src.models.ch.ohlcv import OHLCVRow
 from src.models.pg.instrument import Instrument
-
 
 # ---------------------------------------------------------------------------
 # OHLCVRow dataclass
@@ -26,7 +25,7 @@ def test_ohlcv_row_is_immutable() -> None:
     row = OHLCVRow(
         symbol="BTC",
         timeframe="1D",
-        ts=datetime(2024, 1, 1, tzinfo=timezone.utc),
+        ts=datetime(2024, 1, 1, tzinfo=UTC),
         open=40000.0,
         high=42000.0,
         low=39000.0,
@@ -42,7 +41,7 @@ def test_ohlcv_row_adj_close_defaults_to_none() -> None:
     row = OHLCVRow(
         symbol="BTC",
         timeframe="1D",
-        ts=datetime(2024, 1, 1, tzinfo=timezone.utc),
+        ts=datetime(2024, 1, 1, tzinfo=UTC),
         open=40000.0,
         high=42000.0,
         low=39000.0,
@@ -55,7 +54,7 @@ def test_ohlcv_row_adj_close_defaults_to_none() -> None:
 
 def test_ohlcv_row_to_clickhouse_dict_contains_all_columns() -> None:
     """to_clickhouse_dict must include every column in the ClickHouse schema."""
-    ts = datetime(2024, 6, 15, 12, 0, 0, tzinfo=timezone.utc)
+    ts = datetime(2024, 6, 15, 12, 0, 0, tzinfo=UTC)
     row = OHLCVRow(
         symbol="ETH",
         timeframe="4H",
@@ -69,8 +68,18 @@ def test_ohlcv_row_to_clickhouse_dict_contains_all_columns() -> None:
         adj_close=None,
     )
     d = row.to_clickhouse_dict()
-    expected_keys = {"symbol", "timeframe", "ts", "open", "high", "low", "close",
-                     "volume", "adj_close", "source"}
+    expected_keys = {
+        "symbol",
+        "timeframe",
+        "ts",
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume",
+        "adj_close",
+        "source",
+    }
     assert set(d.keys()) == expected_keys
     assert d["symbol"] == "ETH"
     assert d["ts"] is ts
@@ -81,7 +90,7 @@ def test_ohlcv_row_with_adj_close() -> None:
     row = OHLCVRow(
         symbol="AAPL",
         timeframe="1D",
-        ts=datetime(2024, 1, 2, tzinfo=timezone.utc),
+        ts=datetime(2024, 1, 2, tzinfo=UTC),
         open=185.0,
         high=188.0,
         low=184.0,

@@ -4,6 +4,7 @@ Tests for application settings (src/config.py).
 Validates that Settings() resolves correctly and that values match the
 architectural decisions documented in CLAUDE.md (port registry, auth expiry).
 """
+
 from __future__ import annotations
 
 from src.config import settings
@@ -33,7 +34,7 @@ def test_clickhouse_http_port_is_iana_registered() -> None:
 
 
 def test_clickhouse_native_port_is_iana_registered() -> None:
-    """ClickHouse native TCP port 9000 is IANA-registered — see CLAUDE.md port registry."""
+    """ClickHouse native TCP port 9000 is IANA-registered — see CLAUDE.md."""
     assert settings.clickhouse_port == 9000
 
 
