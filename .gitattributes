@@ -1,0 +1,23 @@
+# Enforce LF line endings for all text files across all platforms.
+# This prevents CRLF/LF diffs on Windows and ensures consistent files in CI.
+
+* text=auto eol=lf
+
+# Explicitly binary — never touch line endings
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.tar binary
+
+# Windows scripts — keep CRLF only if explicitly needed
+*.bat text eol=crlf
+*.cmd text eol=crlf

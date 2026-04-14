@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Bloomberg Terminal — Base Styles
+   High-contrast dark theme, monospace-first typography
+   ============================================================ */
+
+:root {
+  /* Color palette — terminal dark theme */
+  --color-bg-primary:    #0a0a0f;
+  --color-bg-secondary:  #111118;
+  --color-bg-panel:      #14141c;
+  --color-bg-hover:      #1a1a24;
+  --color-border:        #2a2a3a;
+  --color-border-focus:  #4a4a6a;
+
+  /* Text */
+  --color-text-primary:  #e8e8f0;
+  --color-text-secondary:#9090a8;
+  --color-text-muted:    #5a5a72;
+
+  /* Accent — terminal orange-amber (Bloomberg-inspired) */
+  --color-accent:        #f59e0b;
+  --color-accent-dim:    #92610a;
+
+  /* Market colors */
+  --color-positive:      #22c55e;
+  --color-negative:      #ef4444;
+  --color-neutral:       #6b7280;
+
+  /* Typography */
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Terminal loading state */
+.terminal-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+
+/* Scrollbar styling — minimal, terminal-appropriate */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-focus);
+}
+
+/* Focus visible — keyboard navigation must be clearly visible */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
