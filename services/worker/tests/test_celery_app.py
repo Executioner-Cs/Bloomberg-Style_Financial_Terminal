@@ -31,7 +31,8 @@ def test_beat_schedule_contains_required_tasks() -> None:
     """Beat schedule must define all data ingestion and alert tasks."""
     schedule = app.conf.beat_schedule
     required = {
-        "market-data-eod-ingest",
+        "coingecko-ohlcv-ingest",
+        "coingecko-seed-instruments",
         "edgar-filing-check",
         "fred-macro-refresh",
         "news-refresh",

@@ -4,6 +4,7 @@ Tests for cache key functions (src/cache/keys.py).
 Cache keys are the contract between the API layer and Redis. These tests
 confirm key format, required parameters, and that no two keys collide.
 """
+
 from __future__ import annotations
 
 import src.cache.keys as keys
@@ -65,8 +66,8 @@ def test_rate_limit_user_key_format() -> None:
 
 
 def test_rate_limit_ip_key_format() -> None:
-    key = keys.rate_limit_ip("192.168.1.1", "2024-01-01T00")
-    assert key == "ratelimit:ip:192.168.1.1:2024-01-01T00"
+    key = keys.rate_limit_ip("203.0.113.1", "2024-01-01T00")
+    assert key == "ratelimit:ip:203.0.113.1:2024-01-01T00"
 
 
 def test_pubsub_price_channel_format() -> None:

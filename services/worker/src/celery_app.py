@@ -4,17 +4,19 @@ Celery application and Beat schedule configuration.
 Why this exists: Central definition of all scheduled tasks.
 Adding a new scheduled task = add entry to CELERY_BEAT_SCHEDULE only.
 """
-from __future__ import annotations
 
-import os
+from __future__ import annotations
 
 from celery import Celery
 from celery.schedules import crontab
 
-broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/1")
-result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379/2")
+from src.config import settings
 
-app = Celery("terminal", broker=broker_url, backend=result_backend)
+app = Celery(
+    "terminal",
+    broker=settings.celery_broker_url,
+    backend=settings.celery_result_backend,
+)
 
 app.config_from_object(
     {
@@ -24,18 +26,22 @@ app.config_from_object(
         "timezone": "UTC",
         "enable_utc": True,
         "task_track_started": True,
-        "task_time_limit": int(os.environ.get("CELERY_TASK_TIME_LIMIT", "300")),
-        "task_soft_time_limit": int(
-            os.environ.get("CELERY_TASK_SOFT_TIME_LIMIT", "240")
-        ),
+        "task_time_limit": settings.celery_task_time_limit,
+        "task_soft_time_limit": settings.celery_task_soft_time_limit,
         "worker_prefetch_multiplier": 1,  # Fair task distribution
         "task_acks_late": True,  # Only ack after task completes (safer)
         # Beat schedule — all scheduled ingestion tasks
         "beat_schedule": {
-            # EOD price ingestion — weekdays at 17:00 ET (22:00 UTC)
-            "market-data-eod-ingest": {
-                "task": "src.tasks.market_data_ingest.ingest_eod_prices",
-                "schedule": crontab(hour=22, minute=0, day_of_week="1-5"),
+            # CoinGecko OHLCV — daily at 00:05 UTC (after midnight data is available)
+            "coingecko-ohlcv-ingest": {
+                "task": "src.tasks.ingest_ohlcv_coingecko.ingest_coingecko_ohlcv",
+                "schedule": crontab(hour=0, minute=5),
+                "options": {"queue": "ingestion"},
+            },
+            # Seed crypto instruments — daily at 00:00 UTC (runs before OHLCV ingest)
+            "coingecko-seed-instruments": {
+                "task": "src.tasks.ingest_ohlcv_coingecko.seed_crypto_instruments",
+                "schedule": crontab(hour=0, minute=0),
                 "options": {"queue": "ingestion"},
             },
             # EDGAR filing check — daily at 08:00 ET (13:00 UTC)
