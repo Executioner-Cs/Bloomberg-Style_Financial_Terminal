@@ -34,7 +34,7 @@ async def get_redis() -> aioredis.Redis:
     """
     global _client
     if _client is None:
-        _client = aioredis.from_url(  # type: ignore[no-untyped-call]
+        _client = aioredis.from_url(
             settings.redis_url,
             decode_responses=True,
         )

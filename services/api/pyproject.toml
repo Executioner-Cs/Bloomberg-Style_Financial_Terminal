@@ -94,6 +94,13 @@ ignore_missing_imports = true
 module = ["redis", "redis.*"]
 ignore_missing_imports = true
 
+# redis-py's from_url annotation has been inconsistent across Python versions
+# (untyped on 3.13, typed on 3.12). Allow untyped calls in the redis client
+# factory so the codebase is clean without version-dependent type: ignore comments.
+[[tool.mypy.overrides]]
+module = ["src.db.redis"]
+disallow_untyped_calls = false
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
