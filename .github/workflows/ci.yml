@@ -173,6 +173,27 @@ jobs:
           pip-audit
 
   # ----------------------------------------------------------------
+  # SonarCloud — CI-based analysis so sonar-project.properties is
+  # read and cpd.exclusions take effect. The automatic GitHub App
+  # analysis does not read sonar-project.properties.
+  # Requires: SONAR_TOKEN secret set in repository settings.
+  # ----------------------------------------------------------------
+  sonarcloud:
+    name: SonarCloud Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history is required for new-code calculation to be accurate.
+          fetch-depth: 0
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  # ----------------------------------------------------------------
   # Commitlint — enforce Conventional Commits on PRs
   # ----------------------------------------------------------------
   commitlint:
