@@ -8,6 +8,7 @@ Dependency injection: service is built from repository + Redis per request.
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Annotated
 
 import redis.asyncio as aioredis
 from clickhouse_connect.driver.asyncclient import AsyncClient
@@ -26,8 +27,8 @@ _DEFAULT_DAYS_BACK = 365
 
 
 def _build_service(
-    ch: AsyncClient = Depends(get_clickhouse_client),
-    redis: aioredis.Redis = Depends(get_redis),
+    ch: Annotated[AsyncClient, Depends(get_clickhouse_client)],
+    redis: Annotated[aioredis.Redis, Depends(get_redis)],
 ) -> MarketDataService:
     """Construct MarketDataService with injected dependencies."""
     return MarketDataService(
@@ -38,11 +39,11 @@ def _build_service(
 
 @router.get(
     "/{symbol}/ohlcv",
-    response_model=OHLCVResponse,
     summary="Get OHLCV bars",
     description="Returns OHLCV candlestick data for a symbol and timeframe.",
 )
 async def get_ohlcv(
+    service: Annotated[MarketDataService, Depends(_build_service)],
     symbol: str,
     timeframe: str = Query(
         default="1D",
@@ -58,7 +59,6 @@ async def get_ohlcv(
         alias="to",
         description="End date (ISO 8601, UTC). Defaults to today.",
     ),
-    service: MarketDataService = Depends(_build_service),
 ) -> OHLCVResponse:
     now = datetime.now(tz=UTC)
     parsed_from = (
@@ -78,13 +78,12 @@ async def get_ohlcv(
 
 @router.get(
     "/bulk-quotes",
-    response_model=BulkQuotesResponse,
     summary="Get bulk latest quotes",
     description="Returns latest price snapshots for multiple symbols.",
 )
 async def get_bulk_quotes(
+    service: Annotated[MarketDataService, Depends(_build_service)],
     symbols: list[str] = Query(description="List of symbols"),
-    service: MarketDataService = Depends(_build_service),
 ) -> BulkQuotesResponse:
     quotes = await service.get_bulk_quotes([s.upper() for s in symbols])
     return BulkQuotesResponse(quotes=quotes)
@@ -92,12 +91,11 @@ async def get_bulk_quotes(
 
 @router.get(
     "/{symbol}/quote",
-    response_model=QuoteResponse,
     summary="Get latest quote",
     description="Returns the latest price snapshot from Redis cache.",
 )
 async def get_quote(
+    service: Annotated[MarketDataService, Depends(_build_service)],
     symbol: str,
-    service: MarketDataService = Depends(_build_service),
 ) -> QuoteResponse:
     return await service.get_quote(symbol.upper())

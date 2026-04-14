@@ -7,6 +7,8 @@ Dependency injection: service is built from repository + Redis per request.
 
 from __future__ import annotations
 
+from typing import Annotated
+
 import redis.asyncio as aioredis
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,8 +23,8 @@ router = APIRouter(prefix="/instruments")
 
 
 def _build_service(
-    session: AsyncSession = Depends(get_async_session),
-    redis: aioredis.Redis = Depends(get_redis),
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+    redis: Annotated[aioredis.Redis, Depends(get_redis)],
 ) -> InstrumentService:
     """Construct InstrumentService with injected dependencies."""
     return InstrumentService(
@@ -33,7 +35,6 @@ def _build_service(
 
 @router.get(
     "",
-    response_model=InstrumentListResponse,
     summary="List or search instruments",
     description=(
         "Returns a paginated list of instruments. "
@@ -41,10 +42,10 @@ def _build_service(
     ),
 )
 async def list_instruments(
+    service: Annotated[InstrumentService, Depends(_build_service)],
     asset_class: str | None = Query(default=None, description="Filter by asset class"),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
-    service: InstrumentService = Depends(_build_service),
 ) -> InstrumentListResponse:
     return await service.list_instruments(
         asset_class=asset_class,
@@ -55,13 +56,13 @@ async def list_instruments(
 
 @router.get(
     "/{symbol}",
-    response_model=InstrumentResponse,
     summary="Get instrument details",
     description="Returns full instrument details by symbol.",
+    responses={404: {"description": "Instrument not found"}},
 )
 async def get_instrument(
+    service: Annotated[InstrumentService, Depends(_build_service)],
     symbol: str,
-    service: InstrumentService = Depends(_build_service),
 ) -> InstrumentResponse:
     result = await service.get_instrument(symbol.upper())
     if result is None:
