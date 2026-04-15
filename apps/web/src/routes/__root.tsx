@@ -1,11 +1,14 @@
 /**
  * Root layout — terminal shell that wraps all routes.
  *
- * Renders: command palette, status bar, and the panel grid.
- * All routes render inside the panel grid via <Outlet />.
+ * Renders: command palette (global Ctrl+K shortcut), the panel grid
+ * (all routes render inside via <Outlet />), and the status bar.
  */
 import { Outlet } from '@tanstack/react-router';
 import type { JSX } from 'react';
+
+import CommandPalette from '@/components/command-palette';
+import StatusBar from '@/components/status-bar';
 
 export default function RootLayout(): JSX.Element {
   return (
@@ -13,11 +16,11 @@ export default function RootLayout(): JSX.Element {
       className="terminal-shell"
       style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
     >
-      {/* TODO(#6): Add CommandPalette component */}
-      {/* TODO(#6): Add StatusBar component */}
-      <main style={{ flex: 1, overflow: 'hidden' }}>
+      <CommandPalette />
+      <main role="main" style={{ flex: 1, overflow: 'hidden' }}>
         <Outlet />
       </main>
+      <StatusBar />
     </div>
   );
 }

@@ -4,3 +4,5 @@
  */
 export { PanelSkeleton } from './panel-skeleton';
 export { PanelError } from './panel-error';
+export { ComingSoon } from './coming-soon';
+export type { ComingSoonProps } from './coming-soon';
