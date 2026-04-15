@@ -16,7 +16,11 @@ class ResizeObserverStub {
   disconnect(): void {}
 }
 
-if (typeof window !== 'undefined' && !('ResizeObserver' in window)) {
+// jsdom lacks ResizeObserver; cast needed because TS Window type declares it
+if (
+  typeof window !== 'undefined' &&
+  typeof (window as unknown as Record<string, unknown>)['ResizeObserver'] === 'undefined'
+) {
   window.ResizeObserver = ResizeObserverStub;
 }
 
