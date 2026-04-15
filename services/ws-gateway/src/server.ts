@@ -20,7 +20,11 @@ async function buildServer(): Promise<FastifyInstance> {
   });
 
   await server.register(fastifyCors, {
-    origin: (process.env['CORS_ALLOWED_ORIGINS'] ?? 'http://localhost:5173').split(','),
+    // Default includes both https (ADR-004 local dev) and http (plain vite dev fallback).
+    // In production/staging CORS_ALLOWED_ORIGINS is set explicitly via env var.
+    origin: (
+      process.env['CORS_ALLOWED_ORIGINS'] ?? 'https://localhost:5173,http://localhost:5173'
+    ).split(','),
     credentials: true,
   });
 
