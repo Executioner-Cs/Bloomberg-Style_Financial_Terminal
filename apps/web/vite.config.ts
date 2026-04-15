@@ -21,6 +21,7 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@': resolve(__dirname, './src'),
         '@terminal/types': resolve(__dirname, '../../packages/types/src'),
+        '@terminal/ui-components': resolve(__dirname, '../../packages/ui-components/src'),
       },
     },
     server: {
@@ -58,6 +59,9 @@ export default defineConfig(({ mode }) => {
       globals: true,
       environment: 'jsdom',
       setupFiles: ['./src/test-setup.ts'],
+      // Restrict to src/ only — e2e/ contains Playwright specs that must not
+      // be picked up by Vitest. Playwright specs run separately via `pnpm test:e2e`.
+      include: ['src/**/*.test.{ts,tsx}'],
       coverage: {
         provider: 'v8',
         reporter: ['text', 'lcov'],

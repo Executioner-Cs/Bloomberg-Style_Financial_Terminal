@@ -153,14 +153,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
-      - name: Install JS dependencies
-        run: pnpm install --frozen-lockfile
 
       - name: npm audit (high+critical only)
         run: pnpm audit --audit-level=high

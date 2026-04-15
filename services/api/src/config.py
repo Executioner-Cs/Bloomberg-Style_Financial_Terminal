@@ -80,6 +80,10 @@ class Settings(BaseSettings):
     # Quote snapshot TTL. Short enough to feel live, conservative to avoid rate limits.
     quote_cache_ttl_seconds: int = 60
 
+    # Bulk quotes: max symbols per request. Caps memory and query cost.
+    # 50 matches COINGECKO_TOP_N_COINS — covers all tracked assets.
+    bulk_quotes_max_symbols: int = 50
+
     # Rate limits (sourced from env, never hardcoded in business logic)
     marketstack_monthly_limit: int = 100
     alpha_vantage_daily_limit: int = 25
