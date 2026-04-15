@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     app_env: str = "development"
     log_level: str = "INFO"
     api_base_url: str = "http://localhost:8000"
-    # https origin for local dev HTTPS (ADR-004); http kept as fallback for plain vite dev
+    # HTTPS origin for local dev (ADR-004); http fallback for plain vite dev
     cors_allowed_origins: list[str] = ["https://localhost:5173", "http://localhost:5173"]
 
     # Auth — no defaults for secrets, will raise on missing in production
