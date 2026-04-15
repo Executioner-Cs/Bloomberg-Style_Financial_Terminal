@@ -252,7 +252,10 @@ jobs:
   commitlint:
     name: Commit Message Lint
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    # Skip on develop→main promotions: those commits were already linted
+    # on their feature-branch PRs. Re-linting them fails on squash/merge
+    # subjects that GitHub generates (e.g. start-case titles).
+    if: github.event_name == 'pull_request' && github.head_ref != 'develop'
     steps:
       - uses: actions/checkout@v4
         with:

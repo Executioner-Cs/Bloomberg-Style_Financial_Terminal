@@ -14,6 +14,13 @@ import type { OHLCVBar, OHLCVResponse, Timeframe } from '@terminal/types';
 
 import { fetchOHLCV } from '@/lib/api/market-data.api';
 
+/** Crypto-safe random float in [0, 1). */
+function secureRandom(): number {
+  const buf = new Uint32Array(1);
+  crypto.getRandomValues(buf);
+  return (buf[0] ?? 0) / 0x1_0000_0000;
+}
+
 /**
  * Generate a seeded random walk of OHLCV bars for local dev when the backend
  * is not running. Prices follow a geometric random walk (±3% per bar) from a
@@ -52,19 +59,19 @@ function generateMockBars(symbol: string, timeframe: Timeframe): OHLCVResponse {
   for (let i = barCount - 1; i >= 0; i--) {
     const ts = new Date(now - i * msPerBar).toISOString();
     // ±3% random walk per bar — representative of daily crypto volatility.
-    const change = price * (Math.random() * 0.06 - 0.03);
+    const change = price * (secureRandom() * 0.06 - 0.03);
     const open = price;
     const close = price + change;
     // Wicks extend ±1% beyond the open/close range.
-    const high = Math.max(open, close) * (1 + Math.random() * 0.01);
-    const low = Math.min(open, close) * (1 - Math.random() * 0.01);
+    const high = Math.max(open, close) * (1 + secureRandom() * 0.01);
+    const low = Math.min(open, close) * (1 - secureRandom() * 0.01);
     bars.push({
       ts,
       open,
       high,
       low,
       close,
-      volume: 1_000_000 + Math.random() * 500_000,
+      volume: 1_000_000 + secureRandom() * 500_000,
       adjClose: close,
     });
     price = close;
