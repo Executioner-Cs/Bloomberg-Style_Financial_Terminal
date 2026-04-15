@@ -159,7 +159,11 @@ jobs:
           python-version: '3.12'
 
       - name: npm audit (high+critical only)
-        run: pnpm audit --audit-level=high
+        # pnpm 9.x calls the retired v1 audit endpoint (HTTP 410 since April 2026).
+        # pnpm 10 uses the supported bulk advisory endpoint and reads pnpm 9 lockfiles
+        # (same lockfileVersion '9.0'). npx runs pnpm 10 for audit only — no version
+        # conflict with the project's packageManager field.
+        run: npx pnpm@10 audit --audit-level=high
 
       - name: pip-audit (api)
         working-directory: services/api
