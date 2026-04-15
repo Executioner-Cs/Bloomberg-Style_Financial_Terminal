@@ -22,11 +22,26 @@ export class ApiError extends Error {
  * Perform a typed GET request against the terminal API.
  *
  * @param path   - Full path including prefix, e.g. `${API_V1_PREFIX}/instruments`
- * @param params - Optional URL query parameters
+ * @param params - Optional query parameters. String values are appended once;
+ *                 string arrays are appended per-element (e.g. for FastAPI `list[str]` params).
  * @throws {ApiError} on non-2xx responses
  */
-export async function apiGet<T>(path: string, params?: Record<string, string>): Promise<T> {
-  const url = params ? `${path}?${new URLSearchParams(params).toString()}` : path;
+export async function apiGet<T>(
+  path: string,
+  params?: Record<string, string | string[]>,
+): Promise<T> {
+  let url = path;
+  if (params) {
+    const searchParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (Array.isArray(value)) {
+        for (const v of value) searchParams.append(key, v);
+      } else {
+        searchParams.append(key, value);
+      }
+    }
+    url = `${path}?${searchParams.toString()}`;
+  }
 
   const response = await fetch(url, {
     headers: { Accept: 'application/json' },

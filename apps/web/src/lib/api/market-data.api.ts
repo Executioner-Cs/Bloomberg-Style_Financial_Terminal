@@ -24,7 +24,7 @@ export async function fetchOHLCV(
   from?: string,
   to?: string,
 ): Promise<OHLCVResponse> {
-  const params: Record<string, string> = { timeframe };
+  const params: Record<string, string | string[]> = { timeframe };
   if (from !== undefined) params['from_date'] = from;
   if (to !== undefined) params['to_date'] = to;
 
@@ -37,10 +37,13 @@ export async function fetchOHLCV(
 /**
  * Fetch quotes for multiple symbols in a single request.
  *
+ * Sends `?symbols=<a>&symbols=<b>` — FastAPI deserialises repeated params
+ * into `list[str]` on the server side.
+ *
  * @param symbols - Array of CoinGecko coin ids
  */
 export async function fetchBulkQuotes(symbols: string[]): Promise<BulkQuotesResponse> {
-  return apiGet<BulkQuotesResponse>(`${API_V1_PREFIX}/market-data/quotes/bulk`, {
-    symbols: symbols.join(','),
+  return apiGet<BulkQuotesResponse>(`${API_V1_PREFIX}/market-data/bulk-quotes`, {
+    symbols,
   });
 }
