@@ -27,7 +27,7 @@ export function PanelSkeleton({ rows = 5 }: PanelSkeletonProps): JSX.Element {
     >
       {Array.from({ length: rows }).map((_, i) => (
         <div
-          key={i}
+          key={`skeleton-row-${i}`}
           style={{
             height: '16px',
             borderRadius: '3px',

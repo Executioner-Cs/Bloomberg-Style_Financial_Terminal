@@ -29,19 +29,23 @@ test.describe('ChartPanel', () => {
   test('should render timeframe selector buttons', async ({ page }) => {
     await page.goto('/chart/bitcoin');
 
-    await expect(page.getByRole('button', { name: '1D' })).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByRole('button', { name: '1W' })).toBeVisible();
-    await expect(page.getByRole('button', { name: '1M' })).toBeVisible();
+    await expect(page.getByRole('button', { name: /select 1d timeframe/i })).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(page.getByRole('button', { name: /select 1w timeframe/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /select 1m timeframe/i })).toBeVisible();
   });
 
   test('should switch timeframe when button is clicked', async ({ page }) => {
     await page.goto('/chart/bitcoin');
 
     // Wait for initial render
-    await expect(page.getByRole('button', { name: '1D' })).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('button', { name: /select 1d timeframe/i })).toBeVisible({
+      timeout: 10_000,
+    });
 
     // Click 1W timeframe
-    await page.getByRole('button', { name: '1W' }).click();
+    await page.getByRole('button', { name: /select 1w timeframe/i }).click();
 
     // 1W button should appear selected (accent background)
     // and chart should still be visible

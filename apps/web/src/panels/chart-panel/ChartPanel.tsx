@@ -20,6 +20,30 @@ import { useChartData } from './use-chart-data';
 /** Timeframes available in the selector. Ordered from shortest to longest. */
 const TIMEFRAME_OPTIONS: Timeframe[] = ['1D', '1W', '1M'];
 
+/**
+ * Terminal color palette used by lightweight-charts.
+ *
+ * These hex values are the resolved values of the corresponding CSS variables
+ * (defined in apps/web/src/index.css). lightweight-charts does not accept CSS
+ * variable references in its options object — it requires resolved hex values.
+ * If the palette changes in index.css, update these constants to match.
+ *
+ * --color-bg-panel      → #14141c
+ * --color-text-secondary → #9090a8
+ * --color-border        → #2a2a3a
+ * --color-border-focus  → #4a4a6a
+ * --color-positive      → #22c55e
+ * --color-negative      → #ef4444
+ */
+const CHART_THEME = {
+  bgPanel: '#14141c',
+  textSecondary: '#9090a8',
+  border: '#2a2a3a',
+  borderFocus: '#4a4a6a',
+  positive: '#22c55e',
+  negative: '#ef4444',
+} as const;
+
 type ChartPanelProps = {
   /** Unique panel instance ID — used for layout state management. */
   panelId: string;
@@ -61,33 +85,33 @@ export function ChartPanel({
       width: container.clientWidth,
       height: container.clientHeight,
       layout: {
-        background: { color: '#14141c' }, // --color-bg-panel
-        textColor: '#9090a8', // --color-text-secondary
+        background: { color: CHART_THEME.bgPanel },
+        textColor: CHART_THEME.textSecondary,
       },
       grid: {
-        vertLines: { color: '#2a2a3a' }, // --color-border
-        horzLines: { color: '#2a2a3a' },
+        vertLines: { color: CHART_THEME.border },
+        horzLines: { color: CHART_THEME.border },
       },
       crosshair: {
-        vertLine: { color: '#4a4a6a' }, // --color-border-focus
-        horzLine: { color: '#4a4a6a' },
+        vertLine: { color: CHART_THEME.borderFocus },
+        horzLine: { color: CHART_THEME.borderFocus },
       },
       rightPriceScale: {
-        borderColor: '#2a2a3a',
+        borderColor: CHART_THEME.border,
       },
       timeScale: {
-        borderColor: '#2a2a3a',
+        borderColor: CHART_THEME.border,
         timeVisible: true,
       },
     });
 
     const series = chart.addCandlestickSeries({
-      upColor: '#22c55e', // --color-positive
-      downColor: '#ef4444', // --color-negative
-      borderUpColor: '#22c55e',
-      borderDownColor: '#ef4444',
-      wickUpColor: '#22c55e',
-      wickDownColor: '#ef4444',
+      upColor: CHART_THEME.positive,
+      downColor: CHART_THEME.negative,
+      borderUpColor: CHART_THEME.positive,
+      borderDownColor: CHART_THEME.negative,
+      wickUpColor: CHART_THEME.positive,
+      wickDownColor: CHART_THEME.negative,
     });
 
     chartRef.current = chart;
@@ -164,6 +188,8 @@ export function ChartPanel({
             <button
               key={tf}
               type="button"
+              aria-pressed={timeframe === tf}
+              aria-label={`Select ${tf} timeframe`}
               onClick={() => handleTimeframeChange(tf)}
               style={{
                 padding: '2px 8px',

@@ -12,8 +12,9 @@ from typing import Annotated
 
 import redis.asyncio as aioredis
 from clickhouse_connect.driver.asyncclient import AsyncClient
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 
+from src.config import settings
 from src.db.clickhouse import get_clickhouse_client
 from src.db.redis import get_redis
 from src.repositories.ohlcv_repository import OHLCVRepository
@@ -24,6 +25,10 @@ router = APIRouter(prefix="/market-data")
 
 # Default date range: 1 year of history when not specified.
 _DEFAULT_DAYS_BACK = 365
+
+# Symbol validation pattern — alphanumeric plus common exchange suffixes (./-)
+# Max 20 chars covers all crypto and equity ticker formats.
+_SYMBOL_PATTERN = r"^[A-Za-z0-9./\-]{1,20}$"
 
 
 def _build_service(
@@ -44,7 +49,13 @@ def _build_service(
 )
 async def get_ohlcv(
     service: Annotated[MarketDataService, Depends(_build_service)],
-    symbol: str,
+    symbol: Annotated[
+        str,
+        Path(
+            description="Ticker symbol, e.g. 'bitcoin'.",
+            pattern=_SYMBOL_PATTERN,
+        ),
+    ],
     timeframe: str = Query(
         default="1D",
         description="Timeframe: 1m 5m 15m 1H 4H 1D 1W",
@@ -61,12 +72,24 @@ async def get_ohlcv(
     ),
 ) -> OHLCVResponse:
     now = datetime.now(tz=UTC)
-    parsed_from = (
-        datetime.fromisoformat(from_date).replace(tzinfo=UTC)
-        if from_date
-        else datetime(now.year - 1, now.month, now.day, tzinfo=UTC)
-    )
-    parsed_to = datetime.fromisoformat(to_date).replace(tzinfo=UTC) if to_date else now
+
+    try:
+        parsed_from = (
+            datetime.fromisoformat(from_date).replace(tzinfo=UTC)
+            if from_date
+            else datetime(now.year - 1, now.month, now.day, tzinfo=UTC)
+        )
+        parsed_to = (
+            datetime.fromisoformat(to_date).replace(tzinfo=UTC) if to_date else now
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "Invalid date format. Expected ISO 8601"
+                f" (e.g. '2024-01-15T00:00:00'). {exc}"
+            ),
+        ) from exc
 
     return await service.get_ohlcv(
         symbol=symbol.upper(),
@@ -85,6 +108,14 @@ async def get_bulk_quotes(
     service: Annotated[MarketDataService, Depends(_build_service)],
     symbols: list[str] = Query(description="List of symbols"),
 ) -> BulkQuotesResponse:
+    if len(symbols) > settings.bulk_quotes_max_symbols:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"Too many symbols: {len(symbols)} requested, "
+                f"maximum is {settings.bulk_quotes_max_symbols}."
+            ),
+        )
     quotes = await service.get_bulk_quotes([s.upper() for s in symbols])
     return BulkQuotesResponse(quotes=quotes)
 
@@ -96,6 +127,12 @@ async def get_bulk_quotes(
 )
 async def get_quote(
     service: Annotated[MarketDataService, Depends(_build_service)],
-    symbol: str,
+    symbol: Annotated[
+        str,
+        Path(
+            description="Ticker symbol, e.g. 'bitcoin'.",
+            pattern=_SYMBOL_PATTERN,
+        ),
+    ],
 ) -> QuoteResponse:
     return await service.get_quote(symbol.upper())

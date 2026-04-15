@@ -123,9 +123,9 @@ describe('ChartPanel', () => {
 
     renderChartPanel();
 
-    expect(screen.getByRole('button', { name: '1D' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '1W' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '1M' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /select 1d timeframe/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /select 1w timeframe/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /select 1m timeframe/i })).toBeInTheDocument();
   });
 
   it('should call onClose when close button is clicked', () => {
