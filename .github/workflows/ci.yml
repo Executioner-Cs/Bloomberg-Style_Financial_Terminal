@@ -211,6 +211,31 @@ jobs:
           # Full history is required for new-code calculation to be accurate.
           fetch-depth: 0
 
+      # -- Frontend coverage (vitest + v8 → lcov) --
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate frontend coverage report
+        working-directory: apps/web
+        # Threshold enforcement is not the SonarCloud job's concern — SonarCloud
+        # applies its own quality gate. Override vitest thresholds to zero so the
+        # step generates the lcov report without failing on coverage minimums.
+        run: >-
+          pnpm exec vitest run
+          --coverage
+          --coverage.thresholds.lines=0
+          --coverage.thresholds.functions=0
+          --coverage.thresholds.branches=0
+          --coverage.thresholds.statements=0
+
+      # -- Python coverage (pytest-cov → XML) --
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'

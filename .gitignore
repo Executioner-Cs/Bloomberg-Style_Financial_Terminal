@@ -81,6 +81,7 @@ yarn-error.log*
 pnpm-debug.log*
 
 # --- Test Artifacts -----------------------------------------
+coverage/
 test-results/
 playwright-report/
 e2e/screenshots/
