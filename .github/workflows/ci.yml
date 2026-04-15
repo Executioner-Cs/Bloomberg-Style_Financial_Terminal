@@ -148,13 +148,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        with:
-          # pnpm 9.x (packageManager default) calls the retired npm audit endpoint
-          # (https://registry.npmjs.org/-/npm/v1/security/audits → HTTP 410).
-          # pnpm 10+ uses the current bulk advisory endpoint. Override here only;
-          # the lockfile was generated with pnpm 9 and is not affected — pnpm audit
-          # reads pnpm-lock.yaml directly without requiring an install.
-          version: '10.33.0'
+        # version is read from packageManager field in package.json — do not set it here
 
       - uses: actions/setup-node@v4
         with:
