@@ -1,6 +1,6 @@
 # CLAUDE.md — Bloomberg Terminal Engineering Governance
 
-# Last updated: 2026-04-13
+# Last updated: 2026-04-15
 
 # Authority: This document governs ALL code — human-written or AI-generated.
 
@@ -21,6 +21,11 @@ architecturally sound, fully documented, tested, and traceable.
 
 **There is no tech debt budget. There is no "we'll fix it later."
 Do it right, or do not do it yet.**
+
+**All external data sources must be permanently and unconditionally free.**
+No credit card required. No paid tiers. No APIs that exhaust their free quota
+before the first meaningful feature is complete. See ADR-005 for policy and
+the approved source list. Any integration with a paid service is blocked.
 
 ---
 
@@ -342,12 +347,12 @@ if request_count > settings.rate_limit_free_tier_per_hour:
     raise RateLimitError()
 
 # CORRECT: timeout from settings with a comment on where the value comes from
-# Marketstack ToS requires responses within 30s; we timeout at 25s to leave margin.
-async with httpx.AsyncClient(timeout=settings.marketstack_timeout_seconds) as client: ...
+# yfinance has no published timeout; 30s is the self-imposed conservative limit (ADR-005).
+async with httpx.AsyncClient(timeout=settings.yfinance_timeout_seconds) as client: ...
 
 # CORRECT: cache TTL from settings, respecting ToS minimum cache window
-# Alpha Vantage ToS: minimum 60s cache. We use 300s (5min) for safety margin.
-await redis.setex(cache_key, settings.alpha_vantage_cache_ttl_seconds, serialized)
+# NewsAPI free tier: 100 req/day. 300s (5min) TTL limits calls while staying fresh.
+await redis.setex(cache_key, settings.news_cache_ttl_seconds, serialized)
 ```
 
 ### CI Enforcement of Hardcoding Policy
@@ -539,7 +544,7 @@ be overridden by any contributor:
 - Routers: noun-plural (`instruments.py`, `watchlists.py`)
 - Services: noun-singular + `_service` (`market_data_service.py`)
 - Repositories: noun-singular + `_repository` (`ohlcv_repository.py`)
-- Integrations: provider name (`marketstack.py`, `edgar.py`)
+- Integrations: provider name (`yfinance.py`, `edgar.py`, `newsapi.py`)
 - Tests: `test_` prefix matching source file
 
 ### General
@@ -1085,3 +1090,148 @@ Requires a paid API key. Add in a future session when provisioned.
 ### Not installed — Chrome DevTools MCP
 
 Requires a running MCP server. Add when E2E infrastructure is active.
+
+---
+
+## PART XXI — ENGINEERING LAWS AND PROFESSIONAL OBLIGATIONS
+
+These principles are derived from established software engineering laws and
+professional practice standards. They complement the rules above and apply
+to every architectural, implementation, and process decision in this project.
+
+---
+
+### 21.1 — COMPLEXITY AND SCOPE
+
+**Gall's Law — Start simple, evolve complexity.**
+A complex system that works evolved from a simple system that worked.
+A complex system designed from scratch does not work.
+Build the minimum viable version first. Evolve from there.
+Never launch a fully-engineered solution before a working simple one exists.
+
+**Zawinski's Law — Resist scope creep actively.**
+Every system tends to expand until it does everything.
+For every proposed feature: is this critical to the core workflow?
+If the answer requires justification, the answer is no.
+New scope requires a new ADR. No ADR, no feature.
+
+**Greene's Law — Every line of code is a liability.**
+Code costs money to test, maintain, debug, and understand.
+Write only what is necessary. Prefer deleting to adding.
+Reuse existing libraries before writing new logic.
+If a feature can be deferred without harming the product, defer it.
+
+**Law of Leaky Abstractions — Know the layer beneath yours.**
+All non-trivial abstractions leak under edge cases and failure.
+Never rely on a framework abstraction in a production-critical path
+without understanding what it hides. Log at the raw level when debugging.
+
+---
+
+### 21.2 — ESTIMATION AND DELIVERY
+
+**Hofstadter's Law — Estimates are always wrong. Plan for it.**
+It always takes longer than expected, even when you account for this law.
+Break features into micro-deliverables. Each must be independently verifiable.
+Double initial estimates for any work touching multiple layers.
+A plan with no buffer is not a plan — it is a wish.
+
+**Pareto Principle — 80% of bugs live in 20% of the code.**
+High-risk code clusters in older shared utilities and integration boundaries.
+Before a release, identify which 20% of the codebase has the most history
+of bugs and focus test coverage there. SonarCloud metrics guide this.
+
+---
+
+### 21.3 — TESTING AND QUALITY
+
+**Law of Diminishing Returns — Test the right things, not all things.**
+Coverage beyond 80–90% produces diminishing value while inflating test
+maintenance cost. Focus tests on business logic, data flows, and integrations.
+Do not test language guarantees, framework internals, or getter/setter trivia.
+The coverage thresholds in this project reflect this: they are minimums, not targets.
+
+**Boy Scout Rule — Leave code better than you found it.**
+Fix typos, extract magic numbers to constants, remove dead code, and add
+missing types while working on a feature. Improve 1% at a time.
+Compounding small improvements outperform periodic rewrites.
+
+**Entropy is inevitable — schedule refactoring.**
+Clean architecture decays without active maintenance. Technical debt accrues
+interest. Treat refactoring as a recurring cost, not an optional activity.
+If you cannot schedule it, it will be paid in production incidents.
+
+---
+
+### 21.4 — DATA AND INTEGRATION INTEGRITY
+
+**Plan data before UI.**
+Integration architecture, data ownership, sync requirements, and API failure
+handling must be defined before any UI design is locked in.
+Data structure changes discovered mid-UI design create patchwork fixes
+that compound into maintenance failures. Schema first, interface second.
+
+**Postel's Law — Be strict on output, careful on input.**
+Validate all inputs at every system boundary. Sanitize before storing.
+Standardize outputs — internal systems downstream depend on stable contracts.
+This project enforces this via Pydantic on all API inputs and TypeScript
+strict types on all frontend data shapes.
+
+---
+
+### 21.5 — PROFESSIONAL OBLIGATIONS
+
+**Public interest over expediency.**
+This terminal handles financial data. Errors here have economic consequences.
+Never ship code with known defects to meet a deadline.
+Never disable a safety check to unblock a feature.
+The user's financial data deserves the same care as production banking software.
+
+**Competence boundary — only work within verified skill.**
+Do not implement cryptography, financial calculations, or compliance logic
+without verifying the approach against a specification or established reference.
+Document the reference. If no reference exists, do not implement it yet.
+
+**Traceability is a professional obligation, not a preference.**
+Every decision — architectural, implementation, configuration — must be
+traceable to a documented rationale. This is not bureaucracy. It is the
+minimum standard for work that others (or future you) must maintain.
+ADRs, commit messages, and constants with comments are the mechanism.
+
+**Decisions are made once, documented permanently.**
+An undocumented decision will be re-litigated. Every time it is re-litigated,
+it costs time and introduces inconsistency. Write it down once. Never again.
+
+---
+
+### 21.6 — AI-ASSISTED DEVELOPMENT DISCIPLINE
+
+**AI tools accelerate output, not judgment.**
+AI-generated code is produced faster than it can be verified. Faster wrong
+output is a more efficient detour. Every AI suggestion must be reviewed with
+the same rigour as human-written code: types, tests, architecture alignment.
+
+**AI cannot substitute for architecture.**
+Do not use AI generation to skip planning, replace code review, or defer
+documentation. The planning requirements in Part III apply to AI-assisted
+work without exception. Plan first. Generate second. Review always.
+
+**AI output is not trusted at boundaries.**
+Any AI-generated code touching auth, input validation, database queries,
+cryptography, or external API integration requires explicit security review
+before merge. Use `/owasp-security` and the Trail of Bits SAST tools.
+
+---
+
+### 21.7 — POST-LAUNCH DISCIPLINE
+
+**Launch is the beginning, not the finish line.**
+The plan for what happens after release must exist before release.
+Monitoring, support ownership, bug triage process, rollback procedure,
+and a prioritised improvement backlog are required, not optional.
+A launch without a post-launch plan is a controlled crash.
+
+**Measure before optimising.**
+No performance work begins without a measurement baseline.
+Lighthouse CI, ClickHouse query plans, and Redis hit rates are the tools.
+Optimise what the data shows is slow. Not what intuition suggests.
