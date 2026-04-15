@@ -2,16 +2,23 @@
  * Chart route — /chart/:symbol
  * Renders ChartPanel for a specific symbol.
  */
-import { useParams } from '@tanstack/react-router';
+import { useParams, useNavigate } from '@tanstack/react-router';
 import type { JSX } from 'react';
+
+import { ChartPanel } from '@/panels/chart-panel';
 
 export default function ChartPage(): JSX.Element {
   const { symbol } = useParams({ from: '/chart/$symbol' });
+  const navigate = useNavigate();
 
   return (
     <div style={{ height: '100%', padding: '8px' }}>
-      {/* TODO(#7): Replace with ChartPanel component */}
-      <div style={{ color: 'var(--color-text-secondary)', fontSize: '12px' }}>Chart: {symbol}</div>
+      <ChartPanel
+        panelId={`chart-${symbol}`}
+        isActive={true}
+        onClose={() => void navigate({ to: '/' })}
+        symbol={symbol}
+      />
     </div>
   );
 }

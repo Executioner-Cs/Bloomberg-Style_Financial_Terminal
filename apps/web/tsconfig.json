@@ -24,7 +24,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@terminal/types": ["../../packages/types/src"]
+      "@terminal/types": ["../../packages/types/src"],
+      "@terminal/ui-components": ["../../packages/ui-components/src"]
     }
   },
   "include": ["src", "e2e"],
