@@ -29,7 +29,11 @@ class Settings(BaseSettings):
     app_env: str = "development"
     log_level: str = "INFO"
     api_base_url: str = "http://localhost:8000"
-    cors_allowed_origins: list[str] = ["http://localhost:5173"]
+    # HTTPS origin for local dev (ADR-004); http fallback for plain vite dev
+    cors_allowed_origins: list[str] = [
+        "https://localhost:5173",
+        "http://localhost:5173",
+    ]
 
     # Auth — no defaults for secrets, will raise on missing in production
     jwt_secret_key: str
@@ -78,6 +82,10 @@ class Settings(BaseSettings):
     ohlcv_cache_ttl_seconds: int = 3600
     # Quote snapshot TTL. Short enough to feel live, conservative to avoid rate limits.
     quote_cache_ttl_seconds: int = 60
+
+    # Bulk quotes: max symbols per request. Caps memory and query cost.
+    # 50 matches COINGECKO_TOP_N_COINS — covers all tracked assets.
+    bulk_quotes_max_symbols: int = 50
 
     # Rate limits (sourced from env, never hardcoded in business logic)
     marketstack_monthly_limit: int = 100

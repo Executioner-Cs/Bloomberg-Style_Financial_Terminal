@@ -1,7 +1,11 @@
 # CLAUDE.md — Bloomberg Terminal Engineering Governance
-# Last updated: 2026-04-13
+
+# Last updated: 2026-04-15
+
 # Authority: This document governs ALL code — human-written or AI-generated.
+
 # Scope: Every file, every commit, every decision in this repository.
+
 # Compliance: Non-negotiable. Violations block merges. No exceptions granted.
 
 ---
@@ -17,6 +21,11 @@ architecturally sound, fully documented, tested, and traceable.
 
 **There is no tech debt budget. There is no "we'll fix it later."
 Do it right, or do not do it yet.**
+
+**All external data sources must be permanently and unconditionally free.**
+No credit card required. No paid tiers. No APIs that exhaust their free quota
+before the first meaningful feature is complete. See ADR-005 for policy and
+the approved source list. Any integration with a paid service is blocked.
 
 ---
 
@@ -43,7 +52,7 @@ Every value that appears in code must originate from exactly one of:
 If you cannot point to the source of a value, the value does not belong in the code.
 
 **The standard is:** any engineer reading this codebase five years from now
-must be able to understand *why* every number exists without asking anyone.
+must be able to understand _why_ every number exists without asking anyone.
 
 ---
 
@@ -205,36 +214,36 @@ The project divides the unprivileged port space (1024–65535) into
 named ranges by service category. A service MUST use a port from
 its designated range unless an ADR documents the exception.
 
-| Range       | Category                              | Rationale                                              |
-|-------------|---------------------------------------|--------------------------------------------------------|
-| 3001–3099   | Node.js application services          | Node.js services occupy this range. 3000 is excluded — it is the universal Node.js process default, causing ambiguity with external tooling (Next.js, CRA, Nodemon). 3001 is the first unambiguous project-defined Node service port. |
-| 5100–5199   | Frontend dev servers                  | Vite's default is 5173; this range is reserved for frontend tooling. Does not conflict with any standard system service. |
-| 5400–5499   | PostgreSQL                            | IANA-registered range. 5432 is the PostgreSQL default; deviation would break all driver defaults and require explicit override everywhere. |
-| 6300–6400   | Redis and Redis-adjacent              | IANA-registered. 6379 is the Redis default. 6380 is reserved for Redis replicas or Sentinel. |
-| 8000–8099   | Python REST APIs (ASGI/WSGI)          | Python ecosystem convention for application servers. Avoids 8080 (de facto reverse proxy / Tomcat / Jenkins default) and 8888 (Jupyter Notebook default). |
-| 8100–8199   | ClickHouse                            | ClickHouse's IANA-registered HTTP interface occupies 8123. Native TCP protocol occupies 9000. Interserver replication uses 9009. These are not configurable without rebuild. |
-| 8001        | RedisInsight (admin GUI)              | Redis Labs' official management UI default. Adjacent to Redis at 6379 only during local dev; not exposed in production. |
-| 9000–9099   | ClickHouse native protocol + admin    | ClickHouse native TCP (9000), interserver (9009). Also MinIO S3 API (9090) under the optional `storage` Docker profile. |
-| 9001        | MinIO Console                         | MinIO's web console default. Optional profile only. |
+| Range     | Category                           | Rationale                                                                                                                                                                                                                             |
+| --------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 3001–3099 | Node.js application services       | Node.js services occupy this range. 3000 is excluded — it is the universal Node.js process default, causing ambiguity with external tooling (Next.js, CRA, Nodemon). 3001 is the first unambiguous project-defined Node service port. |
+| 5100–5199 | Frontend dev servers               | Vite's default is 5173; this range is reserved for frontend tooling. Does not conflict with any standard system service.                                                                                                              |
+| 5400–5499 | PostgreSQL                         | IANA-registered range. 5432 is the PostgreSQL default; deviation would break all driver defaults and require explicit override everywhere.                                                                                            |
+| 6300–6400 | Redis and Redis-adjacent           | IANA-registered. 6379 is the Redis default. 6380 is reserved for Redis replicas or Sentinel.                                                                                                                                          |
+| 8000–8099 | Python REST APIs (ASGI/WSGI)       | Python ecosystem convention for application servers. Avoids 8080 (de facto reverse proxy / Tomcat / Jenkins default) and 8888 (Jupyter Notebook default).                                                                             |
+| 8100–8199 | ClickHouse                         | ClickHouse's IANA-registered HTTP interface occupies 8123. Native TCP protocol occupies 9000. Interserver replication uses 9009. These are not configurable without rebuild.                                                          |
+| 8001      | RedisInsight (admin GUI)           | Redis Labs' official management UI default. Adjacent to Redis at 6379 only during local dev; not exposed in production.                                                                                                               |
+| 9000–9099 | ClickHouse native protocol + admin | ClickHouse native TCP (9000), interserver (9009). Also MinIO S3 API (9090) under the optional `storage` Docker profile.                                                                                                               |
+| 9001      | MinIO Console                      | MinIO's web console default. Optional profile only.                                                                                                                                                                                   |
 
 ### Port Registry — All Registered Ports
 
 Every port used anywhere in this project must appear here.
 Adding a port without updating this registry is a violation of Rule 1.
 
-| Port | Service | Protocol | Environment | Justification |
-|------|---------|----------|-------------|---------------|
-| 3001 | WS Gateway (Node.js + Fastify) | HTTP/WS | dev + prod | Node.js service range (3001–3099). Port 3000 excluded per range policy — it is the universal Node.js default and causes ambiguity. 3001 is the first clean port in the project-defined Node service range. ADR-003 documents the WS gateway architectural decision. |
-| 5173 | Vite dev server (React SPA) | HTTP | dev only | Vite's assigned default. Universally understood in the Vite ecosystem. Falls within the project's frontend dev server range (5100–5199). Not exposed in production — Nginx serves the built bundle. |
-| 5432 | PostgreSQL 16 | TCP | dev + prod | IANA-registered PostgreSQL default. Deviation would require explicit override in every SQLAlchemy connection string, Alembic config, and pg_dump command. No benefit justifies the overhead. |
-| 6379 | Redis 7 Stack | TCP | dev + prod | IANA-registered Redis default. All Redis client libraries default to this port. Deviation requires explicit override everywhere. |
-| 8000 | FastAPI REST API | HTTP | dev + prod | Python ASGI convention. First available port in the 8000–8099 Python API range that avoids conflicts with 8080 (proxy tools, Jenkins, Tomcat) and 8888 (Jupyter). |
-| 8001 | RedisInsight GUI | HTTP | dev only | Redis Labs' official GUI tool default. Local development only; blocked at the firewall boundary in all other environments. |
-| 8123 | ClickHouse HTTP interface | HTTP | dev + prod | ClickHouse's IANA-registered HTTP port. Used by the Python clickhouse-driver and all HTTP-based clients. Not configurable without recompiling ClickHouse. |
-| 9000 | ClickHouse native TCP | TCP | dev + prod | ClickHouse's IANA-registered native protocol port. Used for high-throughput bulk INSERT operations. Not configurable without recompiling ClickHouse. |
-| 9001 | MinIO Console | HTTP | dev optional | MinIO's web console default. Only active under `--profile storage`. Not present in production. |
-| 9009 | ClickHouse interserver replication | TCP | dev + prod | ClickHouse's default interserver replication port. Required even in single-node setup when ClickHouse is configured for potential cluster expansion. |
-| 9090 | MinIO S3 API | HTTP | dev optional | MinIO's S3-compatible API default. Only active under `--profile storage`. Maps to AWS S3 in production. |
+| Port | Service                            | Protocol | Environment  | Justification                                                                                                                                                                                                                                                       |
+| ---- | ---------------------------------- | -------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 3001 | WS Gateway (Node.js + Fastify)     | HTTP/WS  | dev + prod   | Node.js service range (3001–3099). Port 3000 excluded per range policy — it is the universal Node.js default and causes ambiguity. 3001 is the first clean port in the project-defined Node service range. ADR-003 documents the WS gateway architectural decision. |
+| 5173 | Vite dev server (React SPA)        | HTTP     | dev only     | Vite's assigned default. Universally understood in the Vite ecosystem. Falls within the project's frontend dev server range (5100–5199). Not exposed in production — Nginx serves the built bundle.                                                                 |
+| 5432 | PostgreSQL 16                      | TCP      | dev + prod   | IANA-registered PostgreSQL default. Deviation would require explicit override in every SQLAlchemy connection string, Alembic config, and pg_dump command. No benefit justifies the overhead.                                                                        |
+| 6379 | Redis 7 Stack                      | TCP      | dev + prod   | IANA-registered Redis default. All Redis client libraries default to this port. Deviation requires explicit override everywhere.                                                                                                                                    |
+| 8000 | FastAPI REST API                   | HTTP     | dev + prod   | Python ASGI convention. First available port in the 8000–8099 Python API range that avoids conflicts with 8080 (proxy tools, Jenkins, Tomcat) and 8888 (Jupyter).                                                                                                   |
+| 8001 | RedisInsight GUI                   | HTTP     | dev only     | Redis Labs' official GUI tool default. Local development only; blocked at the firewall boundary in all other environments.                                                                                                                                          |
+| 8123 | ClickHouse HTTP interface          | HTTP     | dev + prod   | ClickHouse's IANA-registered HTTP port. Used by the Python clickhouse-driver and all HTTP-based clients. Not configurable without recompiling ClickHouse.                                                                                                           |
+| 9000 | ClickHouse native TCP              | TCP      | dev + prod   | ClickHouse's IANA-registered native protocol port. Used for high-throughput bulk INSERT operations. Not configurable without recompiling ClickHouse.                                                                                                                |
+| 9001 | MinIO Console                      | HTTP     | dev optional | MinIO's web console default. Only active under `--profile storage`. Not present in production.                                                                                                                                                                      |
+| 9009 | ClickHouse interserver replication | TCP      | dev + prod   | ClickHouse's default interserver replication port. Required even in single-node setup when ClickHouse is configured for potential cluster expansion.                                                                                                                |
+| 9090 | MinIO S3 API                       | HTTP     | dev optional | MinIO's S3-compatible API default. Only active under `--profile storage`. Maps to AWS S3 in production.                                                                                                                                                             |
 
 ### Adding a New Port
 
@@ -338,12 +347,12 @@ if request_count > settings.rate_limit_free_tier_per_hour:
     raise RateLimitError()
 
 # CORRECT: timeout from settings with a comment on where the value comes from
-# Marketstack ToS requires responses within 30s; we timeout at 25s to leave margin.
-async with httpx.AsyncClient(timeout=settings.marketstack_timeout_seconds) as client: ...
+# yfinance has no published timeout; 30s is the self-imposed conservative limit (ADR-005).
+async with httpx.AsyncClient(timeout=settings.yfinance_timeout_seconds) as client: ...
 
 # CORRECT: cache TTL from settings, respecting ToS minimum cache window
-# Alpha Vantage ToS: minimum 60s cache. We use 300s (5min) for safety margin.
-await redis.setex(cache_key, settings.alpha_vantage_cache_ttl_seconds, serialized)
+# NewsAPI free tier: 100 req/day. 300s (5min) TTL limits calls while staying fresh.
+await redis.setex(cache_key, settings.news_cache_ttl_seconds, serialized)
 ```
 
 ### CI Enforcement of Hardcoding Policy
@@ -384,53 +393,53 @@ No check may be skipped. No bypass flags (`--no-verify`, `--force`) are permitte
 
 #### Tier 1 — Code Quality (blocks merge immediately on failure)
 
-| Check | Command | Failure means |
-|-------|---------|---------------|
-| TypeScript typecheck | `pnpm run typecheck` | Type errors in any changed TS/TSX file |
-| ESLint | `pnpm run lint` | Lint errors or warnings (zero-warning policy) |
-| Python mypy | `mypy --strict services/api services/worker` | Type errors in any changed Python file |
-| Python ruff | `ruff check .` | Any lint warning in changed Python files |
-| Python black | `black --check .` | Formatting inconsistency in changed Python files |
+| Check                | Command                                      | Failure means                                    |
+| -------------------- | -------------------------------------------- | ------------------------------------------------ |
+| TypeScript typecheck | `pnpm run typecheck`                         | Type errors in any changed TS/TSX file           |
+| ESLint               | `pnpm run lint`                              | Lint errors or warnings (zero-warning policy)    |
+| Python mypy          | `mypy --strict services/api services/worker` | Type errors in any changed Python file           |
+| Python ruff          | `ruff check .`                               | Any lint warning in changed Python files         |
+| Python black         | `black --check .`                            | Formatting inconsistency in changed Python files |
 
 #### Tier 2 — Tests (blocks merge on failure)
 
-| Check | Command | Failure means |
-|-------|---------|---------------|
-| Frontend unit tests | `pnpm --filter web test:ci` | Any test failure |
-| Frontend coverage | `pnpm --filter web test:coverage` | Any threshold below minimums |
-| Python unit tests | `pytest services/api/tests/unit` | Any test failure |
-| Python integration tests | `pytest services/api/tests/integration` | Any test failure |
-| Python coverage | `pytest --cov --cov-fail-under=80` | Coverage below threshold |
-| E2E tests | `pnpm exec playwright test` | Any E2E scenario failure |
+| Check                    | Command                                 | Failure means                |
+| ------------------------ | --------------------------------------- | ---------------------------- |
+| Frontend unit tests      | `pnpm --filter web test:ci`             | Any test failure             |
+| Frontend coverage        | `pnpm --filter web test:coverage`       | Any threshold below minimums |
+| Python unit tests        | `pytest services/api/tests/unit`        | Any test failure             |
+| Python integration tests | `pytest services/api/tests/integration` | Any test failure             |
+| Python coverage          | `pytest --cov --cov-fail-under=80`      | Coverage below threshold     |
+| E2E tests                | `pnpm exec playwright test`             | Any E2E scenario failure     |
 
 #### Tier 3 — Security (blocks merge on HIGH or CRITICAL findings)
 
-| Check | Command | Failure means |
-|-------|---------|---------------|
-| npm audit | `npm audit --audit-level=high` | HIGH or CRITICAL vulnerability |
-| pip-audit | `pip-audit --vulnerability-service pypi` | HIGH or CRITICAL vulnerability |
-| Secret scan | `git diff --name-only origin/develop | xargs scripts/check-secrets.sh` | Any credential pattern detected |
-| Hardcoding scan | `scripts/check-hardcoding.sh` | Any blocked pattern detected (see Part IV) |
+| Check           | Command                                  | Failure means                              |
+| --------------- | ---------------------------------------- | ------------------------------------------ | ------------------------------- |
+| npm audit       | `npm audit --audit-level=high`           | HIGH or CRITICAL vulnerability             |
+| pip-audit       | `pip-audit --vulnerability-service pypi` | HIGH or CRITICAL vulnerability             |
+| Secret scan     | `git diff --name-only origin/develop     | xargs scripts/check-secrets.sh`            | Any credential pattern detected |
+| Hardcoding scan | `scripts/check-hardcoding.sh`            | Any blocked pattern detected (see Part IV) |
 
 #### Tier 4 — Architecture Governance (blocks merge on violation)
 
-| Check | Tool | Failure means |
-|-------|------|---------------|
-| Conventional commit format | commitlint | Commit message violates format |
-| Branch naming | GitHub Actions branch name check | Branch name violates policy |
-| PR requires plan approval label | GitHub Actions label check | PR is missing the `plan-approved` label |
-| Port registry consistency | `scripts/check-port-registry.sh` | A port appears in config but not in CLAUDE.md registry |
-| ADR required check | `scripts/check-adr-required.sh` | PR touches a port, adds a dependency, or changes an API contract without a new ADR file |
-| No direct-to-main commit | Branch protection rule | Any commit directly to `main` or `develop` |
-| No force push | Branch protection rule | Any force push to any protected branch |
+| Check                           | Tool                             | Failure means                                                                           |
+| ------------------------------- | -------------------------------- | --------------------------------------------------------------------------------------- |
+| Conventional commit format      | commitlint                       | Commit message violates format                                                          |
+| Branch naming                   | GitHub Actions branch name check | Branch name violates policy                                                             |
+| PR requires plan approval label | GitHub Actions label check       | PR is missing the `plan-approved` label                                                 |
+| Port registry consistency       | `scripts/check-port-registry.sh` | A port appears in config but not in CLAUDE.md registry                                  |
+| ADR required check              | `scripts/check-adr-required.sh`  | PR touches a port, adds a dependency, or changes an API contract without a new ADR file |
+| No direct-to-main commit        | Branch protection rule           | Any commit directly to `main` or `develop`                                              |
+| No force push                   | Branch protection rule           | Any force push to any protected branch                                                  |
 
 #### Tier 5 — Performance (advisory on PR, blocking on regression)
 
-| Check | Tool | Failure means |
-|-------|------|---------------|
-| Lighthouse CI | `lhci autorun` | FCP > 1.5s, TTI > 3.5s, or LCP > 2.5s |
-| Bundle size | `pnpm run build --reporter json` | Initial chunk > 200KB gzipped |
-| Performance regression | Comparison to base branch Lighthouse score | Score drops by more than 5 points |
+| Check                  | Tool                                       | Failure means                         |
+| ---------------------- | ------------------------------------------ | ------------------------------------- |
+| Lighthouse CI          | `lhci autorun`                             | FCP > 1.5s, TTI > 3.5s, or LCP > 2.5s |
+| Bundle size            | `pnpm run build --reporter json`           | Initial chunk > 200KB gzipped         |
+| Performance regression | Comparison to base branch Lighthouse score | Score drops by more than 5 points     |
 
 ### PR Template Requirements
 
@@ -439,30 +448,37 @@ template will not be reviewed. The template enforces:
 
 ```markdown
 ## Plan Approval
+
 - [ ] This PR was planned in a session before any code was written
 - [ ] The `plan-approved` label has been applied
 
 ## Design Checklist (from CLAUDE.md Part II)
+
 - [ ] All Design Before Code checklist items confirmed complete
 
 ## Hardcoding Compliance
+
 - [ ] No hardcoded URLs, ports, timeouts, or limits introduced
 - [ ] Every new configuration value is sourced from env vars or named constants
 - [ ] If any `# noqa: hardcoded` exemptions were used: justification cited in PR description
 
 ## Port Registry
+
 - [ ] No new ports introduced, OR
 - [ ] New ports have been added to the Port Registry in CLAUDE.md with full justification
 
 ## ADR Compliance
+
 - [ ] No architectural decisions made, OR
 - [ ] New ADR(s) created and linked here: [ADR-XXX](docs/architecture/decisions/ADR-XXX.md)
 
 ## Testing
+
 - [ ] All new code has tests at the required coverage level (CLAUDE.md Part VII)
 - [ ] All existing tests still pass
 
 ## Documentation
+
 - [ ] .env.example updated for any new env vars
 - [ ] CHANGELOG.md updated (if user-facing change)
 - [ ] Runbook(s) updated (if new data source or UI panel)
@@ -528,7 +544,7 @@ be overridden by any contributor:
 - Routers: noun-plural (`instruments.py`, `watchlists.py`)
 - Services: noun-singular + `_service` (`market_data_service.py`)
 - Repositories: noun-singular + `_repository` (`ohlcv_repository.py`)
-- Integrations: provider name (`marketstack.py`, `edgar.py`)
+- Integrations: provider name (`yfinance.py`, `edgar.py`, `newsapi.py`)
 - Tests: `test_` prefix matching source file
 
 ### General
@@ -565,6 +581,7 @@ Format: `<type>/<scope>/<short-description>`
 - `chore/deps/pydantic-v2-upgrade`
 
 Rules:
+
 - All lowercase, hyphens only (no underscores, no dots)
 - Max 50 characters
 - NEVER commit directly to `main` or `develop`
@@ -584,6 +601,7 @@ Rules:
 Format: `<type>(<scope>): <imperative description>`
 
 **Types:**
+
 - `feat` — new user-visible feature
 - `fix` — bug fix
 - `perf` — performance improvement
@@ -598,6 +616,7 @@ Format: `<type>(<scope>): <imperative description>`
 `api`, `worker`, `ws-gateway`, `web`, `db`, `infra`, `docs`, `deps`, `plugins`, `types`, `ui-components`
 
 **Examples:**
+
 ```
 feat(web): add RSI indicator to chart panel
 fix(api): correct OHLCV timezone handling for non-UTC exchanges
@@ -606,6 +625,7 @@ feat(worker): implement EDGAR 8-K RSS ingestion task
 ```
 
 **Rules:**
+
 - Imperative present tense: "add" not "added", "fix" not "fixes"
 - Max 72 characters for the subject line
 - Body required for breaking changes and non-obvious fixes
@@ -677,28 +697,31 @@ feat(worker): implement EDGAR 8-K RSS ingestion task
 
 ### Coverage Minimums (enforced in CI — build fails below threshold)
 
-| Layer | Minimum |
-|-------|---------|
-| Python services | 80% line coverage |
-| Python repositories | 70% line coverage |
-| Python routers | 60% (integration tests cover the rest) |
-| React hooks | 80% line coverage |
-| React components | 60% (E2E covers the rest) |
-| Utility functions (both languages) | 90% line coverage |
+| Layer                              | Minimum                                |
+| ---------------------------------- | -------------------------------------- |
+| Python services                    | 80% line coverage                      |
+| Python repositories                | 70% line coverage                      |
+| Python routers                     | 60% (integration tests cover the rest) |
+| React hooks                        | 80% line coverage                      |
+| React components                   | 60% (E2E covers the rest)              |
+| Utility functions (both languages) | 90% line coverage                      |
 
 ### Required Test Types for Every New Feature
 
 **Unit tests** (no I/O, all dependencies mocked):
+
 - Every service method with a non-trivial branch
 - Every utility function with edge cases
 - Every Pydantic schema with invalid inputs
 - Every TypeScript function with type-guarded branches
 
 **Integration tests** (real database, no external HTTP):
+
 - Every FastAPI endpoint (`httpx.AsyncClient` + test database)
 - Every repository query with representative data
 
 **E2E tests** (Playwright):
+
 - Chart loads and renders candlesticks
 - Watchlist: add/remove symbol
 - Command palette: open, find symbol, navigate to chart
@@ -724,31 +747,31 @@ feat(worker): implement EDGAR 8-K RSS ingestion task
 
 ### Frontend (Lighthouse CI)
 
-| Metric | Budget |
-|--------|--------|
-| First Contentful Paint | < 1.5s (simulated 4G) |
-| Time to Interactive | < 3.5s |
-| Largest Contentful Paint | < 2.5s |
-| Total Blocking Time | < 200ms |
-| Initial JS bundle | < 200KB gzipped |
-| Total JS (async included) | < 1MB gzipped |
+| Metric                    | Budget                |
+| ------------------------- | --------------------- |
+| First Contentful Paint    | < 1.5s (simulated 4G) |
+| Time to Interactive       | < 3.5s                |
+| Largest Contentful Paint  | < 2.5s                |
+| Total Blocking Time       | < 200ms               |
+| Initial JS bundle         | < 200KB gzipped       |
+| Total JS (async included) | < 1MB gzipped         |
 
 ### API
 
-| Metric | Budget |
-|--------|--------|
-| P50, cached endpoints | < 50ms |
-| P99, cached endpoints | < 200ms |
-| P50, ClickHouse OHLCV (1Y daily) | < 100ms |
-| P99, ClickHouse OHLCV | < 500ms |
+| Metric                           | Budget   |
+| -------------------------------- | -------- |
+| P50, cached endpoints            | < 50ms   |
+| P99, cached endpoints            | < 200ms  |
+| P50, ClickHouse OHLCV (1Y daily) | < 100ms  |
+| P99, ClickHouse OHLCV            | < 500ms  |
 | Screener, uncached complex query | < 2s P99 |
 
 ### Real-Time
 
-| Metric | Budget |
-|--------|--------|
-| WS fan-out latency (server receive → client receive) | < 50ms |
-| Price update frequency (per symbol per client) | max 1/second |
+| Metric                                               | Budget       |
+| ---------------------------------------------------- | ------------ |
+| WS fan-out latency (server receive → client receive) | < 50ms       |
+| Price update frequency (per symbol per client)       | max 1/second |
 
 ---
 
@@ -770,11 +793,11 @@ feat(worker): implement EDGAR 8-K RSS ingestion task
 
 ### Rate Limiting
 
-| Tier | Limit |
-|------|-------|
-| Anonymous | 60 requests/hour per IP |
-| Free tier | 300 requests/hour per user |
-| Pro tier | 3000 requests/hour per user |
+| Tier      | Limit                                      |
+| --------- | ------------------------------------------ |
+| Anonymous | 60 requests/hour per IP                    |
+| Free tier | 300 requests/hour per user                 |
+| Pro tier  | 3000 requests/hour per user                |
 | WebSocket | max 50 symbol subscriptions per connection |
 
 All limits sourced from `config.py` — never hardcoded.
@@ -875,10 +898,11 @@ Follow in order. No steps skipped.
    - `<PanelName>Panel.test.tsx` — component tests
 
 3. **Panel interface** (all panels must accept exactly these props):
+
    ```typescript
    interface PanelProps {
-     panelId: string;    // unique instance ID for layout state
-     isActive: boolean;  // whether this panel has keyboard focus
+     panelId: string; // unique instance ID for layout state
+     isActive: boolean; // whether this panel has keyboard focus
      onClose: () => void;
    }
    ```
@@ -930,32 +954,284 @@ Follow in order. No steps skipped.
 Before every commit, verify every item. No exceptions.
 
 **Governance**
+
 - [ ] This change was planned before any code was written
 - [ ] Every value in the diff originates from env vars, named constants, or documented rationale
 - [ ] No new port introduced without a Port Registry entry in CLAUDE.md
 - [ ] No architectural decision made without an ADR
 
 **Code Quality**
+
 - [ ] `pnpm run typecheck` passes — zero TypeScript errors
 - [ ] `pnpm run lint` passes — zero ESLint errors or warnings
 - [ ] `mypy --strict` passes on all changed Python files
 - [ ] `ruff check .` and `black --check .` pass
 
 **Testing**
+
 - [ ] All new code has tests at the required coverage level
 - [ ] All existing tests still pass
 - [ ] No real HTTP calls introduced in unit or integration tests
 
 **Configuration**
+
 - [ ] New env vars documented in `.env.example`
 - [ ] No secrets, API keys, or PII in the diff (`git diff` reviewed)
 
 **Documentation**
+
 - [ ] `CHANGELOG.md` updated if this is a user-facing change
 - [ ] ADR created if an architectural decision was made
 - [ ] Runbook updated if a new data source or UI panel was added
 
 **Commit**
+
 - [ ] Commit message follows Conventional Commits format
 - [ ] Commit scope is one of the approved scopes
 - [ ] This commit leaves the codebase in a fully passing, verifiable state
+
+---
+
+## PART XX — DEVELOPER TOOLS
+
+These tools are installed globally and available in every session.
+All skills live in `~/.claude/skills/` and are invoked via the Skill tool.
+
+### graphify — Codebase Knowledge Graph
+
+Installed via: `pip install graphifyy && graphify install`
+Skill: `~/.claude/skills/graphify/SKILL.md` | Trigger: `/graphify`
+
+Run `/graphify .` from the project root to build an interactive knowledge graph of the
+codebase (AST extraction + semantic clustering). Useful before large refactors or when
+onboarding to an unfamiliar area. The graph is regenerated incrementally — only changed
+files are reprocessed.
+
+**When to use:** Before planning cross-service changes, when tracing call graphs,
+when understanding module dependency clusters.
+
+**Output:** `graph_output/` directory (gitignored) — HTML, JSON, and markdown reports.
+
+### stop-slop — Anti-AI-Slop Writing
+
+Installed via: `curl -sL https://raw.githubusercontent.com/hardikpandya/stop-slop/main/SKILL.md -o ~/.claude/skills/stop-slop/SKILL.md`
+Skill: `~/.claude/skills/stop-slop/SKILL.md` | Trigger: `/stop-slop`
+
+Enforces direct, specific, active-voice prose. Eliminates throat-clearing openers,
+false agency ("this code aims to…"), em dashes, rhetorical setups, passive voice,
+and all patterns that make output sound AI-generated.
+
+**When to use:** When drafting documentation, PR descriptions, ADRs, runbooks, or
+any user-facing text. Apply before committing any prose to the repo.
+
+### owasp-security — Security Code Review
+
+Installed via: `curl -sL https://raw.githubusercontent.com/agamm/claude-code-owasp/main/.claude/skills/owasp-security/SKILL.md -o ~/.claude/skills/owasp-security/SKILL.md`
+Skill: `~/.claude/skills/owasp-security/SKILL.md` | Trigger: `/owasp-security`
+
+Checks code against OWASP Top 10:2025, ASVS 5.0, and Agentic AI Security (ASI01-ASI10).
+Covers input validation, authentication, access control, data protection, error handling,
+and language-specific security quirks for Python and TypeScript.
+
+**When to use:** Automatically activates when reviewing auth code, handling user input,
+working with cryptography, or designing API endpoints. Also invoke explicitly with
+`/owasp-security` before any security-sensitive PR.
+
+### caveman — Token-Efficient Communication
+
+Installed via: `claude plugin marketplace add JuliusBrussee/caveman && claude plugin install caveman@caveman`
+Plugin: Claude Code plugin (not a skill file) | Trigger: `/caveman`
+
+Reduces output token usage by ~75% while retaining technical accuracy. Useful during
+long sessions to stay within context budgets.
+
+**Permitted uses:**
+
+- `/caveman` — compressed explanations and analysis
+- `/caveman-review` — terse PR feedback (one line: location + problem + fix)
+
+**Prohibited:** `/caveman-commit` — its output format (`L<Line>: <problem>. <fix>.`)
+violates this project's commitlint rules (Conventional Commits enforced in CI).
+All commit messages must follow `type(scope): imperative description` — see Part IX.
+
+### frontend-design — Anti-Generic UI/UX (Anthropic Official)
+
+Installed via: `curl` from `anthropics/skills` repo (skills.sh)
+Skill: `~/.claude/skills/frontend-design/SKILL.md` | Trigger: `/frontend-design`
+
+Creates distinctive, production-grade interfaces. Avoids generic AI aesthetics
+(Inter font, purple gradients, overused component patterns). Enforces bold
+typography, intentional color palettes, and purposeful motion.
+
+**When to use:** Automatically activates when building or styling web UI,
+React components, dashboards, or pages. Invoke with `/frontend-design` when
+designing new panels. The terminal's existing CSS palette (#0a0a0f, #f59e0b,
+JetBrains Mono) already follows this philosophy — maintain consistency with it.
+
+### Trail of Bits Security Skills
+
+Marketplace: `claude plugin marketplace add trailofbits/skills`
+Installed plugins: `semgrep-rule-creator`, `static-analysis`, `variant-analysis`
+
+- **`semgrep-rule-creator@trailofbits`** — write Semgrep rules to detect
+  vulnerability patterns across the codebase
+- **`static-analysis@trailofbits`** — SAST: trace data flows, flag unsafe
+  patterns in Python and TypeScript
+- **`variant-analysis@trailofbits`** — given one vulnerability, find all
+  similar variants across the entire codebase
+
+**When to use:** Before any PR touching auth, input validation, DB queries,
+API endpoints, or dependency upgrades. Use alongside `/owasp-security`.
+
+### Not installed — Snyk
+
+Requires a paid API key. Add in a future session when provisioned.
+
+### Not installed — Chrome DevTools MCP
+
+Requires a running MCP server. Add when E2E infrastructure is active.
+
+---
+
+## PART XXI — ENGINEERING LAWS AND PROFESSIONAL OBLIGATIONS
+
+These principles are derived from established software engineering laws and
+professional practice standards. They complement the rules above and apply
+to every architectural, implementation, and process decision in this project.
+
+---
+
+### 21.1 — COMPLEXITY AND SCOPE
+
+**Gall's Law — Start simple, evolve complexity.**
+A complex system that works evolved from a simple system that worked.
+A complex system designed from scratch does not work.
+Build the minimum viable version first. Evolve from there.
+Never launch a fully-engineered solution before a working simple one exists.
+
+**Zawinski's Law — Resist scope creep actively.**
+Every system tends to expand until it does everything.
+For every proposed feature: is this critical to the core workflow?
+If the answer requires justification, the answer is no.
+New scope requires a new ADR. No ADR, no feature.
+
+**Greene's Law — Every line of code is a liability.**
+Code costs money to test, maintain, debug, and understand.
+Write only what is necessary. Prefer deleting to adding.
+Reuse existing libraries before writing new logic.
+If a feature can be deferred without harming the product, defer it.
+
+**Law of Leaky Abstractions — Know the layer beneath yours.**
+All non-trivial abstractions leak under edge cases and failure.
+Never rely on a framework abstraction in a production-critical path
+without understanding what it hides. Log at the raw level when debugging.
+
+---
+
+### 21.2 — ESTIMATION AND DELIVERY
+
+**Hofstadter's Law — Estimates are always wrong. Plan for it.**
+It always takes longer than expected, even when you account for this law.
+Break features into micro-deliverables. Each must be independently verifiable.
+Double initial estimates for any work touching multiple layers.
+A plan with no buffer is not a plan — it is a wish.
+
+**Pareto Principle — 80% of bugs live in 20% of the code.**
+High-risk code clusters in older shared utilities and integration boundaries.
+Before a release, identify which 20% of the codebase has the most history
+of bugs and focus test coverage there. SonarCloud metrics guide this.
+
+---
+
+### 21.3 — TESTING AND QUALITY
+
+**Law of Diminishing Returns — Test the right things, not all things.**
+Coverage beyond 80–90% produces diminishing value while inflating test
+maintenance cost. Focus tests on business logic, data flows, and integrations.
+Do not test language guarantees, framework internals, or getter/setter trivia.
+The coverage thresholds in this project reflect this: they are minimums, not targets.
+
+**Boy Scout Rule — Leave code better than you found it.**
+Fix typos, extract magic numbers to constants, remove dead code, and add
+missing types while working on a feature. Improve 1% at a time.
+Compounding small improvements outperform periodic rewrites.
+
+**Entropy is inevitable — schedule refactoring.**
+Clean architecture decays without active maintenance. Technical debt accrues
+interest. Treat refactoring as a recurring cost, not an optional activity.
+If you cannot schedule it, it will be paid in production incidents.
+
+---
+
+### 21.4 — DATA AND INTEGRATION INTEGRITY
+
+**Plan data before UI.**
+Integration architecture, data ownership, sync requirements, and API failure
+handling must be defined before any UI design is locked in.
+Data structure changes discovered mid-UI design create patchwork fixes
+that compound into maintenance failures. Schema first, interface second.
+
+**Postel's Law — Be strict on output, careful on input.**
+Validate all inputs at every system boundary. Sanitize before storing.
+Standardize outputs — internal systems downstream depend on stable contracts.
+This project enforces this via Pydantic on all API inputs and TypeScript
+strict types on all frontend data shapes.
+
+---
+
+### 21.5 — PROFESSIONAL OBLIGATIONS
+
+**Public interest over expediency.**
+This terminal handles financial data. Errors here have economic consequences.
+Never ship code with known defects to meet a deadline.
+Never disable a safety check to unblock a feature.
+The user's financial data deserves the same care as production banking software.
+
+**Competence boundary — only work within verified skill.**
+Do not implement cryptography, financial calculations, or compliance logic
+without verifying the approach against a specification or established reference.
+Document the reference. If no reference exists, do not implement it yet.
+
+**Traceability is a professional obligation, not a preference.**
+Every decision — architectural, implementation, configuration — must be
+traceable to a documented rationale. This is not bureaucracy. It is the
+minimum standard for work that others (or future you) must maintain.
+ADRs, commit messages, and constants with comments are the mechanism.
+
+**Decisions are made once, documented permanently.**
+An undocumented decision will be re-litigated. Every time it is re-litigated,
+it costs time and introduces inconsistency. Write it down once. Never again.
+
+---
+
+### 21.6 — AI-ASSISTED DEVELOPMENT DISCIPLINE
+
+**AI tools accelerate output, not judgment.**
+AI-generated code is produced faster than it can be verified. Faster wrong
+output is a more efficient detour. Every AI suggestion must be reviewed with
+the same rigour as human-written code: types, tests, architecture alignment.
+
+**AI cannot substitute for architecture.**
+Do not use AI generation to skip planning, replace code review, or defer
+documentation. The planning requirements in Part III apply to AI-assisted
+work without exception. Plan first. Generate second. Review always.
+
+**AI output is not trusted at boundaries.**
+Any AI-generated code touching auth, input validation, database queries,
+cryptography, or external API integration requires explicit security review
+before merge. Use `/owasp-security` and the Trail of Bits SAST tools.
+
+---
+
+### 21.7 — POST-LAUNCH DISCIPLINE
+
+**Launch is the beginning, not the finish line.**
+The plan for what happens after release must exist before release.
+Monitoring, support ownership, bug triage process, rollback procedure,
+and a prioritised improvement backlog are required, not optional.
+A launch without a post-launch plan is a controlled crash.
+
+**Measure before optimising.**
+No performance work begins without a measurement baseline.
+Lighthouse CI, ClickHouse query plans, and Redis hit rates are the tools.
+Optimise what the data shows is slow. Not what intuition suggests.

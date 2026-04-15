@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 import { resolve } from 'path';
 
 // https://vitejs.dev/config/
@@ -13,15 +14,19 @@ export default defineConfig(({ mode }) => {
   const wsProxyTarget = env['VITE_DEV_WS_PROXY_TARGET'] ?? 'ws://localhost:3001';
 
   return {
-    plugins: [react()],
+    // basicSsl generates an ephemeral self-signed cert — see ADR-004.
+    // Browser will show a "Not Secure" warning on first visit; accept once.
+    plugins: [react(), basicSsl()],
     resolve: {
       alias: {
         '@': resolve(__dirname, './src'),
         '@terminal/types': resolve(__dirname, '../../packages/types/src'),
+        '@terminal/ui-components': resolve(__dirname, '../../packages/ui-components/src'),
       },
     },
     server: {
       port: 5173,
+      https: true, // cert provided by @vitejs/plugin-basic-ssl (ADR-004)
       proxy: {
         '/api': {
           target: apiProxyTarget,
@@ -54,6 +59,9 @@ export default defineConfig(({ mode }) => {
       globals: true,
       environment: 'jsdom',
       setupFiles: ['./src/test-setup.ts'],
+      // Restrict to src/ only — e2e/ contains Playwright specs that must not
+      // be picked up by Vitest. Playwright specs run separately via `pnpm test:e2e`.
+      include: ['src/**/*.test.{ts,tsx}'],
       coverage: {
         provider: 'v8',
         reporter: ['text', 'lcov'],

@@ -18,6 +18,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.32.0",
     "@tanstack/react-router": "^1.30.0",
+    "@terminal/ui-components": "workspace:^",
     "cmdk": "^1.0.0",
     "d3": "^7.9.0",
     "fuse.js": "^7.0.0",
@@ -29,8 +30,9 @@
     "zustand": "^4.5.0"
   },
   "devDependencies": {
-    "@ag-grid-community/react": "^31.2.0",
     "@ag-grid-community/core": "^31.2.0",
+    "@ag-grid-community/react": "^31.2.0",
+    "@playwright/test": "^1.44.0",
     "@terminal/eslint-config": "workspace:*",
     "@terminal/types": "workspace:*",
     "@testing-library/jest-dom": "^6.4.0",
@@ -39,6 +41,7 @@
     "@types/d3": "^7.4.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-basic-ssl": "^1.1.0",
     "@vitejs/plugin-react": "^4.2.0",
     "@vitest/coverage-v8": "^1.5.0",
     "autoprefixer": "^10.4.0",

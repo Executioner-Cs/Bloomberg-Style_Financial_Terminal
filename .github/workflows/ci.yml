@@ -153,17 +153,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Install JS dependencies
-        run: pnpm install --frozen-lockfile
-
       - name: npm audit (high+critical only)
-        run: pnpm audit --audit-level=high
+        # pnpm 9.x calls the retired v1 audit endpoint (HTTP 410 since April 2026).
+        # pnpm 10 uses the supported bulk advisory endpoint and reads pnpm 9 lockfiles
+        # (same lockfileVersion '9.0'). npx runs pnpm 10 for audit only — no version
+        # conflict with the project's packageManager field.
+        run: npx pnpm@10 audit --audit-level=high
 
       - name: pip-audit (api)
         working-directory: services/api
@@ -211,6 +211,31 @@ jobs:
           # Full history is required for new-code calculation to be accurate.
           fetch-depth: 0
 
+      # -- Frontend coverage (vitest + v8 → lcov) --
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate frontend coverage report
+        working-directory: apps/web
+        # Threshold enforcement is not the SonarCloud job's concern — SonarCloud
+        # applies its own quality gate. Override vitest thresholds to zero so the
+        # step generates the lcov report without failing on coverage minimums.
+        run: >-
+          pnpm exec vitest run
+          --coverage
+          --coverage.thresholds.lines=0
+          --coverage.thresholds.functions=0
+          --coverage.thresholds.branches=0
+          --coverage.thresholds.statements=0
+
+      # -- Python coverage (pytest-cov → XML) --
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -252,7 +277,10 @@ jobs:
   commitlint:
     name: Commit Message Lint
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    # Skip on develop→main promotions: those commits were already linted
+    # on their feature-branch PRs. Re-linting them fails on squash/merge
+    # subjects that GitHub generates (e.g. start-case titles).
+    if: github.event_name == 'pull_request' && github.head_ref != 'develop'
     steps:
       - uses: actions/checkout@v4
         with:

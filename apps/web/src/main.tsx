@@ -16,9 +16,10 @@ import './index.css';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Stale-while-revalidate: show cached data immediately, refetch in background
-      staleTime: 30_000,       // 30 seconds before data is considered stale
-      gcTime: 5 * 60_000,     // 5 minutes before unused data is garbage-collected
+      // 60s minimum staleTime — CoinGecko free-tier ToS requires at minimum 60s caching.
+      // Data is served from cache within this window; background revalidation fires after.
+      staleTime: 60_000, // 60 seconds — CoinGecko ToS minimum cache window
+      gcTime: 5 * 60_000, // 5 minutes before unused data is garbage-collected
       retry: 2,
       refetchOnWindowFocus: true,
     },

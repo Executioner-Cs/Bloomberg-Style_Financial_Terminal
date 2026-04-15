@@ -30,6 +30,13 @@ module.exports = {
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
 
+    // Unused variables — allow underscore-prefixed identifiers as intentional "unused" markers.
+    // This is the TypeScript convention for required-by-interface params not yet consumed.
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+    ],
+
     // General quality
     'no-console': ['warn', { allow: ['warn', 'error'] }],
   },
