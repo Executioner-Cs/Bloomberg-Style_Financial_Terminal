@@ -14,10 +14,11 @@ export type Timeframe = '1m' | '5m' | '15m' | '30m' | '1H' | '4H' | '1D' | '1W' 
 export type Quote = {
   symbol: string;
   price: number | null;
-  changePct: number | null;
-  changeAbs: number | null;
-  volume: number | null;
-  ts: number | null; // Unix ms
+  /** 24-hour price change as a decimal fraction. e.g. 0.03 = +3%. */
+  change_24h: number | null;
+  volume_24h: number | null;
+  /** ISO 8601 UTC string from JSON serialization of datetime. */
+  ts: string | null;
 };
 
 export type OHLCVResponse = {
