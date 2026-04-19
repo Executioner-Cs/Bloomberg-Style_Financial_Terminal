@@ -51,8 +51,10 @@ class Settings(BaseSettings):
     # Required — set API_BASE_URL in .env. No localhost default: fails fast if missing.
     api_base_url: str
     # Required — set CORS_ALLOWED_ORIGINS in .env (comma-separated, no trailing slashes).
-    # Parsed by parse_cors_origins validator below.
-    cors_allowed_origins: list[str]
+    # Stored as a raw string because pydantic-settings 2.6 JSON-parses any
+    # `list[str]`-typed env var before field validators run. Access the parsed
+    # list via the cors_origins property below.
+    cors_allowed_origins: str
 
     # Auth — no defaults for secrets, will raise on missing in production
     jwt_secret_key: str
@@ -208,13 +210,10 @@ class Settings(BaseSettings):
     sentry_dsn: str = ""
     sentry_environment: str = "development"
 
-    @field_validator("cors_allowed_origins", mode="before")
-    @classmethod
-    def parse_cors_origins(cls, v: object) -> list[str]:
-        """Parse comma-separated string into list."""
-        if isinstance(v, str):
-            return [origin.strip() for origin in v.split(",") if origin.strip()]
-        return v  # type: ignore[return-value]
+    @property
+    def cors_origins(self) -> list[str]:
+        """Parsed comma-separated CORS origin list with empty entries dropped."""
+        return [o.strip() for o in self.cors_allowed_origins.split(",") if o.strip()]
 
     @field_validator("app_env")
     @classmethod

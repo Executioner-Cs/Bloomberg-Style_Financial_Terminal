@@ -51,12 +51,6 @@ class MacroSeriesResponse(BaseModel):
     source: str = Field(description="Data provider that sourced these observations.")
 
 
-class MacroSeriesListResponse(BaseModel):
-    """Response for GET /macro/ — all available macro series metadata."""
-
-    series: list[MacroSeriesMeta] = Field(description="List of available macro series.")
-
-
 class MacroSeriesMeta(BaseModel):
     """Metadata for a single macro series (no bar data)."""
 
@@ -69,3 +63,9 @@ class MacroSeriesMeta(BaseModel):
     latest_ts: datetime | None = Field(
         default=None, description="Most recent observation date (UTC)."
     )
+
+
+class MacroSeriesListResponse(BaseModel):
+    """Response for GET /macro/ — all available macro series metadata."""
+
+    series: list[MacroSeriesMeta] = Field(description="List of available macro series.")
