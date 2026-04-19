@@ -1,0 +1,402 @@
+[
+  {
+    "symbol": "BTC",
+    "name": "Bitcoin",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "ETH",
+    "name": "Ethereum",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "BNB",
+    "name": "BNB",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "SOL",
+    "name": "Solana",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "XRP",
+    "name": "XRP",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "ADA",
+    "name": "Cardano",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "AVAX",
+    "name": "Avalanche",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "DOGE",
+    "name": "Dogecoin",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "DOT",
+    "name": "Polkadot",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "MATIC",
+    "name": "Polygon",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "LINK",
+    "name": "Chainlink",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "UNI",
+    "name": "Uniswap",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "LTC",
+    "name": "Litecoin",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "BCH",
+    "name": "Bitcoin Cash",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "ATOM",
+    "name": "Cosmos",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "XLM",
+    "name": "Stellar",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "NEAR",
+    "name": "NEAR Protocol",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "ICP",
+    "name": "Internet Computer",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "APT",
+    "name": "Aptos",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "ARB",
+    "name": "Arbitrum",
+    "asset_class": "crypto",
+    "exchange": null,
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "AAPL",
+    "name": "Apple Inc.",
+    "asset_class": "equity",
+    "exchange": "NASDAQ",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "MSFT",
+    "name": "Microsoft Corporation",
+    "asset_class": "equity",
+    "exchange": "NASDAQ",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "GOOGL",
+    "name": "Alphabet Inc.",
+    "asset_class": "equity",
+    "exchange": "NASDAQ",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "AMZN",
+    "name": "Amazon.com Inc.",
+    "asset_class": "equity",
+    "exchange": "NASDAQ",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "NVDA",
+    "name": "NVIDIA Corporation",
+    "asset_class": "equity",
+    "exchange": "NASDAQ",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "META",
+    "name": "Meta Platforms Inc.",
+    "asset_class": "equity",
+    "exchange": "NASDAQ",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "TSLA",
+    "name": "Tesla Inc.",
+    "asset_class": "equity",
+    "exchange": "NASDAQ",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "JPM",
+    "name": "JPMorgan Chase & Co.",
+    "asset_class": "equity",
+    "exchange": "NYSE",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "V",
+    "name": "Visa Inc.",
+    "asset_class": "equity",
+    "exchange": "NYSE",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "JNJ",
+    "name": "Johnson & Johnson",
+    "asset_class": "equity",
+    "exchange": "NYSE",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "PG",
+    "name": "Procter & Gamble Co.",
+    "asset_class": "equity",
+    "exchange": "NYSE",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "UNH",
+    "name": "UnitedHealth Group Inc.",
+    "asset_class": "equity",
+    "exchange": "NYSE",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "MA",
+    "name": "Mastercard Inc.",
+    "asset_class": "equity",
+    "exchange": "NYSE",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "HD",
+    "name": "The Home Depot Inc.",
+    "asset_class": "equity",
+    "exchange": "NYSE",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "CVX",
+    "name": "Chevron Corporation",
+    "asset_class": "equity",
+    "exchange": "NYSE",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "MRK",
+    "name": "Merck & Co. Inc.",
+    "asset_class": "equity",
+    "exchange": "NYSE",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "ABBV",
+    "name": "AbbVie Inc.",
+    "asset_class": "equity",
+    "exchange": "NYSE",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "KO",
+    "name": "The Coca-Cola Company",
+    "asset_class": "equity",
+    "exchange": "NYSE",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "PEP",
+    "name": "PepsiCo Inc.",
+    "asset_class": "equity",
+    "exchange": "NYSE",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "WMT",
+    "name": "Walmart Inc.",
+    "asset_class": "equity",
+    "exchange": "NYSE",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "BAC",
+    "name": "Bank of America Corporation",
+    "asset_class": "equity",
+    "exchange": "NYSE",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "XOM",
+    "name": "Exxon Mobil Corporation",
+    "asset_class": "equity",
+    "exchange": "NYSE",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "LLY",
+    "name": "Eli Lilly and Company",
+    "asset_class": "equity",
+    "exchange": "NYSE",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "AVGO",
+    "name": "Broadcom Inc.",
+    "asset_class": "equity",
+    "exchange": "NASDAQ",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "COST",
+    "name": "Costco Wholesale Corporation",
+    "asset_class": "equity",
+    "exchange": "NASDAQ",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "DIS",
+    "name": "The Walt Disney Company",
+    "asset_class": "equity",
+    "exchange": "NYSE",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "ADBE",
+    "name": "Adobe Inc.",
+    "asset_class": "equity",
+    "exchange": "NASDAQ",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "NFLX",
+    "name": "Netflix Inc.",
+    "asset_class": "equity",
+    "exchange": "NASDAQ",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "CRM",
+    "name": "Salesforce Inc.",
+    "asset_class": "equity",
+    "exchange": "NASDAQ",
+    "currency": "USD",
+    "is_active": true
+  },
+  {
+    "symbol": "AMD",
+    "name": "Advanced Micro Devices Inc.",
+    "asset_class": "equity",
+    "exchange": "NASDAQ",
+    "currency": "USD",
+    "is_active": true
+  }
+]
