@@ -16,10 +16,13 @@ from httpx import ASGITransport, AsyncClient
 from src.main import app
 from src.routers import instruments as instruments_router
 from src.routers import market_data as market_data_router
+from src.routers import news as news_router
 from src.schemas.instruments import InstrumentListResponse, InstrumentResponse
 from src.schemas.market_data import OHLCVResponse, QuoteResponse
+from src.schemas.news import NewsResponse
 from src.services.instrument_service import InstrumentService
 from src.services.market_data_service import MarketDataService
+from src.services.news_service import NewsService
 
 
 @pytest.fixture
@@ -204,11 +207,31 @@ async def test_list_filings_stub(client: AsyncClient) -> None:
     assert response.json()["filings"] == []
 
 
+# ---------------------------------------------------------------------------
+# News — now wired to service (uses dependency_overrides for isolation)
+# ---------------------------------------------------------------------------
+
+
 @pytest.mark.asyncio
-async def test_list_news_stub(client: AsyncClient) -> None:
-    response = await client.get("/api/v1/news")
+async def test_list_news_returns_articles_shape() -> None:
+    """GET /news returns NewsResponse shape via service layer."""
+    mock_service = AsyncMock(spec=NewsService)
+    mock_service.get_top_headlines.return_value = NewsResponse(
+        articles=[], total=0, page=1
+    )
+    app.dependency_overrides[news_router._build_service] = lambda: mock_service
+    try:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="https://test"
+        ) as ac:
+            response = await ac.get("/api/v1/news")
+    finally:
+        app.dependency_overrides.pop(news_router._build_service, None)
+
     assert response.status_code == 200
-    assert response.json()["news"] == []
+    data = response.json()
+    assert data["articles"] == []
+    assert data["total"] == 0
 
 
 @pytest.mark.asyncio
