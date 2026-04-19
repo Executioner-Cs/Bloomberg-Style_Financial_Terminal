@@ -37,9 +37,20 @@ def news_feed(symbol: str | None, page: int) -> str:
     return f"cache:news:{sym}:page:{page}"
 
 
+def news_query(query_hash: str, page: int) -> str:
+    """News feed for a free-form query — hash input to keep keys bounded."""
+    return f"cache:news:q:{query_hash}:page:{page}"
+
+
 def macro_series(series_id: str) -> str:
     """FRED macro series data."""
     return f"cache:macro:{series_id}"
+
+
+def filings(symbol: str, form_type: str | None) -> str:
+    """EDGAR filings for a symbol, optionally filtered by form type."""
+    form = form_type or "all"
+    return f"cache:filings:{symbol}:{form}"
 
 
 def instrument_list(asset_class: str | None, page: int) -> str:

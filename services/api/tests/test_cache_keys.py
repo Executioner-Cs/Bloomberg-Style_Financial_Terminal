@@ -40,9 +40,31 @@ def test_news_feed_key_without_symbol_uses_all() -> None:
     assert key == "cache:news:all:page:1"
 
 
+def test_news_query_key_format() -> None:
+    key = keys.news_query("deadbeef", 1)
+    assert key == "cache:news:q:deadbeef:page:1"
+
+
+def test_news_feed_and_news_query_do_not_collide() -> None:
+    """Feed and query variants share the news namespace but produce distinct keys."""
+    feed_key = keys.news_feed("AAPL", 1)
+    query_key = keys.news_query("AAPL", 1)
+    assert feed_key != query_key
+
+
 def test_macro_series_key_format() -> None:
     key = keys.macro_series("FEDFUNDS")
     assert key == "cache:macro:FEDFUNDS"
+
+
+def test_filings_key_with_form_type() -> None:
+    key = keys.filings("AAPL", "10-K")
+    assert key == "cache:filings:AAPL:10-K"
+
+
+def test_filings_key_without_form_type_uses_all() -> None:
+    key = keys.filings("AAPL", None)
+    assert key == "cache:filings:AAPL:all"
 
 
 def test_instrument_list_key_with_asset_class() -> None:

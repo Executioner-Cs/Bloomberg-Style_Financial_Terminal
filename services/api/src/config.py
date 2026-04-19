@@ -182,6 +182,13 @@ class Settings(BaseSettings):
     edgar_timeout_seconds: float = Field(default=30.0, description="EDGAR API request timeout. ADR-005.")
     # 86400s = 24hr: filings are published quarterly — no need to re-fetch intraday.
     edgar_cache_ttl_seconds: int = Field(default=86400, description="EDGAR filing cache TTL. 86400s (24hr): filings don't change intraday. ADR-005.")
+    # Cache TTL used by the FilingsService (HTTP-facing cache-aside). Mirrors
+    # edgar_cache_ttl_seconds but exposed as its own field so the service
+    # layer never references a source-specific constant.
+    filings_cache_ttl_seconds: int = Field(
+        default=86400,
+        description="FilingsService cache TTL (24hr). Filings are quarterly. ADR-005.",
+    )
 
     # ─── WebSocket gateway ────────────────────────────────────────────────────
     ws_gateway_port: int = 3001
