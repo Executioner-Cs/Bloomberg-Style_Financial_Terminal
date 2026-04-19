@@ -14,15 +14,24 @@ from typing import Any
 
 import httpx
 
+from src.config import settings
+
 logger = logging.getLogger(__name__)
 
-# Default timeout for all external API calls
+# Self-imposed conservative timeout for integrations without a published SLA.
+# ADR-005: all free-tier providers lack SLA guarantees; 30s is the project-wide
+# safe ceiling. Subclasses override this via _get_client() using provider-specific
+# settings fields (e.g. settings.coingecko_timeout_seconds).
 DEFAULT_TIMEOUT_SECONDS = 30
 
-# Maximum number of retries on transient failures (429, 5xx)
+# 3 retries with exponential backoff covers most transient 5xx / network blips
+# without blocking a Celery task for more than ~7s (1+2+4). Subclasses that
+# call get() without a max_retries override inherit this default.
 DEFAULT_MAX_RETRIES = 3
 
-# Initial backoff in seconds (doubles each retry)
+# Initial backoff delay in seconds. Doubles each retry: 1s → 2s → 4s.
+# Chosen to be long enough to recover from a momentary server hiccup without
+# hammering a rate-limited free-tier endpoint.
 INITIAL_BACKOFF_SECONDS = 1.0
 
 
@@ -58,9 +67,14 @@ class BaseIntegrationClient:
         self._client: httpx.AsyncClient | None = None
 
     def _build_headers(self) -> dict[str, str]:
-        """Override in subclasses to add provider-specific headers."""
+        """
+        Override in subclasses to add provider-specific headers.
+
+        Default User-Agent sourced from settings.app_user_agent (env var
+        APP_USER_AGENT). Never hardcoded — CLAUDE.md Rule 1.
+        """
         return {
-            "User-Agent": "Bloomberg-Terminal/1.0 contact@yourdomain.com",
+            "User-Agent": settings.app_user_agent,
             "Accept": "application/json",
         }
 
