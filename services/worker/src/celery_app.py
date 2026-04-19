@@ -60,10 +60,17 @@ app.config_from_object(
                 "schedule": crontab(hour=13, minute=0),
                 "options": {"queue": "ingestion"},
             },
-            # FRED macro data — daily at 09:00 ET (14:00 UTC)
+            # FRED macro data — weekly Monday 08:00 UTC. Macro series release
+            # cadence is weekly at the earliest (most monthly/quarterly), so
+            # daily polling wastes the free-tier quota. Schedule sourced from
+            # settings.fred_ingest_* — no hardcoded values (CLAUDE.md Rule 1).
             "fred-macro-refresh": {
                 "task": "src.tasks.fred_ingest.refresh_macro_series",
-                "schedule": crontab(hour=14, minute=0),
+                "schedule": crontab(
+                    day_of_week=settings.fred_ingest_day_of_week,
+                    hour=str(settings.fred_ingest_hour_utc),
+                    minute=str(settings.fred_ingest_minute_utc),
+                ),
                 "options": {"queue": "ingestion"},
             },
             # News ingestion — every 15 minutes
