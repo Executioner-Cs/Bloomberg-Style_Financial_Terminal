@@ -107,3 +107,8 @@ services/*/dist/
 # --- Generated Files ----------------------------------------
 packages/types/src/*.generated.ts
 services/api/src/openapi.json
+
+# --- Graphify (knowledge graph tool output) -----------------
+# graphify generates HTML/JSON reports into graphify-out/.
+# Source is in .graphifyignore. Output is never committed.
+graphify-out/
