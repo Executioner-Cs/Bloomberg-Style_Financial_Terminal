@@ -28,3 +28,10 @@ export {
   WORKSPACE_SNAPSHOT_VERSION,
   type WorkspaceSnapshot,
 } from './layout-serializer';
+export {
+  listPresets,
+  getPreset,
+  switchToPreset,
+  DEFAULT_PRESET_SLUG,
+  type LayoutPreset,
+} from './default-layouts';
