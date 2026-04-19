@@ -14,12 +14,15 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from src.main import app
+from src.routers import filings as filings_router
 from src.routers import instruments as instruments_router
 from src.routers import market_data as market_data_router
 from src.routers import news as news_router
+from src.schemas.filings import FilingsResponse
 from src.schemas.instruments import InstrumentListResponse, InstrumentResponse
 from src.schemas.market_data import OHLCVResponse, QuoteResponse
 from src.schemas.news import NewsResponse
+from src.services.filings_service import FilingsService
 from src.services.instrument_service import InstrumentService
 from src.services.market_data_service import MarketDataService
 from src.services.news_service import NewsService
@@ -200,11 +203,48 @@ async def test_list_alerts_stub(client: AsyncClient) -> None:
     assert response.json()["alerts"] == []
 
 
+# ---------------------------------------------------------------------------
+# Filings — now wired to service (uses dependency_overrides for isolation)
+# ---------------------------------------------------------------------------
+
+
 @pytest.mark.asyncio
-async def test_list_filings_stub(client: AsyncClient) -> None:
-    response = await client.get("/api/v1/filings")
+async def test_get_filings_returns_filings_shape() -> None:
+    """GET /filings/{symbol} returns FilingsResponse shape via service layer."""
+    mock_service = AsyncMock(spec=FilingsService)
+    mock_service.get_filings.return_value = FilingsResponse(
+        symbol="AAPL", filings=[], total=0
+    )
+    app.dependency_overrides[filings_router._build_service] = lambda: mock_service
+    try:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="https://test"
+        ) as ac:
+            response = await ac.get("/api/v1/filings/AAPL")
+    finally:
+        app.dependency_overrides.pop(filings_router._build_service, None)
+
     assert response.status_code == 200
-    assert response.json()["filings"] == []
+    data = response.json()
+    assert data["symbol"] == "AAPL"
+    assert data["filings"] == []
+
+
+@pytest.mark.asyncio
+async def test_get_filings_rejects_unsupported_form_type() -> None:
+    """GET /filings/{symbol} returns 422 for form_types outside the allowed set."""
+    mock_service = AsyncMock(spec=FilingsService)
+    app.dependency_overrides[filings_router._build_service] = lambda: mock_service
+    try:
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="https://test"
+        ) as ac:
+            response = await ac.get("/api/v1/filings/AAPL?form_type=S-1")
+    finally:
+        app.dependency_overrides.pop(filings_router._build_service, None)
+
+    assert response.status_code == 422
+    mock_service.get_filings.assert_not_awaited()
 
 
 # ---------------------------------------------------------------------------

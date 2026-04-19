@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+from typing import cast
 
 import redis.asyncio as aioredis
 
@@ -134,7 +135,7 @@ class NewsService:
         get_news = getattr(self._mock, "get_news", None)
         if get_news is None:
             return NewsResponse(articles=[], total=0, page=page)
-        return get_news(symbol=symbol, page=page)
+        return cast(NewsResponse, get_news(symbol=symbol, page=page))
 
 
 def build_news_client() -> NewsAPIClient | None:
