@@ -44,6 +44,16 @@ app.config_from_object(
                 "schedule": crontab(hour=0, minute=0),
                 "options": {"queue": "ingestion"},
             },
+            # yfinance equity OHLCV — daily at 21:30 UTC (4:30 PM ET, 30 min after
+            # NYSE close). Schedule from settings.yfinance_ingest_hour_utc. ADR-005.
+            "yfinance-ohlcv-ingest": {
+                "task": "src.tasks.ingest_ohlcv_yfinance.ingest_yfinance_ohlcv",
+                "schedule": crontab(
+                    hour=str(settings.yfinance_ingest_hour_utc),
+                    minute=str(settings.yfinance_ingest_minute_utc),
+                ),
+                "options": {"queue": "ingestion"},
+            },
             # EDGAR filing check — daily at 08:00 ET (13:00 UTC)
             "edgar-filing-check": {
                 "task": "src.tasks.edgar_ingest.check_new_filings",

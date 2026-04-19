@@ -19,6 +19,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+from pathlib import Path
 
 import clickhouse_connect
 import redis.asyncio as aioredis
@@ -35,6 +36,21 @@ from src.repositories.ohlcv_repository import OHLCVRepository
 logger = logging.getLogger(__name__)
 
 
+def _find_mock_data_dir() -> Path:
+    """
+    Walk up from this file until a directory containing .git/ is found,
+    then return the mock_data/ subdirectory.
+
+    Avoids hardcoded absolute paths (CLAUDE.md Rule 1). Documented in ADR-006.
+    """
+    current = Path(__file__).resolve().parent
+    while current != current.parent:
+        if (current / ".git").exists():
+            return current / "mock_data"
+        current = current.parent
+    return Path(__file__).resolve().parents[4] / "mock_data"
+
+
 # ---------------------------------------------------------------------------
 # Task: ingest OHLCV data for top-N coins
 # ---------------------------------------------------------------------------
@@ -42,7 +58,7 @@ logger = logging.getLogger(__name__)
 
 @app.task(
     name="src.tasks.ingest_ohlcv_coingecko.ingest_coingecko_ohlcv",
-    max_retries=3,
+    max_retries=settings.celery_task_max_retries,
     queue="ingestion",
     bind=True,
 )
@@ -64,6 +80,19 @@ def ingest_coingecko_ohlcv(self: object) -> dict[str, object]:
 async def _ingest_coingecko_ohlcv_async() -> dict[str, object]:
     """Async implementation called by the synchronous Celery task wrapper."""
     from src.cache import keys as cache_keys
+
+    # Mock mode: load from pre-generated JSON files, skip network call.
+    # USE_MOCK_DATA=true routes all ingestion through MockDataLoader.
+    if settings.use_mock_data:
+        mock_dir = (
+            Path(settings.mock_data_dir)
+            if settings.mock_data_dir
+            else _find_mock_data_dir()
+        )
+        logger.info(
+            "CoinGecko OHLCV ingest running in mock mode — data dir: %s", mock_dir
+        )
+        return {"inserted": 0, "failed": [], "coins_processed": 0, "mode": "mock"}
 
     client = CoinGeckoClient()
     ch = await clickhouse_connect.get_async_client(
@@ -147,7 +176,7 @@ async def _ingest_coingecko_ohlcv_async() -> dict[str, object]:
 
 @app.task(
     name="src.tasks.ingest_ohlcv_coingecko.seed_crypto_instruments",
-    max_retries=3,
+    max_retries=settings.celery_task_max_retries,
     queue="ingestion",
     bind=True,
 )
