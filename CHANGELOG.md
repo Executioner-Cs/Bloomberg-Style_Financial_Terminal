@@ -9,6 +9,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Phase 2 (in progress, 2026-04-18): Workspace Shell + Panel Apps
+
+Delivers the **terminal core** capability tier — workspace shell plus the first
+six panels (Chart, Quote, Watchlist, Macro, News, Filings).
+
+**Backend (Stage A, shipped):**
+
+- `MacroService` + `/macro`, `/macro/{series_id}` routers with cache-first pattern (Redis)
+- `NewsService` + `/news`, `/news/{symbol}` routers with 5-min TTL (NewsAPI 100 req/day budget)
+- `FilingsService` + `/filings/{symbol}` router with 24-hour TTL (ADR-009)
+- `settings.filings_cache_ttl_seconds` (default 86400) + `cache:filings:{symbol}:{form_type}` key
+- `MockDataLoader.get_news()` + `.get_filings()` — zero-network mock path (ADR-006 extension)
+- Integration smoke tests for all 3 endpoints (`tests/integration/test_phase2_endpoints.py`)
+- FRED macro ingest schedule now settings-driven (`fred_ingest_day_of_week/hour_utc/minute_utc`) — removed hardcoded crontab
+
+**Frontend workspace foundation (Stage B, in progress):**
+
+- `dockview-react@5.2.0` + `zustand@4.5.7` added as direct web deps
+- `terminal-context.store` — activeSymbol + theme (symbol-linking bus)
+- `workspace.store` — panel instance map + opaque dockview layout JSON
+- `PanelApp<Props>` contract + module-scoped registry (`panel-registry.ts`) with write-then-freeze semantics
+- `lucide-react` added for icon provider (used by `PanelApp.icon`)
+- Public workspace barrel: `@/workspace` re-exports stores + registry + types
+
+**Governance:**
+
+- CLAUDE.md Part XII extended with **workspace interaction budgets** (panel focus < 50ms, symbol link < 150ms, workspace restore < 500ms, drag/resize ≥ 60fps, command palette instant)
+- CLAUDE.md Part XII extended with **panel data discipline** (pause polling when hidden, selector subscriptions only, virtualized tables ≥ 100 rows, memoized dense rows)
+- CLAUDE.md governing principle extended with the four-tier capability vision (terminal core → power features → AI analyst → Rust performance layer)
+
+**Docs:**
+
+- README phase table rewritten with a capability-tier column (pre-core → terminal core → power features → AI analyst → Rust performance → platform)
+- ROADMAP Phase 2 rescoped to the full terminal-core panel set (Chart + Quote + Watchlist + Macro + News + Filings, not just chart+watchlist)
+- ROADMAP phase 3+ mapped to the power-features, AI-analyst, and Rust-performance tiers
+
 ### Added — Phase 1 (2026-04-18): Data Ingestion Layer
 
 **Integration clients** (`services/api/src/integrations/`, mirrored in worker):

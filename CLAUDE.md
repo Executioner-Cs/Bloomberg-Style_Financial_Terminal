@@ -27,6 +27,33 @@ No credit card required. No paid tiers. No APIs that exhaust their free quota
 before the first meaningful feature is complete. See ADR-005 for policy and
 the approved source list. Any integration with a paid service is blocked.
 
+### Product Vision
+
+The long-term product is a keyboard-first, information-dense, workspace-oriented
+terminal, evolving across four capability tiers:
+
+1. **Terminal core** — docked/tabbed panels, symbol-linking bus, saved layouts,
+   command palette, the first research panels (Chart, Quote, Watchlist, Macro,
+   News, Filings).
+2. **Power features** — Screener, Movers, Earnings, Economic Calendar, Alerts,
+   Portfolio.
+3. **AI analyst** — Why-Is-It-Moving, Compare Companies, Filing Summarizer,
+   Earnings Brief, Ask Terminal.
+4. **Rust performance layer** — stream gateway, screener engine, risk engine,
+   replay engine — replacing the Node.js/Python hot paths where latency rules.
+
+Core principles (non-negotiable):
+
+- **Workspace-first** — the product is workspaces of panels, not pages.
+- **Information-dense** — 11–12px rows, tabular numerics, zero SaaS chrome.
+- **Keyboard-first** — mouse optional; every action is keyboard-addressable.
+- **Instant feel** — the Part XII budgets define "instant".
+- **Modular** — every feature is a registered panel app.
+
+Visual spec: codified in `memory/project_visual_reference.md` and in the
+Tailwind design tokens at `apps/web/tailwind.config.ts`. ROADMAP.md is the
+granular execution track; every phase ties back to one of the four tiers above.
+
 ---
 
 ## PART I — NON-NEGOTIABLE ENGINEERING RULES
@@ -772,6 +799,40 @@ feat(worker): implement EDGAR 8-K RSS ingestion task
 | ---------------------------------------------------- | ------------ |
 | WS fan-out latency (server receive → client receive) | < 50ms       |
 | Price update frequency (per symbol per client)       | max 1/second |
+
+### Workspace Interaction (terminal-specific)
+
+These are the user-felt targets that define whether the product
+_feels_ like a Bloomberg-class terminal. Measured in the browser via
+`performance.mark` / `performance.measure`; regressions block release.
+
+| Metric                                                   | Budget  |
+| -------------------------------------------------------- | ------- |
+| Panel focus switch (keyboard or click → focused)         | < 50ms  |
+| Symbol link propagation (setActiveSymbol → panel render) | < 150ms |
+| Panel drag / resize frame rate (dockview layout)         | ≥ 60fps |
+| Workspace restore (mount → all panels rendered)          | < 500ms |
+| Command palette open (Ctrl+K → first paint)              | instant |
+| Type-to-search first result render                       | < 100ms |
+
+**Rationale:** Terminal authenticity comes from speed more than
+visuals — see `memory/project_visual_reference.md`. These targets
+define "instant feel" for the product.
+
+### Panel Data Discipline
+
+Every panel MUST:
+
+- Pause TanStack Query polling when not visible in the layout
+  (`enabled: isVisible` on every `useQuery` inside a panel).
+- Use Zustand selectors (`useStore(s => s.slice)`), never
+  whole-store subscriptions, to avoid re-render storms on the
+  symbol-linking bus.
+- Use virtualized tables (`react-virtual` or `ag-grid`) for any
+  list that can exceed 100 rows — screener results, news, filings,
+  watchlist, movers.
+- Memoize dense row components (`React.memo` + stable keys) —
+  ticking numbers in a watchlist must not re-render untouched rows.
 
 ---
 

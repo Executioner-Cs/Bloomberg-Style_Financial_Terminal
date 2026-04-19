@@ -3,24 +3,25 @@
 **Canonical 9-phase plan.** Supersedes scattered phase references in README, ADRs, and old plan files. Every phase here is the single source of truth for its scope.
 
 - Last updated: 2026-04-18
-- Governance: [CLAUDE.md](./CLAUDE.md) Parts I–XX apply to every phase without exception.
+- Governance: [CLAUDE.md](./CLAUDE.md) Parts I–XXI apply to every phase without exception.
+- Capability tiers: the product evolves across four tiers — **terminal core** (workspace + first panels), **power features** (screener/movers/alerts/portfolio), **AI analyst** (why-moving, filing summarizer, ask terminal), and a **Rust performance layer** (stream/screener/risk). Each roadmap phase names the tier it advances.
 - Change control: phases may be re-scoped only via ADR. Out-of-scope items are explicit and must reference the phase that owns them.
 
 ---
 
 ## Phase Summary
 
-| Phase | Status         | Theme                                           | Exit signal                                      |
-| ----- | -------------- | ----------------------------------------------- | ------------------------------------------------ |
-| 0     | ✅ Complete    | Foundation                                      | Terminal shell loads, Docker stack healthy       |
-| 1     | ✅ Complete    | Data ingestion + mock layer                     | 5 integrations operational, 134 tests green      |
-| 2     | 🚧 In Progress | Terminal UI (chart, watchlist, command palette) | User can navigate to a symbol and view its chart |
-| 3     | Planned        | Real-time prices via WS gateway                 | Live crypto prices tick in the chart             |
-| 4     | Planned        | Fundamentals + filings + news panels            | Three research panels wired to live data         |
-| 5     | Planned        | Screener + alerts engine                        | User can build a filter and receive an alert     |
-| 6     | Planned        | Macro dashboard + polish                        | Yield curve + macro panel; Lighthouse ≥ 90       |
-| 7     | Planned        | Auth + multi-user                               | JWT, refresh rotation, per-user watchlists       |
-| 8     | Planned        | Plugin system + production deployment           | One sample plugin; deployed on AWS ECS           |
+| Phase | Status         | Theme                                                                                 | Exit signal                                               | Capability tier        |
+| ----- | -------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------- | ---------------------- |
+| 0     | ✅ Complete    | Foundation                                                                            | Terminal shell loads, Docker stack healthy                | pre-core               |
+| 1     | ✅ Complete    | Data ingestion + mock layer                                                           | 6 integrations operational, 134 tests green               | pre-core               |
+| 2     | 🚧 In Progress | Workspace shell + REST endpoints + first panel apps                                   | User opens Equities workspace, symbol-linking bus works   | Terminal core          |
+| 3     | Planned        | Real-time WS streaming + Screener + Movers + Earnings + Calendar + Alerts + Portfolio | Live ticks; screener < 2s; alert fires within 1 min       | Power features         |
+| 4     | Planned        | AI analyst (Why Moving / Compare / Summarizer / Brief / Ask Terminal)                 | Every panel has a one-click AI context action             | AI analyst             |
+| 5     | Planned        | Rust performance layer (stream/screener/risk/replay)                                  | WS fan-out P99 < 50ms, screener engine 10× throughput     | Rust performance       |
+| 6     | Planned        | Macro dashboard polish + accessibility + Lighthouse ≥ 90                              | Yield curve panel + full keyboard-only E2E                | Terminal core (polish) |
+| 7     | Planned        | Auth + multi-user + monetisation tiers                                                | JWT rotation; Free/Pro/Institutional rate limits enforced | Platform               |
+| 8     | Planned        | Plugin system + production deployment (ECS/CloudFront/OTel)                           | One sample plugin; rolling deploy green                   | Platform               |
 
 ---
 
@@ -65,31 +66,59 @@
 
 ---
 
-## Phase 2 — Terminal UI 🚧
+## Phase 2 — Workspace Shell + First Panel Apps 🚧
 
-**Intent:** The three interactions every Bloomberg-style terminal needs: jump to a symbol, view its chart, track it in a watchlist.
+**Intent:** The first shippable increment of the terminal. A workspace of docked, tabbed, resizable panels with saved layouts, symbol-linking, keyboard command palette, and six working panels (Chart, Quote, Watchlist, Macro, News, Filings) rendering from live or mock data. Delivers the **terminal core** capability tier.
 
 **Scope:**
 
-- Chart panel (`apps/web/src/panels/chart-panel/`): TradingView Lightweight Charts, 1D candlesticks, timeframe switcher, zoom/pan, keyboard shortcuts
-- Watchlist panel: add/remove symbols, keyboard-driven, persisted to localStorage (Phase 7 moves to server-side)
-- Command palette: Ctrl+K opens, fuzzy search across instruments + commands, Enter navigates
-- Panel layout engine: split/dock primitives, `useKeyboardShortcuts` hook, active-panel focus ring
-- REST endpoints wired: `GET /api/v1/instruments`, `GET /api/v1/market-data/{symbol}/ohlcv`, `GET /api/v1/search`
-- E2E tests (Playwright): "load chart for AAPL", "add to watchlist", "Ctrl+K → BTC → Enter"
+_Backend (Stage A, done):_
 
-**Out of scope:** Real-time price ticks (→ Phase 3); indicators beyond basic volume (→ deferred to Phase 6 polish); alerts (→ Phase 5).
+- `MacroService`, `NewsService`, `FilingsService` + routers (cache-first, no DB persistence for news/filings in this phase — ADR-009)
+- `MockDataLoader` extended with `get_news` + `get_filings`
+- Integration smoke tests for all 3 endpoints
+
+_Frontend workspace foundation (Stage B):_
+
+- `dockview-react` + `zustand` added as first-class deps
+- `terminal-context.store` (activeSymbol, theme) + `workspace.store` (panel instances, layoutJson)
+- `PanelApp<Props>` registry contract + runtime (`registerPanelApp`, `getPanelApp`, `listPanelApps`)
+- `WorkspaceShell` wrapping dockview; layout serializer (`localStorage:terminal.workspace.v1` + `?ws=` URL query); default layout presets (Equities, Macro, Filings Research)
+- Command palette: open/close/switch panel, switch workspace preset
+
+_Panel apps (Stage C):_
+
+- `ChartPanel` refactored as a workspace app
+- `QuotePanel` — Bloomberg-style dense header strip + numbered tabs (`1) Current 2) Historical 3) Matrix 4) Ownership`)
+- `WatchlistPanel` — virtualized table, live price + Δ%, add/remove, localStorage-backed (Phase 7 moves to server)
+- `MacroPanel` — table with full-cell Δ bands
+- `NewsPanel` — timestamp-left layout
+- `FilingPanel` + `use-filings` hook
+- Symbol-linking bus wired across all panels with `linkable: true`
+- Panels pause TanStack Query polling when hidden (CLAUDE.md Part XII)
+
+_Visual language (Stage D, ADR-010):_
+
+- Design tokens in `apps/web/tailwind.config.ts`: shell `#050505`, panel `#0c0c0f`, divider `#242428`, amber `#F59E0B`, green `#10B981`, red `#EF4444`, cyan `#22D3EE`, white `#F8F8F8`, gray `#9CA3AF`
+- `font-variant-numeric: tabular-nums` globally on numeric cells
+- Zero border-radius, no shadows, Inter for UI / JetBrains Mono for numbers
+- Keyboard-first UX: `1/2/3` switch tabs, `/` search, `Esc` blur, arrows for row nav
+
+**Out of scope:** Real-time price ticks (→ Phase 3); indicators beyond basic volume (→ Phase 6); alerts (→ Phase 3); auth/server-side watchlist (→ Phase 7).
 
 **Exit criteria:**
 
-- User opens terminal → Ctrl+K → types "AAPL" → Enter → chart loads with 1Y of daily bars
-- Watchlist persists across reload
+- `docker compose up` boots full stack; default Equities workspace renders Chart + Quote + Watchlist + News tiled
+- Clicking NVDA in Quote updates Chart via symbol-linking bus
+- Layout saves to localStorage and restores across reload
+- `?ws=macro` URL loads Macro preset
+- All CLAUDE.md Part XII workspace-interaction budgets met (panel focus < 50ms, symbol link < 150ms, workspace restore < 500ms)
 - Lighthouse score ≥ 85 on the terminal shell
 - Every panel passes the "keyboard-only navigation" E2E test
 
 **Dependencies:** Phase 1 ingestion running (or `USE_MOCK_DATA=true`).
 
-**Risks:** TradingView library API changes; chart performance with 5Y tick data → mitigation: paginate OHLCV requests by timeframe.
+**Risks:** Dockview bundle size (~40 KB gzipped) → lazy-load `WorkspaceShell`; layout JSON forward compat → `version` field in serialiser with reset-to-default fallback; symbol-bus re-render storms → Zustand selector-based subscriptions, never whole-store.
 
 ---
 

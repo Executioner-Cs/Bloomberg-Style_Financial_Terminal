@@ -4,6 +4,26 @@ A keyboard-driven, web-first financial terminal built by a solo developer.
 Multi-asset market data, TradingView-class charting, news/filings aggregation,
 equity screening, and a plugin architecture for quant research tools.
 
+The long-term product evolves across four capability tiers: **terminal core**
+(workspace + first panels), **power features** (screener, movers, earnings,
+calendar, alerts, portfolio), **AI analyst** (why-is-it-moving, filing
+summarizer, earnings brief, ask terminal), and a **Rust performance layer**
+(stream gateway, screener engine, risk engine) for hot paths where latency
+rules. ROADMAP.md tracks phase-by-phase execution.
+
+**Design principles:**
+
+1. **Workspace-first** — the product is not pages; it is workspaces of
+   docked, tabbed, resizable panels with saved layouts.
+2. **Information-dense** — no wasted pixels; 11–12px rows, tabular
+   numerics, zero SaaS fluff.
+3. **Keyboard-first** — mouse is optional; every panel action is
+   keyboard-addressable.
+4. **Instant feel** — panel focus < 50ms, symbol link < 150ms, resize
+   at 60fps (CLAUDE.md Part XII).
+5. **Modular** — every feature is a registered panel app
+   (`apps/web/src/workspace/panel-registry.ts`).
+
 ---
 
 ## Tech Stack
@@ -119,17 +139,16 @@ As of 2026-04-18 (Phase 1 complete):
 
 See [ROADMAP.md](./ROADMAP.md) for the full phase-by-phase plan with scope, exit criteria, and dependencies.
 
-| Phase | Scope                                                              | Status         |
-| ----- | ------------------------------------------------------------------ | -------------- |
-| 0     | Foundation: monorepo, Docker stack, blank terminal shell           | ✅ Complete    |
-| 1     | Data ingestion: mock layer + 5 integrations + workers → ClickHouse | ✅ Complete    |
-| 2     | Terminal UI: chart + watchlist + command palette                   | 🚧 In Progress |
-| 3     | Real-time prices: Binance WS, live crypto streaming                | Planned        |
-| 4     | Fundamentals + filings + news panels                               | Planned        |
-| 5     | Screener + alerts engine                                           | Planned        |
-| 6     | Macro dashboard + polish                                           | Planned        |
-| 7     | Auth + multi-user                                                  | Planned        |
-| 8     | Plugin system + production deployment                              | Planned        |
+| Phase | Scope                                                                                               | Status         | Capability tier  |
+| ----- | --------------------------------------------------------------------------------------------------- | -------------- | ---------------- |
+| 0     | Foundation: monorepo, Docker stack, blank terminal shell                                            | ✅ Complete    | pre-core         |
+| 1     | Data ingestion: mock layer + 6 integrations + workers → ClickHouse                                  | ✅ Complete    | pre-core         |
+| 2     | Workspace shell + REST endpoints + first panel apps (Chart, Quote, Watchlist, Macro, News, Filings) | 🚧 In Progress | Terminal core    |
+| 3     | Real-time WS streams + Screener + Movers + Earnings + Economic Calendar + Alerts + Portfolio        | Planned        | Power features   |
+| 4     | AI analyst: Why Is It Moving, Compare Companies, Filing Summarizer, Earnings Brief, Ask Terminal    | Planned        | AI analyst       |
+| 5     | Rust performance layer: Stream Gateway, Screener Engine, Risk Engine, Replay                        | Planned        | Rust performance |
+| 6     | Auth + multi-user + monetisation tiers (Free/Pro/Institutional)                                     | Planned        | Platform         |
+| 7     | Plugin system + production deployment + cloud sync                                                  | Planned        | Platform         |
 
 ---
 
