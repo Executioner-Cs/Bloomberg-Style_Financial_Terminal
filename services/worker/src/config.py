@@ -44,11 +44,11 @@ class WorkerSettings(BaseSettings):
     app_env: str = "development"
 
     # Celery broker and backend — separate Redis DBs to isolate task traffic.
-    # DB 1: broker (task queue), DB 2: results backend.
-    celery_broker_url: str = "redis://localhost:6379/1"
-    celery_result_backend: str = "redis://localhost:6379/2"
-    # DB 0: cache (shared with API service for quote snapshots).
-    redis_url: str = "redis://localhost:6379/0"
+    # DB 1: broker (task queue), DB 2: results backend. All required; no localhost defaults.
+    celery_broker_url: str
+    celery_result_backend: str
+    # DB 0: cache (shared with API service for quote snapshots). Required.
+    redis_url: str
 
     # Task time limits sourced from env — never hardcoded in task decorators.
     celery_task_time_limit: int = 300
@@ -72,8 +72,9 @@ class WorkerSettings(BaseSettings):
     clickhouse_user: str = "default"
     clickhouse_password: str = ""
 
-    # PostgreSQL — worker upserts instrument rows.
-    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/terminal"
+    # PostgreSQL — worker upserts instrument rows. Required; no default to prevent
+    # accidental connection to a dev DB in production or committing credentials.
+    database_url: str
 
     # CoinGecko integration — base URL overridable so tests can use a mock server.
     coingecko_base_url: str = "https://api.coingecko.com/api/v3"

@@ -48,12 +48,11 @@ class Settings(BaseSettings):
     # Application
     app_env: str = "development"
     log_level: str = "INFO"
-    api_base_url: str = "http://localhost:8000"
-    # HTTPS origin for local dev (ADR-004); http fallback for plain vite dev
-    cors_allowed_origins: list[str] = [
-        "https://localhost:5173",
-        "http://localhost:5173",
-    ]
+    # Required — set API_BASE_URL in .env. No localhost default: fails fast if missing.
+    api_base_url: str
+    # Required — set CORS_ALLOWED_ORIGINS in .env (comma-separated, no trailing slashes).
+    # Parsed by parse_cors_origins validator below.
+    cors_allowed_origins: list[str]
 
     # Auth — no defaults for secrets, will raise on missing in production
     jwt_secret_key: str
@@ -76,10 +75,11 @@ class Settings(BaseSettings):
     clickhouse_password: str = ""
     clickhouse_http_port: int = 8123
 
-    # Redis
-    redis_url: str = "redis://localhost:6379/0"
-    celery_broker_url: str = "redis://localhost:6379/1"
-    celery_result_backend: str = "redis://localhost:6379/2"
+    # Redis — all required, no localhost defaults. Set in .env.
+    # DB 0: cache; DB 1: Celery broker; DB 2: Celery results backend.
+    redis_url: str
+    celery_broker_url: str
+    celery_result_backend: str
 
     # ─── Mock data (ADR-006) ─────────────────────────────────────────────────
     # When true, all integration calls route to local JSON files in mock_data/.
@@ -185,7 +185,8 @@ class Settings(BaseSettings):
 
     # ─── WebSocket gateway ────────────────────────────────────────────────────
     ws_gateway_port: int = 3001
-    ws_gateway_internal_api_url: str = "http://localhost:8000"
+    # Required — server-side call within Docker bridge. Set WS_GATEWAY_INTERNAL_API_URL in .env.
+    ws_gateway_internal_api_url: str
     binance_ws_base_url: str = "wss://stream.binance.com:9443"
     coinbase_ws_base_url: str = "wss://advanced-trade-ws.coinbase.com"
 
