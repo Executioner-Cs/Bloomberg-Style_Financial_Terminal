@@ -6,6 +6,15 @@
  * production — no hard-coded host required in client code.
  */
 
+/**
+ * Client-side timeout for all API requests.
+ *
+ * 30s matches the API server's self-imposed ceiling for external provider
+ * calls (ADR-005). Browser fetch does not enforce timeouts natively —
+ * AbortController is required to prevent hung requests from blocking the UI.
+ */
+const API_REQUEST_TIMEOUT_MS = 30_000;
+
 /** Structured error thrown by apiGet when the server returns a non-2xx status. */
 export class ApiError extends Error {
   constructor(
@@ -43,9 +52,18 @@ export async function apiGet<T>(
     url = `${path}?${searchParams.toString()}`;
   }
 
-  const response = await fetch(url, {
-    headers: { Accept: 'application/json' },
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), API_REQUEST_TIMEOUT_MS);
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      headers: { Accept: 'application/json' },
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   if (!response.ok) {
     throw new ApiError(

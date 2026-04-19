@@ -10,8 +10,16 @@ export default defineConfig(({ mode }) => {
   // VITE_DEV_* vars are consumed here at config time — never shipped to the client.
   const env = loadEnv(mode, resolve(__dirname, '../..'), '');
 
-  const apiProxyTarget = env['VITE_DEV_API_PROXY_TARGET'] ?? 'http://localhost:8000';
-  const wsProxyTarget = env['VITE_DEV_WS_PROXY_TARGET'] ?? 'ws://localhost:3001';
+  // Both proxy targets are required — no localhost fallback. Fail fast to prevent
+  // silent misconfiguration when running without a .env file.
+  const apiProxyTarget = env['VITE_DEV_API_PROXY_TARGET'];
+  const wsProxyTarget = env['VITE_DEV_WS_PROXY_TARGET'];
+  if (!apiProxyTarget) {
+    throw new Error('VITE_DEV_API_PROXY_TARGET is required in .env (e.g. http://localhost:8000)');
+  }
+  if (!wsProxyTarget) {
+    throw new Error('VITE_DEV_WS_PROXY_TARGET is required in .env (e.g. ws://localhost:3001)');
+  }
 
   return {
     // basicSsl generates an ephemeral self-signed cert — see ADR-004.
@@ -25,7 +33,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
-      port: 5173,
+      port: 5173, // noqa: hardcoded — Vite's assigned default. Falls within project frontend range (5100–5199). ADR-004.
       https: true, // cert provided by @vitejs/plugin-basic-ssl (ADR-004)
       proxy: {
         '/api': {
