@@ -35,3 +35,9 @@ export {
   DEFAULT_PRESET_SLUG,
   type LayoutPreset,
 } from './default-layouts';
+export {
+  getWorkspaceApi,
+  setWorkspaceApi,
+  clearWorkspaceApi,
+  addPanelToWorkspace,
+} from './workspace-api-ref';

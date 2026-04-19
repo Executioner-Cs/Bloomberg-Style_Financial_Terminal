@@ -1,22 +1,33 @@
 /**
- * CommandPalette — global instrument search accessible via Ctrl+K.
+ * CommandPalette — global Ctrl+K palette for instrument search and
+ * workspace actions.
  *
- * Opens as a floating dialog over the terminal. The user types a symbol or
- * name; results are filtered client-side via Fuse.js fuzzy search. Selecting
- * an instrument navigates to its chart page.
+ * Opens as a floating dialog over the terminal. Two command groups:
+ *
+ *   Instruments — fuzzy-search over all registered instruments via Fuse.js.
+ *                 Selecting navigates to the instrument's chart page.
+ *
+ *   Workspace   — preset switching and panel-open actions.
+ *                 "Switch to Equities/Macro/Filings Research" replaces the
+ *                 current dockview layout via `switchToPreset`.
+ *                 Panel-open actions are added in Stage C once panel apps
+ *                 register themselves in the panel registry.
  *
  * Keyboard contract:
  *   Ctrl+K  — toggle open/close (browser default prevented)
  *   Escape  — close
  *   ↑ / ↓  — navigate results (handled by cmdk)
  *   Enter   — select focused result (handled by cmdk)
+ *
+ * Plan ref: B14.
  */
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useMemo, useState, type JSX } from 'react';
 import { Command } from 'cmdk';
 import { useNavigate } from '@tanstack/react-router';
 import type { InstrumentResponse } from '@terminal/types';
 
 import { useInstruments } from '@/hooks/use-instruments';
+import { listPresets, switchToPreset, getWorkspaceApi } from '@/workspace';
 
 /** Maximum results shown when no query is typed. */
 const DEFAULT_RESULT_LIMIT = 20;
@@ -35,6 +46,9 @@ export default function CommandPalette(): JSX.Element {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
   const { data } = useInstruments();
+
+  // Preset list is static — computed once, never changes at runtime.
+  const presets = useMemo(() => listPresets(), []);
 
   // Global Ctrl+K listener — prevents browser address-bar shortcut.
   useEffect(() => {
@@ -58,6 +72,15 @@ export default function CommandPalette(): JSX.Element {
     void navigate({ to: '/chart/$symbol', params: { symbol: instrument.symbol } });
   }
 
+  function handlePresetSelect(slug: string): void {
+    const api = getWorkspaceApi();
+    // Guard: palette may open before the workspace route is active.
+    if (!api) return;
+    setOpen(false);
+    setQuery('');
+    switchToPreset(slug, api);
+  }
+
   function getResults(): InstrumentResponse[] {
     if (data === undefined) return [];
     if (query.trim().length === 0) {
@@ -66,7 +89,25 @@ export default function CommandPalette(): JSX.Element {
     return data.fuse.search(query).map((r) => r.item);
   }
 
+  // Workspace preset results — show when query is empty or matches the
+  // preset name / slug / keywords. Case-insensitive substring match is
+  // sufficient: the preset list is tiny and always fully loaded.
+  function getPresetResults(): typeof presets {
+    const q = query.trim().toLowerCase();
+    if (q.length === 0) return presets;
+    return presets.filter(
+      (p) =>
+        p.displayName.toLowerCase().includes(q) ||
+        p.slug.includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        'preset'.includes(q) ||
+        'workspace'.includes(q) ||
+        'switch'.includes(q),
+    );
+  }
+
   const results = getResults();
+  const presetResults = getPresetResults();
 
   if (!open) return <></>;
 
@@ -244,6 +285,60 @@ export default function CommandPalette(): JSX.Element {
                 </span>
               </Command.Item>
             ))}
+
+            {/* Workspace group — preset switching */}
+            {presetResults.length > 0 && (
+              <Command.Group
+                heading="Workspace"
+                style={{
+                  paddingTop: '4px',
+                  borderTop: results.length > 0 ? '1px solid var(--color-border)' : undefined,
+                }}
+              >
+                {presetResults.map((preset) => {
+                  const Icon = preset.icon;
+                  return (
+                    <Command.Item
+                      key={preset.slug}
+                      value={`workspace-preset-${preset.slug}`}
+                      onSelect={(): void => handlePresetSelect(preset.slug)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '9px 14px',
+                        cursor: 'pointer',
+                        userSelect: 'none',
+                      }}
+                    >
+                      <Icon size={13} style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
+                      <span
+                        style={{
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: '13px',
+                          color: 'var(--color-text-primary)',
+                          flexShrink: 0,
+                        }}
+                      >
+                        Switch to {preset.displayName}
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: '11px',
+                          color: 'var(--color-text-muted)',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {preset.description}
+                      </span>
+                    </Command.Item>
+                  );
+                })}
+              </Command.Group>
+            )}
           </Command.List>
 
           {/* Footer */}
