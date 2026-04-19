@@ -1,0 +1,95 @@
+{
+  "source": "mock",
+  "filings": [
+    {
+      "symbol": "WMT",
+      "form_type": "10-Q",
+      "filed_at": "2026-02-20T00:00:00+00:00",
+      "period_of_report": "2026-01-21",
+      "accession_number": "0000392572-26-000005",
+      "filing_url": "https://mock.invalid/filings/WMT/0000392572-26-000005",
+      "description": "Mock 10-Q filing for WMT."
+    },
+    {
+      "symbol": "WMT",
+      "form_type": "10-Q",
+      "filed_at": "2026-02-02T00:00:00+00:00",
+      "period_of_report": "2026-01-03",
+      "accession_number": "0000338356-26-000002",
+      "filing_url": "https://mock.invalid/filings/WMT/0000338356-26-000002",
+      "description": "Mock 10-Q filing for WMT."
+    },
+    {
+      "symbol": "WMT",
+      "form_type": "8-K",
+      "filed_at": "2025-12-01T00:00:00+00:00",
+      "period_of_report": "2025-11-01",
+      "accession_number": "0000390781-25-000008",
+      "filing_url": "https://mock.invalid/filings/WMT/0000390781-25-000008",
+      "description": "Mock 8-K filing for WMT."
+    },
+    {
+      "symbol": "WMT",
+      "form_type": "8-K",
+      "filed_at": "2025-11-26T00:00:00+00:00",
+      "period_of_report": "2025-10-27",
+      "accession_number": "0000386231-25-000009",
+      "filing_url": "https://mock.invalid/filings/WMT/0000386231-25-000009",
+      "description": "Mock 8-K filing for WMT."
+    },
+    {
+      "symbol": "WMT",
+      "form_type": "8-K",
+      "filed_at": "2025-05-23T00:00:00+00:00",
+      "period_of_report": "2025-04-23",
+      "accession_number": "0000366393-25-000006",
+      "filing_url": "https://mock.invalid/filings/WMT/0000366393-25-000006",
+      "description": "Mock 8-K filing for WMT."
+    },
+    {
+      "symbol": "WMT",
+      "form_type": "10-Q",
+      "filed_at": "2025-03-22T00:00:00+00:00",
+      "period_of_report": "2025-02-20",
+      "accession_number": "0000360384-25-000000",
+      "filing_url": "https://mock.invalid/filings/WMT/0000360384-25-000000",
+      "description": "Mock 10-Q filing for WMT."
+    },
+    {
+      "symbol": "WMT",
+      "form_type": "8-K",
+      "filed_at": "2025-03-02T00:00:00+00:00",
+      "period_of_report": "2025-01-31",
+      "accession_number": "0000374738-25-000001",
+      "filing_url": "https://mock.invalid/filings/WMT/0000374738-25-000001",
+      "description": "Mock 8-K filing for WMT."
+    },
+    {
+      "symbol": "WMT",
+      "form_type": "8-K",
+      "filed_at": "2025-01-04T00:00:00+00:00",
+      "period_of_report": "2024-12-05",
+      "accession_number": "0000339702-25-000003",
+      "filing_url": "https://mock.invalid/filings/WMT/0000339702-25-000003",
+      "description": "Mock 8-K filing for WMT."
+    },
+    {
+      "symbol": "WMT",
+      "form_type": "8-K",
+      "filed_at": "2024-11-07T00:00:00+00:00",
+      "period_of_report": "2024-10-08",
+      "accession_number": "0000370076-24-000007",
+      "filing_url": "https://mock.invalid/filings/WMT/0000370076-24-000007",
+      "description": "Mock 8-K filing for WMT."
+    },
+    {
+      "symbol": "WMT",
+      "form_type": "8-K",
+      "filed_at": "2024-09-15T00:00:00+00:00",
+      "period_of_report": "2024-08-16",
+      "accession_number": "0000363544-24-000004",
+      "filing_url": "https://mock.invalid/filings/WMT/0000363544-24-000004",
+      "description": "Mock 8-K filing for WMT."
+    }
+  ]
+}

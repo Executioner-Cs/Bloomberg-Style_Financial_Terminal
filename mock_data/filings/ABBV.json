@@ -1,0 +1,95 @@
+{
+  "source": "mock",
+  "filings": [
+    {
+      "symbol": "ABBV",
+      "form_type": "10-Q",
+      "filed_at": "2026-03-15T00:00:00+00:00",
+      "period_of_report": "2026-02-13",
+      "accession_number": "0000386472-26-000007",
+      "filing_url": "https://mock.invalid/filings/ABBV/0000386472-26-000007",
+      "description": "Mock 10-Q filing for ABBV."
+    },
+    {
+      "symbol": "ABBV",
+      "form_type": "8-K",
+      "filed_at": "2026-03-03T00:00:00+00:00",
+      "period_of_report": "2026-02-01",
+      "accession_number": "0000370675-26-000008",
+      "filing_url": "https://mock.invalid/filings/ABBV/0000370675-26-000008",
+      "description": "Mock 8-K filing for ABBV."
+    },
+    {
+      "symbol": "ABBV",
+      "form_type": "8-K",
+      "filed_at": "2025-12-20T00:00:00+00:00",
+      "period_of_report": "2025-11-20",
+      "accession_number": "0000399934-25-000005",
+      "filing_url": "https://mock.invalid/filings/ABBV/0000399934-25-000005",
+      "description": "Mock 8-K filing for ABBV."
+    },
+    {
+      "symbol": "ABBV",
+      "form_type": "8-K",
+      "filed_at": "2025-08-06T00:00:00+00:00",
+      "period_of_report": "2025-07-07",
+      "accession_number": "0000399017-25-000002",
+      "filing_url": "https://mock.invalid/filings/ABBV/0000399017-25-000002",
+      "description": "Mock 8-K filing for ABBV."
+    },
+    {
+      "symbol": "ABBV",
+      "form_type": "10-K",
+      "filed_at": "2025-05-18T00:00:00+00:00",
+      "period_of_report": "2025-04-18",
+      "accession_number": "0000377319-25-000003",
+      "filing_url": "https://mock.invalid/filings/ABBV/0000377319-25-000003",
+      "description": "Mock 10-K filing for ABBV."
+    },
+    {
+      "symbol": "ABBV",
+      "form_type": "8-K",
+      "filed_at": "2025-04-20T00:00:00+00:00",
+      "period_of_report": "2025-03-21",
+      "accession_number": "0000314113-25-000000",
+      "filing_url": "https://mock.invalid/filings/ABBV/0000314113-25-000000",
+      "description": "Mock 8-K filing for ABBV."
+    },
+    {
+      "symbol": "ABBV",
+      "form_type": "8-K",
+      "filed_at": "2025-04-13T00:00:00+00:00",
+      "period_of_report": "2025-03-14",
+      "accession_number": "0000312685-25-000004",
+      "filing_url": "https://mock.invalid/filings/ABBV/0000312685-25-000004",
+      "description": "Mock 8-K filing for ABBV."
+    },
+    {
+      "symbol": "ABBV",
+      "form_type": "8-K",
+      "filed_at": "2025-02-06T00:00:00+00:00",
+      "period_of_report": "2025-01-07",
+      "accession_number": "0000322599-25-000001",
+      "filing_url": "https://mock.invalid/filings/ABBV/0000322599-25-000001",
+      "description": "Mock 8-K filing for ABBV."
+    },
+    {
+      "symbol": "ABBV",
+      "form_type": "8-K",
+      "filed_at": "2025-02-05T00:00:00+00:00",
+      "period_of_report": "2025-01-06",
+      "accession_number": "0000385420-25-000006",
+      "filing_url": "https://mock.invalid/filings/ABBV/0000385420-25-000006",
+      "description": "Mock 8-K filing for ABBV."
+    },
+    {
+      "symbol": "ABBV",
+      "form_type": "10-Q",
+      "filed_at": "2025-01-02T00:00:00+00:00",
+      "period_of_report": "2024-12-03",
+      "accession_number": "0000381490-25-000009",
+      "filing_url": "https://mock.invalid/filings/ABBV/0000381490-25-000009",
+      "description": "Mock 10-Q filing for ABBV."
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "source": "mock",
+  "filings": [
+    {
+      "symbol": "DIS",
+      "form_type": "10-K",
+      "filed_at": "2025-10-13T00:00:00+00:00",
+      "period_of_report": "2025-09-13",
+      "accession_number": "0000371445-25-000006",
+      "filing_url": "https://mock.invalid/filings/DIS/0000371445-25-000006",
+      "description": "Mock 10-K filing for DIS."
+    },
+    {
+      "symbol": "DIS",
+      "form_type": "8-K",
+      "filed_at": "2025-09-24T00:00:00+00:00",
+      "period_of_report": "2025-08-25",
+      "accession_number": "0000325916-25-000007",
+      "filing_url": "https://mock.invalid/filings/DIS/0000325916-25-000007",
+      "description": "Mock 8-K filing for DIS."
+    },
+    {
+      "symbol": "DIS",
+      "form_type": "8-K",
+      "filed_at": "2025-06-09T00:00:00+00:00",
+      "period_of_report": "2025-05-10",
+      "accession_number": "0000349381-25-000008",
+      "filing_url": "https://mock.invalid/filings/DIS/0000349381-25-000008",
+      "description": "Mock 8-K filing for DIS."
+    },
+    {
+      "symbol": "DIS",
+      "form_type": "8-K",
+      "filed_at": "2025-05-16T00:00:00+00:00",
+      "period_of_report": "2025-04-16",
+      "accession_number": "0000383201-25-000002",
+      "filing_url": "https://mock.invalid/filings/DIS/0000383201-25-000002",
+      "description": "Mock 8-K filing for DIS."
+    },
+    {
+      "symbol": "DIS",
+      "form_type": "8-K",
+      "filed_at": "2025-04-30T00:00:00+00:00",
+      "period_of_report": "2025-03-31",
+      "accession_number": "0000324408-25-000009",
+      "filing_url": "https://mock.invalid/filings/DIS/0000324408-25-000009",
+      "description": "Mock 8-K filing for DIS."
+    },
+    {
+      "symbol": "DIS",
+      "form_type": "10-Q",
+      "filed_at": "2025-03-16T00:00:00+00:00",
+      "period_of_report": "2025-02-14",
+      "accession_number": "0000324659-25-000005",
+      "filing_url": "https://mock.invalid/filings/DIS/0000324659-25-000005",
+      "description": "Mock 10-Q filing for DIS."
+    },
+    {
+      "symbol": "DIS",
+      "form_type": "10-Q",
+      "filed_at": "2025-02-20T00:00:00+00:00",
+      "period_of_report": "2025-01-21",
+      "accession_number": "0000333478-25-000004",
+      "filing_url": "https://mock.invalid/filings/DIS/0000333478-25-000004",
+      "description": "Mock 10-Q filing for DIS."
+    },
+    {
+      "symbol": "DIS",
+      "form_type": "10-Q",
+      "filed_at": "2025-01-16T00:00:00+00:00",
+      "period_of_report": "2024-12-17",
+      "accession_number": "0000335455-25-000003",
+      "filing_url": "https://mock.invalid/filings/DIS/0000335455-25-000003",
+      "description": "Mock 10-Q filing for DIS."
+    },
+    {
+      "symbol": "DIS",
+      "form_type": "8-K",
+      "filed_at": "2024-10-15T00:00:00+00:00",
+      "period_of_report": "2024-09-15",
+      "accession_number": "0000368858-24-000001",
+      "filing_url": "https://mock.invalid/filings/DIS/0000368858-24-000001",
+      "description": "Mock 8-K filing for DIS."
+    },
+    {
+      "symbol": "DIS",
+      "form_type": "8-K",
+      "filed_at": "2024-07-28T00:00:00+00:00",
+      "period_of_report": "2024-06-28",
+      "accession_number": "0000321437-24-000000",
+      "filing_url": "https://mock.invalid/filings/DIS/0000321437-24-000000",
+      "description": "Mock 8-K filing for DIS."
+    }
+  ]
+}

@@ -23,9 +23,11 @@ import pytest
 from src.integrations.mock_loader import MockDataError, MockDataLoader
 from src.models.ch.macro import MacroRow
 from src.models.ch.ohlcv import OHLCVRow
+from src.schemas.filings import SUPPORTED_FORM_TYPES, FilingsResponse
 from src.schemas.instruments import InstrumentResponse
 from src.schemas.macro import MacroSeriesResponse
 from src.schemas.market_data import QuoteResponse
+from src.schemas.news import NewsResponse
 
 
 def _find_mock_data_dir() -> Path:
@@ -227,3 +229,69 @@ class TestGetMacroRows:
     def test_get_macro_rows_returns_empty_for_unknown(self, loader: MockDataLoader) -> None:
         rows = loader.get_macro_rows("NONEXISTENT_SERIES")
         assert rows == []
+
+
+# ---------------------------------------------------------------------------
+# get_news
+# ---------------------------------------------------------------------------
+
+
+class TestGetNews:
+    def test_get_news_returns_news_response(self, loader: MockDataLoader) -> None:
+        response = loader.get_news(symbol=None, page=1)
+        assert isinstance(response, NewsResponse)
+        assert len(response.articles) > 0
+
+    def test_get_news_symbol_scoped_matches(self, loader: MockDataLoader) -> None:
+        response = loader.get_news(symbol="AAPL", page=1)
+        assert response.total > 0
+        assert all(a.symbol == "AAPL" for a in response.articles)
+
+    def test_get_news_paginates_page_2_returns_remainder_or_empty(
+        self, loader: MockDataLoader
+    ) -> None:
+        response = loader.get_news(symbol=None, page=2)
+        # 30 all.json articles with page_size=20: page 2 yields 10.
+        assert response.page == 2
+        assert len(response.articles) <= 20
+
+    def test_get_news_unknown_symbol_returns_empty(
+        self, loader: MockDataLoader
+    ) -> None:
+        response = loader.get_news(symbol="NOT_A_TICKER", page=1)
+        assert response.articles == []
+        assert response.total == 0
+
+
+# ---------------------------------------------------------------------------
+# get_filings
+# ---------------------------------------------------------------------------
+
+
+class TestGetFilings:
+    def test_get_filings_returns_filings_response(
+        self, loader: MockDataLoader
+    ) -> None:
+        response = loader.get_filings("AAPL")
+        assert isinstance(response, FilingsResponse)
+        assert response.symbol == "AAPL"
+        assert response.total > 0
+
+    def test_get_filings_form_type_filter(self, loader: MockDataLoader) -> None:
+        response = loader.get_filings("AAPL", form_type="10-K")
+        assert all(f.form_type == "10-K" for f in response.filings)
+
+    def test_get_filings_all_form_types_supported(
+        self, loader: MockDataLoader
+    ) -> None:
+        response = loader.get_filings("MSFT")
+        form_types_seen = {f.form_type for f in response.filings}
+        assert form_types_seen.issubset(SUPPORTED_FORM_TYPES)
+
+    def test_get_filings_unknown_symbol_returns_empty(
+        self, loader: MockDataLoader
+    ) -> None:
+        response = loader.get_filings("NOT_A_TICKER")
+        assert response.symbol == "NOT_A_TICKER"
+        assert response.filings == []
+        assert response.total == 0

@@ -1,0 +1,95 @@
+{
+  "source": "mock",
+  "filings": [
+    {
+      "symbol": "MA",
+      "form_type": "8-K",
+      "filed_at": "2026-02-24T00:00:00+00:00",
+      "period_of_report": "2026-01-25",
+      "accession_number": "0000310611-26-000000",
+      "filing_url": "https://mock.invalid/filings/MA/0000310611-26-000000",
+      "description": "Mock 8-K filing for MA."
+    },
+    {
+      "symbol": "MA",
+      "form_type": "10-K",
+      "filed_at": "2026-01-06T00:00:00+00:00",
+      "period_of_report": "2025-12-07",
+      "accession_number": "0000388007-26-000001",
+      "filing_url": "https://mock.invalid/filings/MA/0000388007-26-000001",
+      "description": "Mock 10-K filing for MA."
+    },
+    {
+      "symbol": "MA",
+      "form_type": "10-K",
+      "filed_at": "2025-09-19T00:00:00+00:00",
+      "period_of_report": "2025-08-20",
+      "accession_number": "0000383071-25-000002",
+      "filing_url": "https://mock.invalid/filings/MA/0000383071-25-000002",
+      "description": "Mock 10-K filing for MA."
+    },
+    {
+      "symbol": "MA",
+      "form_type": "10-Q",
+      "filed_at": "2025-09-16T00:00:00+00:00",
+      "period_of_report": "2025-08-17",
+      "accession_number": "0000333924-25-000006",
+      "filing_url": "https://mock.invalid/filings/MA/0000333924-25-000006",
+      "description": "Mock 10-Q filing for MA."
+    },
+    {
+      "symbol": "MA",
+      "form_type": "10-Q",
+      "filed_at": "2025-08-31T00:00:00+00:00",
+      "period_of_report": "2025-08-01",
+      "accession_number": "0000385034-25-000009",
+      "filing_url": "https://mock.invalid/filings/MA/0000385034-25-000009",
+      "description": "Mock 10-Q filing for MA."
+    },
+    {
+      "symbol": "MA",
+      "form_type": "8-K",
+      "filed_at": "2025-06-04T00:00:00+00:00",
+      "period_of_report": "2025-05-05",
+      "accession_number": "0000370881-25-000005",
+      "filing_url": "https://mock.invalid/filings/MA/0000370881-25-000005",
+      "description": "Mock 8-K filing for MA."
+    },
+    {
+      "symbol": "MA",
+      "form_type": "10-K",
+      "filed_at": "2025-03-04T00:00:00+00:00",
+      "period_of_report": "2025-02-02",
+      "accession_number": "0000397902-25-000008",
+      "filing_url": "https://mock.invalid/filings/MA/0000397902-25-000008",
+      "description": "Mock 10-K filing for MA."
+    },
+    {
+      "symbol": "MA",
+      "form_type": "8-K",
+      "filed_at": "2024-06-21T00:00:00+00:00",
+      "period_of_report": "2024-05-22",
+      "accession_number": "0000363364-24-000003",
+      "filing_url": "https://mock.invalid/filings/MA/0000363364-24-000003",
+      "description": "Mock 8-K filing for MA."
+    },
+    {
+      "symbol": "MA",
+      "form_type": "8-K",
+      "filed_at": "2024-06-21T00:00:00+00:00",
+      "period_of_report": "2024-05-22",
+      "accession_number": "0000320984-24-000004",
+      "filing_url": "https://mock.invalid/filings/MA/0000320984-24-000004",
+      "description": "Mock 8-K filing for MA."
+    },
+    {
+      "symbol": "MA",
+      "form_type": "8-K",
+      "filed_at": "2024-04-30T00:00:00+00:00",
+      "period_of_report": "2024-03-31",
+      "accession_number": "0000326453-24-000007",
+      "filing_url": "https://mock.invalid/filings/MA/0000326453-24-000007",
+      "description": "Mock 8-K filing for MA."
+    }
+  ]
+}

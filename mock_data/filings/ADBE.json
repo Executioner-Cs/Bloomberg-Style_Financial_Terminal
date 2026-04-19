@@ -1,0 +1,95 @@
+{
+  "source": "mock",
+  "filings": [
+    {
+      "symbol": "ADBE",
+      "form_type": "8-K",
+      "filed_at": "2026-04-14T00:00:00+00:00",
+      "period_of_report": "2026-03-15",
+      "accession_number": "0000357813-26-000002",
+      "filing_url": "https://mock.invalid/filings/ADBE/0000357813-26-000002",
+      "description": "Mock 8-K filing for ADBE."
+    },
+    {
+      "symbol": "ADBE",
+      "form_type": "8-K",
+      "filed_at": "2026-03-03T00:00:00+00:00",
+      "period_of_report": "2026-02-01",
+      "accession_number": "0000388820-26-000001",
+      "filing_url": "https://mock.invalid/filings/ADBE/0000388820-26-000001",
+      "description": "Mock 8-K filing for ADBE."
+    },
+    {
+      "symbol": "ADBE",
+      "form_type": "10-K",
+      "filed_at": "2025-12-26T00:00:00+00:00",
+      "period_of_report": "2025-11-26",
+      "accession_number": "0000398447-25-000000",
+      "filing_url": "https://mock.invalid/filings/ADBE/0000398447-25-000000",
+      "description": "Mock 10-K filing for ADBE."
+    },
+    {
+      "symbol": "ADBE",
+      "form_type": "8-K",
+      "filed_at": "2025-12-16T00:00:00+00:00",
+      "period_of_report": "2025-11-16",
+      "accession_number": "0000372799-25-000006",
+      "filing_url": "https://mock.invalid/filings/ADBE/0000372799-25-000006",
+      "description": "Mock 8-K filing for ADBE."
+    },
+    {
+      "symbol": "ADBE",
+      "form_type": "10-Q",
+      "filed_at": "2025-12-04T00:00:00+00:00",
+      "period_of_report": "2025-11-04",
+      "accession_number": "0000395612-25-000009",
+      "filing_url": "https://mock.invalid/filings/ADBE/0000395612-25-000009",
+      "description": "Mock 10-Q filing for ADBE."
+    },
+    {
+      "symbol": "ADBE",
+      "form_type": "8-K",
+      "filed_at": "2025-03-23T00:00:00+00:00",
+      "period_of_report": "2025-02-21",
+      "accession_number": "0000398534-25-000005",
+      "filing_url": "https://mock.invalid/filings/ADBE/0000398534-25-000005",
+      "description": "Mock 8-K filing for ADBE."
+    },
+    {
+      "symbol": "ADBE",
+      "form_type": "10-Q",
+      "filed_at": "2025-01-22T00:00:00+00:00",
+      "period_of_report": "2024-12-23",
+      "accession_number": "0000316373-25-000003",
+      "filing_url": "https://mock.invalid/filings/ADBE/0000316373-25-000003",
+      "description": "Mock 10-Q filing for ADBE."
+    },
+    {
+      "symbol": "ADBE",
+      "form_type": "8-K",
+      "filed_at": "2024-10-07T00:00:00+00:00",
+      "period_of_report": "2024-09-07",
+      "accession_number": "0000377590-24-000008",
+      "filing_url": "https://mock.invalid/filings/ADBE/0000377590-24-000008",
+      "description": "Mock 8-K filing for ADBE."
+    },
+    {
+      "symbol": "ADBE",
+      "form_type": "10-Q",
+      "filed_at": "2024-08-08T00:00:00+00:00",
+      "period_of_report": "2024-07-09",
+      "accession_number": "0000333458-24-000007",
+      "filing_url": "https://mock.invalid/filings/ADBE/0000333458-24-000007",
+      "description": "Mock 10-Q filing for ADBE."
+    },
+    {
+      "symbol": "ADBE",
+      "form_type": "8-K",
+      "filed_at": "2024-06-11T00:00:00+00:00",
+      "period_of_report": "2024-05-12",
+      "accession_number": "0000384014-24-000004",
+      "filing_url": "https://mock.invalid/filings/ADBE/0000384014-24-000004",
+      "description": "Mock 8-K filing for ADBE."
+    }
+  ]
+}

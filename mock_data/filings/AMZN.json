@@ -1,0 +1,95 @@
+{
+  "source": "mock",
+  "filings": [
+    {
+      "symbol": "AMZN",
+      "form_type": "10-Q",
+      "filed_at": "2026-02-23T00:00:00+00:00",
+      "period_of_report": "2026-01-24",
+      "accession_number": "0000334550-26-000006",
+      "filing_url": "https://mock.invalid/filings/AMZN/0000334550-26-000006",
+      "description": "Mock 10-Q filing for AMZN."
+    },
+    {
+      "symbol": "AMZN",
+      "form_type": "10-K",
+      "filed_at": "2025-09-25T00:00:00+00:00",
+      "period_of_report": "2025-08-26",
+      "accession_number": "0000391954-25-000005",
+      "filing_url": "https://mock.invalid/filings/AMZN/0000391954-25-000005",
+      "description": "Mock 10-K filing for AMZN."
+    },
+    {
+      "symbol": "AMZN",
+      "form_type": "10-K",
+      "filed_at": "2025-09-16T00:00:00+00:00",
+      "period_of_report": "2025-08-17",
+      "accession_number": "0000379178-25-000002",
+      "filing_url": "https://mock.invalid/filings/AMZN/0000379178-25-000002",
+      "description": "Mock 10-K filing for AMZN."
+    },
+    {
+      "symbol": "AMZN",
+      "form_type": "10-Q",
+      "filed_at": "2025-07-05T00:00:00+00:00",
+      "period_of_report": "2025-06-05",
+      "accession_number": "0000317558-25-000003",
+      "filing_url": "https://mock.invalid/filings/AMZN/0000317558-25-000003",
+      "description": "Mock 10-Q filing for AMZN."
+    },
+    {
+      "symbol": "AMZN",
+      "form_type": "10-Q",
+      "filed_at": "2025-05-16T00:00:00+00:00",
+      "period_of_report": "2025-04-16",
+      "accession_number": "0000353742-25-000007",
+      "filing_url": "https://mock.invalid/filings/AMZN/0000353742-25-000007",
+      "description": "Mock 10-Q filing for AMZN."
+    },
+    {
+      "symbol": "AMZN",
+      "form_type": "8-K",
+      "filed_at": "2025-02-26T00:00:00+00:00",
+      "period_of_report": "2025-01-27",
+      "accession_number": "0000318816-25-000008",
+      "filing_url": "https://mock.invalid/filings/AMZN/0000318816-25-000008",
+      "description": "Mock 8-K filing for AMZN."
+    },
+    {
+      "symbol": "AMZN",
+      "form_type": "8-K",
+      "filed_at": "2024-12-19T00:00:00+00:00",
+      "period_of_report": "2024-11-19",
+      "accession_number": "0000380940-24-000000",
+      "filing_url": "https://mock.invalid/filings/AMZN/0000380940-24-000000",
+      "description": "Mock 8-K filing for AMZN."
+    },
+    {
+      "symbol": "AMZN",
+      "form_type": "8-K",
+      "filed_at": "2024-09-25T00:00:00+00:00",
+      "period_of_report": "2024-08-26",
+      "accession_number": "0000371987-24-000009",
+      "filing_url": "https://mock.invalid/filings/AMZN/0000371987-24-000009",
+      "description": "Mock 8-K filing for AMZN."
+    },
+    {
+      "symbol": "AMZN",
+      "form_type": "8-K",
+      "filed_at": "2024-08-02T00:00:00+00:00",
+      "period_of_report": "2024-07-03",
+      "accession_number": "0000317171-24-000001",
+      "filing_url": "https://mock.invalid/filings/AMZN/0000317171-24-000001",
+      "description": "Mock 8-K filing for AMZN."
+    },
+    {
+      "symbol": "AMZN",
+      "form_type": "10-Q",
+      "filed_at": "2024-07-18T00:00:00+00:00",
+      "period_of_report": "2024-06-18",
+      "accession_number": "0000317270-24-000004",
+      "filing_url": "https://mock.invalid/filings/AMZN/0000317270-24-000004",
+      "description": "Mock 10-Q filing for AMZN."
+    }
+  ]
+}

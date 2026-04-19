@@ -1,0 +1,95 @@
+{
+  "source": "mock",
+  "filings": [
+    {
+      "symbol": "TSLA",
+      "form_type": "8-K",
+      "filed_at": "2026-03-27T00:00:00+00:00",
+      "period_of_report": "2026-02-25",
+      "accession_number": "0000365873-26-000005",
+      "filing_url": "https://mock.invalid/filings/TSLA/0000365873-26-000005",
+      "description": "Mock 8-K filing for TSLA."
+    },
+    {
+      "symbol": "TSLA",
+      "form_type": "10-Q",
+      "filed_at": "2025-12-21T00:00:00+00:00",
+      "period_of_report": "2025-11-21",
+      "accession_number": "0000316340-25-000003",
+      "filing_url": "https://mock.invalid/filings/TSLA/0000316340-25-000003",
+      "description": "Mock 10-Q filing for TSLA."
+    },
+    {
+      "symbol": "TSLA",
+      "form_type": "10-Q",
+      "filed_at": "2025-08-18T00:00:00+00:00",
+      "period_of_report": "2025-07-19",
+      "accession_number": "0000310258-25-000001",
+      "filing_url": "https://mock.invalid/filings/TSLA/0000310258-25-000001",
+      "description": "Mock 10-Q filing for TSLA."
+    },
+    {
+      "symbol": "TSLA",
+      "form_type": "10-K",
+      "filed_at": "2025-08-03T00:00:00+00:00",
+      "period_of_report": "2025-07-04",
+      "accession_number": "0000347201-25-000002",
+      "filing_url": "https://mock.invalid/filings/TSLA/0000347201-25-000002",
+      "description": "Mock 10-K filing for TSLA."
+    },
+    {
+      "symbol": "TSLA",
+      "form_type": "10-K",
+      "filed_at": "2025-07-20T00:00:00+00:00",
+      "period_of_report": "2025-06-20",
+      "accession_number": "0000343379-25-000007",
+      "filing_url": "https://mock.invalid/filings/TSLA/0000343379-25-000007",
+      "description": "Mock 10-K filing for TSLA."
+    },
+    {
+      "symbol": "TSLA",
+      "form_type": "8-K",
+      "filed_at": "2025-03-14T00:00:00+00:00",
+      "period_of_report": "2025-02-12",
+      "accession_number": "0000351436-25-000009",
+      "filing_url": "https://mock.invalid/filings/TSLA/0000351436-25-000009",
+      "description": "Mock 8-K filing for TSLA."
+    },
+    {
+      "symbol": "TSLA",
+      "form_type": "10-Q",
+      "filed_at": "2025-03-07T00:00:00+00:00",
+      "period_of_report": "2025-02-05",
+      "accession_number": "0000361858-25-000006",
+      "filing_url": "https://mock.invalid/filings/TSLA/0000361858-25-000006",
+      "description": "Mock 10-Q filing for TSLA."
+    },
+    {
+      "symbol": "TSLA",
+      "form_type": "10-Q",
+      "filed_at": "2024-09-19T00:00:00+00:00",
+      "period_of_report": "2024-08-20",
+      "accession_number": "0000364647-24-000004",
+      "filing_url": "https://mock.invalid/filings/TSLA/0000364647-24-000004",
+      "description": "Mock 10-Q filing for TSLA."
+    },
+    {
+      "symbol": "TSLA",
+      "form_type": "8-K",
+      "filed_at": "2024-05-02T00:00:00+00:00",
+      "period_of_report": "2024-04-02",
+      "accession_number": "0000379558-24-000008",
+      "filing_url": "https://mock.invalid/filings/TSLA/0000379558-24-000008",
+      "description": "Mock 8-K filing for TSLA."
+    },
+    {
+      "symbol": "TSLA",
+      "form_type": "8-K",
+      "filed_at": "2024-04-27T00:00:00+00:00",
+      "period_of_report": "2024-03-28",
+      "accession_number": "0000365121-24-000000",
+      "filing_url": "https://mock.invalid/filings/TSLA/0000365121-24-000000",
+      "description": "Mock 8-K filing for TSLA."
+    }
+  ]
+}

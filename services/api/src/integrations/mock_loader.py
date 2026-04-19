@@ -21,6 +21,7 @@ from typing import Any
 
 from src.models.ch.macro import MacroRow
 from src.models.ch.ohlcv import OHLCVRow
+from src.schemas.filings import Filing, FilingsResponse
 from src.schemas.instruments import InstrumentResponse
 from src.schemas.macro import (
     FRED_SERIES_NAMES,
@@ -29,6 +30,11 @@ from src.schemas.macro import (
     MacroSeriesResponse,
 )
 from src.schemas.market_data import QuoteResponse
+from src.schemas.news import NewsArticle, NewsResponse
+
+# Default page size mirrors the router default. Keep in sync with
+# routers/news.py page_size query parameter default.
+_NEWS_PAGE_SIZE = 20
 
 logger = logging.getLogger(__name__)
 
@@ -155,6 +161,74 @@ class MockDataLoader:
             logger.debug("No mock quote found for symbol %s", symbol)
             return None
         return QuoteResponse(**entry)
+
+    def get_news(self, symbol: str | None, page: int = 1) -> NewsResponse:
+        """
+        Return cached mock news articles.
+
+        Reads: mock_data/news/{SYMBOL}.json when symbol is set, otherwise
+        mock_data/news/all.json. Slices by page (1-indexed) using the
+        router's default page size. Returns an empty response when the
+        expected file is absent — callers should treat that as "no mock
+        data exists for this symbol", not a fatal error.
+        """
+        filename = f"{symbol}.json" if symbol else "all.json"
+        path = self._dir / "news" / filename
+        if not path.exists():
+            logger.debug("No mock news data found at %s", path)
+            return NewsResponse(articles=[], total=0, page=page)
+
+        data = self._load_json(path)
+        raw_articles: list[dict[str, Any]] = data.get("articles", [])
+        articles = [
+            NewsArticle(
+                title=a["title"],
+                description=a.get("description"),
+                url=a["url"],
+                published_at=_parse_dt(a["published_at"]),
+                source_name=a["source_name"],
+                symbol=a.get("symbol") or symbol,
+            )
+            for a in raw_articles
+        ]
+        start = max(page - 1, 0) * _NEWS_PAGE_SIZE
+        end = start + _NEWS_PAGE_SIZE
+        return NewsResponse(
+            articles=articles[start:end],
+            total=len(articles),
+            page=page,
+        )
+
+    def get_filings(self, symbol: str, form_type: str | None = None) -> FilingsResponse:
+        """
+        Return cached mock SEC filings for *symbol*.
+
+        Reads: mock_data/filings/{SYMBOL}.json. Optionally filters by
+        form_type (10-K, 10-Q, 8-K). Returns an empty response when the
+        file is absent so callers can render a "no data" state instead of
+        erroring.
+        """
+        path = self._dir / "filings" / f"{symbol}.json"
+        if not path.exists():
+            logger.debug("No mock filings data found at %s", path)
+            return FilingsResponse(symbol=symbol, filings=[], total=0)
+
+        data = self._load_json(path)
+        raw_filings: list[dict[str, Any]] = data.get("filings", [])
+        filings = [
+            Filing(
+                symbol=symbol,
+                form_type=f["form_type"],
+                filed_at=_parse_dt(f["filed_at"]),
+                period_of_report=datetime.fromisoformat(f["period_of_report"]).date(),
+                accession_number=f["accession_number"],
+                filing_url=f["filing_url"],
+                description=f.get("description"),
+            )
+            for f in raw_filings
+            if form_type is None or f["form_type"] == form_type
+        ]
+        return FilingsResponse(symbol=symbol, filings=filings, total=len(filings))
 
     def get_macro_series(self, series_id: str) -> MacroSeriesResponse | None:
         """

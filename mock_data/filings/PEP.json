@@ -1,0 +1,95 @@
+{
+  "source": "mock",
+  "filings": [
+    {
+      "symbol": "PEP",
+      "form_type": "8-K",
+      "filed_at": "2025-11-09T00:00:00+00:00",
+      "period_of_report": "2025-10-10",
+      "accession_number": "0000322004-25-000002",
+      "filing_url": "https://mock.invalid/filings/PEP/0000322004-25-000002",
+      "description": "Mock 8-K filing for PEP."
+    },
+    {
+      "symbol": "PEP",
+      "form_type": "10-Q",
+      "filed_at": "2025-10-19T00:00:00+00:00",
+      "period_of_report": "2025-09-19",
+      "accession_number": "0000383659-25-000001",
+      "filing_url": "https://mock.invalid/filings/PEP/0000383659-25-000001",
+      "description": "Mock 10-Q filing for PEP."
+    },
+    {
+      "symbol": "PEP",
+      "form_type": "10-Q",
+      "filed_at": "2025-10-17T00:00:00+00:00",
+      "period_of_report": "2025-09-17",
+      "accession_number": "0000381779-25-000005",
+      "filing_url": "https://mock.invalid/filings/PEP/0000381779-25-000005",
+      "description": "Mock 10-Q filing for PEP."
+    },
+    {
+      "symbol": "PEP",
+      "form_type": "8-K",
+      "filed_at": "2025-05-20T00:00:00+00:00",
+      "period_of_report": "2025-04-20",
+      "accession_number": "0000338882-25-000009",
+      "filing_url": "https://mock.invalid/filings/PEP/0000338882-25-000009",
+      "description": "Mock 8-K filing for PEP."
+    },
+    {
+      "symbol": "PEP",
+      "form_type": "10-Q",
+      "filed_at": "2025-04-19T00:00:00+00:00",
+      "period_of_report": "2025-03-20",
+      "accession_number": "0000384796-25-000000",
+      "filing_url": "https://mock.invalid/filings/PEP/0000384796-25-000000",
+      "description": "Mock 10-Q filing for PEP."
+    },
+    {
+      "symbol": "PEP",
+      "form_type": "8-K",
+      "filed_at": "2025-02-06T00:00:00+00:00",
+      "period_of_report": "2025-01-07",
+      "accession_number": "0000341339-25-000007",
+      "filing_url": "https://mock.invalid/filings/PEP/0000341339-25-000007",
+      "description": "Mock 8-K filing for PEP."
+    },
+    {
+      "symbol": "PEP",
+      "form_type": "8-K",
+      "filed_at": "2025-01-05T00:00:00+00:00",
+      "period_of_report": "2024-12-06",
+      "accession_number": "0000351033-25-000008",
+      "filing_url": "https://mock.invalid/filings/PEP/0000351033-25-000008",
+      "description": "Mock 8-K filing for PEP."
+    },
+    {
+      "symbol": "PEP",
+      "form_type": "8-K",
+      "filed_at": "2024-12-02T00:00:00+00:00",
+      "period_of_report": "2024-11-02",
+      "accession_number": "0000327678-24-000003",
+      "filing_url": "https://mock.invalid/filings/PEP/0000327678-24-000003",
+      "description": "Mock 8-K filing for PEP."
+    },
+    {
+      "symbol": "PEP",
+      "form_type": "8-K",
+      "filed_at": "2024-06-12T00:00:00+00:00",
+      "period_of_report": "2024-05-13",
+      "accession_number": "0000357258-24-000006",
+      "filing_url": "https://mock.invalid/filings/PEP/0000357258-24-000006",
+      "description": "Mock 8-K filing for PEP."
+    },
+    {
+      "symbol": "PEP",
+      "form_type": "10-Q",
+      "filed_at": "2024-04-28T00:00:00+00:00",
+      "period_of_report": "2024-03-29",
+      "accession_number": "0000342238-24-000004",
+      "filing_url": "https://mock.invalid/filings/PEP/0000342238-24-000004",
+      "description": "Mock 10-Q filing for PEP."
+    }
+  ]
+}

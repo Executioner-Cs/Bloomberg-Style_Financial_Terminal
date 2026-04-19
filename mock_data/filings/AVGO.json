@@ -1,0 +1,95 @@
+{
+  "source": "mock",
+  "filings": [
+    {
+      "symbol": "AVGO",
+      "form_type": "8-K",
+      "filed_at": "2025-11-22T00:00:00+00:00",
+      "period_of_report": "2025-10-23",
+      "accession_number": "0000390955-25-000009",
+      "filing_url": "https://mock.invalid/filings/AVGO/0000390955-25-000009",
+      "description": "Mock 8-K filing for AVGO."
+    },
+    {
+      "symbol": "AVGO",
+      "form_type": "8-K",
+      "filed_at": "2025-07-09T00:00:00+00:00",
+      "period_of_report": "2025-06-09",
+      "accession_number": "0000326024-25-000003",
+      "filing_url": "https://mock.invalid/filings/AVGO/0000326024-25-000003",
+      "description": "Mock 8-K filing for AVGO."
+    },
+    {
+      "symbol": "AVGO",
+      "form_type": "10-K",
+      "filed_at": "2025-01-31T00:00:00+00:00",
+      "period_of_report": "2025-01-01",
+      "accession_number": "0000361918-25-000001",
+      "filing_url": "https://mock.invalid/filings/AVGO/0000361918-25-000001",
+      "description": "Mock 10-K filing for AVGO."
+    },
+    {
+      "symbol": "AVGO",
+      "form_type": "10-Q",
+      "filed_at": "2024-10-05T00:00:00+00:00",
+      "period_of_report": "2024-09-05",
+      "accession_number": "0000320290-24-000000",
+      "filing_url": "https://mock.invalid/filings/AVGO/0000320290-24-000000",
+      "description": "Mock 10-Q filing for AVGO."
+    },
+    {
+      "symbol": "AVGO",
+      "form_type": "10-K",
+      "filed_at": "2024-09-27T00:00:00+00:00",
+      "period_of_report": "2024-08-28",
+      "accession_number": "0000323708-24-000002",
+      "filing_url": "https://mock.invalid/filings/AVGO/0000323708-24-000002",
+      "description": "Mock 10-K filing for AVGO."
+    },
+    {
+      "symbol": "AVGO",
+      "form_type": "8-K",
+      "filed_at": "2024-09-06T00:00:00+00:00",
+      "period_of_report": "2024-08-07",
+      "accession_number": "0000329997-24-000008",
+      "filing_url": "https://mock.invalid/filings/AVGO/0000329997-24-000008",
+      "description": "Mock 8-K filing for AVGO."
+    },
+    {
+      "symbol": "AVGO",
+      "form_type": "10-Q",
+      "filed_at": "2024-07-08T00:00:00+00:00",
+      "period_of_report": "2024-06-08",
+      "accession_number": "0000351944-24-000006",
+      "filing_url": "https://mock.invalid/filings/AVGO/0000351944-24-000006",
+      "description": "Mock 10-Q filing for AVGO."
+    },
+    {
+      "symbol": "AVGO",
+      "form_type": "8-K",
+      "filed_at": "2024-05-20T00:00:00+00:00",
+      "period_of_report": "2024-04-20",
+      "accession_number": "0000362008-24-000005",
+      "filing_url": "https://mock.invalid/filings/AVGO/0000362008-24-000005",
+      "description": "Mock 8-K filing for AVGO."
+    },
+    {
+      "symbol": "AVGO",
+      "form_type": "8-K",
+      "filed_at": "2024-05-13T00:00:00+00:00",
+      "period_of_report": "2024-04-13",
+      "accession_number": "0000369798-24-000007",
+      "filing_url": "https://mock.invalid/filings/AVGO/0000369798-24-000007",
+      "description": "Mock 8-K filing for AVGO."
+    },
+    {
+      "symbol": "AVGO",
+      "form_type": "10-Q",
+      "filed_at": "2024-05-06T00:00:00+00:00",
+      "period_of_report": "2024-04-06",
+      "accession_number": "0000313562-24-000004",
+      "filing_url": "https://mock.invalid/filings/AVGO/0000313562-24-000004",
+      "description": "Mock 10-Q filing for AVGO."
+    }
+  ]
+}

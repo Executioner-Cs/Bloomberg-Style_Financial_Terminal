@@ -1,0 +1,95 @@
+{
+  "source": "mock",
+  "filings": [
+    {
+      "symbol": "UNH",
+      "form_type": "8-K",
+      "filed_at": "2025-10-15T00:00:00+00:00",
+      "period_of_report": "2025-09-15",
+      "accession_number": "0000394908-25-000004",
+      "filing_url": "https://mock.invalid/filings/UNH/0000394908-25-000004",
+      "description": "Mock 8-K filing for UNH."
+    },
+    {
+      "symbol": "UNH",
+      "form_type": "8-K",
+      "filed_at": "2025-09-24T00:00:00+00:00",
+      "period_of_report": "2025-08-25",
+      "accession_number": "0000343866-25-000006",
+      "filing_url": "https://mock.invalid/filings/UNH/0000343866-25-000006",
+      "description": "Mock 8-K filing for UNH."
+    },
+    {
+      "symbol": "UNH",
+      "form_type": "10-Q",
+      "filed_at": "2025-09-07T00:00:00+00:00",
+      "period_of_report": "2025-08-08",
+      "accession_number": "0000335481-25-000008",
+      "filing_url": "https://mock.invalid/filings/UNH/0000335481-25-000008",
+      "description": "Mock 10-Q filing for UNH."
+    },
+    {
+      "symbol": "UNH",
+      "form_type": "8-K",
+      "filed_at": "2025-08-29T00:00:00+00:00",
+      "period_of_report": "2025-07-30",
+      "accession_number": "0000348761-25-000003",
+      "filing_url": "https://mock.invalid/filings/UNH/0000348761-25-000003",
+      "description": "Mock 8-K filing for UNH."
+    },
+    {
+      "symbol": "UNH",
+      "form_type": "8-K",
+      "filed_at": "2025-08-03T00:00:00+00:00",
+      "period_of_report": "2025-07-04",
+      "accession_number": "0000393680-25-000007",
+      "filing_url": "https://mock.invalid/filings/UNH/0000393680-25-000007",
+      "description": "Mock 8-K filing for UNH."
+    },
+    {
+      "symbol": "UNH",
+      "form_type": "8-K",
+      "filed_at": "2025-07-18T00:00:00+00:00",
+      "period_of_report": "2025-06-18",
+      "accession_number": "0000376635-25-000009",
+      "filing_url": "https://mock.invalid/filings/UNH/0000376635-25-000009",
+      "description": "Mock 8-K filing for UNH."
+    },
+    {
+      "symbol": "UNH",
+      "form_type": "10-Q",
+      "filed_at": "2025-06-29T00:00:00+00:00",
+      "period_of_report": "2025-05-30",
+      "accession_number": "0000353065-25-000001",
+      "filing_url": "https://mock.invalid/filings/UNH/0000353065-25-000001",
+      "description": "Mock 10-Q filing for UNH."
+    },
+    {
+      "symbol": "UNH",
+      "form_type": "8-K",
+      "filed_at": "2025-04-21T00:00:00+00:00",
+      "period_of_report": "2025-03-22",
+      "accession_number": "0000354527-25-000000",
+      "filing_url": "https://mock.invalid/filings/UNH/0000354527-25-000000",
+      "description": "Mock 8-K filing for UNH."
+    },
+    {
+      "symbol": "UNH",
+      "form_type": "8-K",
+      "filed_at": "2025-03-06T00:00:00+00:00",
+      "period_of_report": "2025-02-04",
+      "accession_number": "0000379419-25-000002",
+      "filing_url": "https://mock.invalid/filings/UNH/0000379419-25-000002",
+      "description": "Mock 8-K filing for UNH."
+    },
+    {
+      "symbol": "UNH",
+      "form_type": "10-Q",
+      "filed_at": "2024-12-15T00:00:00+00:00",
+      "period_of_report": "2024-11-15",
+      "accession_number": "0000379077-24-000005",
+      "filing_url": "https://mock.invalid/filings/UNH/0000379077-24-000005",
+      "description": "Mock 10-Q filing for UNH."
+    }
+  ]
+}

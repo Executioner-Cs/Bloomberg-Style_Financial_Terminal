@@ -1,0 +1,95 @@
+{
+  "source": "mock",
+  "filings": [
+    {
+      "symbol": "CRM",
+      "form_type": "8-K",
+      "filed_at": "2025-11-24T00:00:00+00:00",
+      "period_of_report": "2025-10-25",
+      "accession_number": "0000346503-25-000002",
+      "filing_url": "https://mock.invalid/filings/CRM/0000346503-25-000002",
+      "description": "Mock 8-K filing for CRM."
+    },
+    {
+      "symbol": "CRM",
+      "form_type": "8-K",
+      "filed_at": "2025-05-29T00:00:00+00:00",
+      "period_of_report": "2025-04-29",
+      "accession_number": "0000319913-25-000009",
+      "filing_url": "https://mock.invalid/filings/CRM/0000319913-25-000009",
+      "description": "Mock 8-K filing for CRM."
+    },
+    {
+      "symbol": "CRM",
+      "form_type": "8-K",
+      "filed_at": "2025-05-10T00:00:00+00:00",
+      "period_of_report": "2025-04-10",
+      "accession_number": "0000343276-25-000001",
+      "filing_url": "https://mock.invalid/filings/CRM/0000343276-25-000001",
+      "description": "Mock 8-K filing for CRM."
+    },
+    {
+      "symbol": "CRM",
+      "form_type": "10-Q",
+      "filed_at": "2025-04-03T00:00:00+00:00",
+      "period_of_report": "2025-03-04",
+      "accession_number": "0000358416-25-000008",
+      "filing_url": "https://mock.invalid/filings/CRM/0000358416-25-000008",
+      "description": "Mock 10-Q filing for CRM."
+    },
+    {
+      "symbol": "CRM",
+      "form_type": "8-K",
+      "filed_at": "2025-03-23T00:00:00+00:00",
+      "period_of_report": "2025-02-21",
+      "accession_number": "0000324840-25-000007",
+      "filing_url": "https://mock.invalid/filings/CRM/0000324840-25-000007",
+      "description": "Mock 8-K filing for CRM."
+    },
+    {
+      "symbol": "CRM",
+      "form_type": "10-Q",
+      "filed_at": "2025-01-11T00:00:00+00:00",
+      "period_of_report": "2024-12-12",
+      "accession_number": "0000336192-25-000000",
+      "filing_url": "https://mock.invalid/filings/CRM/0000336192-25-000000",
+      "description": "Mock 10-Q filing for CRM."
+    },
+    {
+      "symbol": "CRM",
+      "form_type": "10-K",
+      "filed_at": "2024-10-26T00:00:00+00:00",
+      "period_of_report": "2024-09-26",
+      "accession_number": "0000388525-24-000003",
+      "filing_url": "https://mock.invalid/filings/CRM/0000388525-24-000003",
+      "description": "Mock 10-K filing for CRM."
+    },
+    {
+      "symbol": "CRM",
+      "form_type": "10-K",
+      "filed_at": "2024-09-24T00:00:00+00:00",
+      "period_of_report": "2024-08-25",
+      "accession_number": "0000399966-24-000005",
+      "filing_url": "https://mock.invalid/filings/CRM/0000399966-24-000005",
+      "description": "Mock 10-K filing for CRM."
+    },
+    {
+      "symbol": "CRM",
+      "form_type": "10-K",
+      "filed_at": "2024-07-18T00:00:00+00:00",
+      "period_of_report": "2024-06-18",
+      "accession_number": "0000391030-24-000004",
+      "filing_url": "https://mock.invalid/filings/CRM/0000391030-24-000004",
+      "description": "Mock 10-K filing for CRM."
+    },
+    {
+      "symbol": "CRM",
+      "form_type": "10-Q",
+      "filed_at": "2024-07-06T00:00:00+00:00",
+      "period_of_report": "2024-06-06",
+      "accession_number": "0000380073-24-000006",
+      "filing_url": "https://mock.invalid/filings/CRM/0000380073-24-000006",
+      "description": "Mock 10-Q filing for CRM."
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "source": "mock",
+  "filings": [
+    {
+      "symbol": "JNJ",
+      "form_type": "10-Q",
+      "filed_at": "2026-01-07T00:00:00+00:00",
+      "period_of_report": "2025-12-08",
+      "accession_number": "0000332236-26-000002",
+      "filing_url": "https://mock.invalid/filings/JNJ/0000332236-26-000002",
+      "description": "Mock 10-Q filing for JNJ."
+    },
+    {
+      "symbol": "JNJ",
+      "form_type": "8-K",
+      "filed_at": "2025-12-21T00:00:00+00:00",
+      "period_of_report": "2025-11-21",
+      "accession_number": "0000358024-25-000000",
+      "filing_url": "https://mock.invalid/filings/JNJ/0000358024-25-000000",
+      "description": "Mock 8-K filing for JNJ."
+    },
+    {
+      "symbol": "JNJ",
+      "form_type": "8-K",
+      "filed_at": "2025-12-11T00:00:00+00:00",
+      "period_of_report": "2025-11-11",
+      "accession_number": "0000337437-25-000001",
+      "filing_url": "https://mock.invalid/filings/JNJ/0000337437-25-000001",
+      "description": "Mock 8-K filing for JNJ."
+    },
+    {
+      "symbol": "JNJ",
+      "form_type": "8-K",
+      "filed_at": "2025-01-27T00:00:00+00:00",
+      "period_of_report": "2024-12-28",
+      "accession_number": "0000372043-25-000008",
+      "filing_url": "https://mock.invalid/filings/JNJ/0000372043-25-000008",
+      "description": "Mock 8-K filing for JNJ."
+    },
+    {
+      "symbol": "JNJ",
+      "form_type": "8-K",
+      "filed_at": "2024-12-23T00:00:00+00:00",
+      "period_of_report": "2024-11-23",
+      "accession_number": "0000348963-24-000007",
+      "filing_url": "https://mock.invalid/filings/JNJ/0000348963-24-000007",
+      "description": "Mock 8-K filing for JNJ."
+    },
+    {
+      "symbol": "JNJ",
+      "form_type": "8-K",
+      "filed_at": "2024-11-03T00:00:00+00:00",
+      "period_of_report": "2024-10-04",
+      "accession_number": "0000389522-24-000009",
+      "filing_url": "https://mock.invalid/filings/JNJ/0000389522-24-000009",
+      "description": "Mock 8-K filing for JNJ."
+    },
+    {
+      "symbol": "JNJ",
+      "form_type": "10-Q",
+      "filed_at": "2024-06-30T00:00:00+00:00",
+      "period_of_report": "2024-05-31",
+      "accession_number": "0000373600-24-000005",
+      "filing_url": "https://mock.invalid/filings/JNJ/0000373600-24-000005",
+      "description": "Mock 10-Q filing for JNJ."
+    },
+    {
+      "symbol": "JNJ",
+      "form_type": "10-Q",
+      "filed_at": "2024-05-25T00:00:00+00:00",
+      "period_of_report": "2024-04-25",
+      "accession_number": "0000337219-24-000004",
+      "filing_url": "https://mock.invalid/filings/JNJ/0000337219-24-000004",
+      "description": "Mock 10-Q filing for JNJ."
+    },
+    {
+      "symbol": "JNJ",
+      "form_type": "8-K",
+      "filed_at": "2024-05-17T00:00:00+00:00",
+      "period_of_report": "2024-04-17",
+      "accession_number": "0000343508-24-000006",
+      "filing_url": "https://mock.invalid/filings/JNJ/0000343508-24-000006",
+      "description": "Mock 8-K filing for JNJ."
+    },
+    {
+      "symbol": "JNJ",
+      "form_type": "10-Q",
+      "filed_at": "2024-05-06T00:00:00+00:00",
+      "period_of_report": "2024-04-06",
+      "accession_number": "0000318333-24-000003",
+      "filing_url": "https://mock.invalid/filings/JNJ/0000318333-24-000003",
+      "description": "Mock 10-Q filing for JNJ."
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "source": "mock",
+  "filings": [
+    {
+      "symbol": "NVDA",
+      "form_type": "10-Q",
+      "filed_at": "2026-02-27T00:00:00+00:00",
+      "period_of_report": "2026-01-28",
+      "accession_number": "0000339363-26-000002",
+      "filing_url": "https://mock.invalid/filings/NVDA/0000339363-26-000002",
+      "description": "Mock 10-Q filing for NVDA."
+    },
+    {
+      "symbol": "NVDA",
+      "form_type": "8-K",
+      "filed_at": "2026-01-24T00:00:00+00:00",
+      "period_of_report": "2025-12-25",
+      "accession_number": "0000327140-26-000006",
+      "filing_url": "https://mock.invalid/filings/NVDA/0000327140-26-000006",
+      "description": "Mock 8-K filing for NVDA."
+    },
+    {
+      "symbol": "NVDA",
+      "form_type": "8-K",
+      "filed_at": "2026-01-06T00:00:00+00:00",
+      "period_of_report": "2025-12-07",
+      "accession_number": "0000360827-26-000005",
+      "filing_url": "https://mock.invalid/filings/NVDA/0000360827-26-000005",
+      "description": "Mock 8-K filing for NVDA."
+    },
+    {
+      "symbol": "NVDA",
+      "form_type": "8-K",
+      "filed_at": "2025-12-26T00:00:00+00:00",
+      "period_of_report": "2025-11-26",
+      "accession_number": "0000392181-25-000008",
+      "filing_url": "https://mock.invalid/filings/NVDA/0000392181-25-000008",
+      "description": "Mock 8-K filing for NVDA."
+    },
+    {
+      "symbol": "NVDA",
+      "form_type": "8-K",
+      "filed_at": "2025-12-09T00:00:00+00:00",
+      "period_of_report": "2025-11-09",
+      "accession_number": "0000338085-25-000000",
+      "filing_url": "https://mock.invalid/filings/NVDA/0000338085-25-000000",
+      "description": "Mock 8-K filing for NVDA."
+    },
+    {
+      "symbol": "NVDA",
+      "form_type": "8-K",
+      "filed_at": "2025-10-24T00:00:00+00:00",
+      "period_of_report": "2025-09-24",
+      "accession_number": "0000376783-25-000004",
+      "filing_url": "https://mock.invalid/filings/NVDA/0000376783-25-000004",
+      "description": "Mock 8-K filing for NVDA."
+    },
+    {
+      "symbol": "NVDA",
+      "form_type": "8-K",
+      "filed_at": "2025-10-12T00:00:00+00:00",
+      "period_of_report": "2025-09-12",
+      "accession_number": "0000395653-25-000009",
+      "filing_url": "https://mock.invalid/filings/NVDA/0000395653-25-000009",
+      "description": "Mock 8-K filing for NVDA."
+    },
+    {
+      "symbol": "NVDA",
+      "form_type": "8-K",
+      "filed_at": "2025-04-19T00:00:00+00:00",
+      "period_of_report": "2025-03-20",
+      "accession_number": "0000395707-25-000001",
+      "filing_url": "https://mock.invalid/filings/NVDA/0000395707-25-000001",
+      "description": "Mock 8-K filing for NVDA."
+    },
+    {
+      "symbol": "NVDA",
+      "form_type": "10-Q",
+      "filed_at": "2024-12-11T00:00:00+00:00",
+      "period_of_report": "2024-11-11",
+      "accession_number": "0000385969-24-000003",
+      "filing_url": "https://mock.invalid/filings/NVDA/0000385969-24-000003",
+      "description": "Mock 10-Q filing for NVDA."
+    },
+    {
+      "symbol": "NVDA",
+      "form_type": "10-Q",
+      "filed_at": "2024-06-23T00:00:00+00:00",
+      "period_of_report": "2024-05-24",
+      "accession_number": "0000378602-24-000007",
+      "filing_url": "https://mock.invalid/filings/NVDA/0000378602-24-000007",
+      "description": "Mock 10-Q filing for NVDA."
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "source": "mock",
+  "filings": [
+    {
+      "symbol": "JPM",
+      "form_type": "10-Q",
+      "filed_at": "2026-04-16T00:00:00+00:00",
+      "period_of_report": "2026-03-17",
+      "accession_number": "0000318278-26-000001",
+      "filing_url": "https://mock.invalid/filings/JPM/0000318278-26-000001",
+      "description": "Mock 10-Q filing for JPM."
+    },
+    {
+      "symbol": "JPM",
+      "form_type": "8-K",
+      "filed_at": "2025-05-17T00:00:00+00:00",
+      "period_of_report": "2025-04-17",
+      "accession_number": "0000361047-25-000006",
+      "filing_url": "https://mock.invalid/filings/JPM/0000361047-25-000006",
+      "description": "Mock 8-K filing for JPM."
+    },
+    {
+      "symbol": "JPM",
+      "form_type": "8-K",
+      "filed_at": "2025-05-13T00:00:00+00:00",
+      "period_of_report": "2025-04-13",
+      "accession_number": "0000378060-25-000009",
+      "filing_url": "https://mock.invalid/filings/JPM/0000378060-25-000009",
+      "description": "Mock 8-K filing for JPM."
+    },
+    {
+      "symbol": "JPM",
+      "form_type": "10-Q",
+      "filed_at": "2025-05-11T00:00:00+00:00",
+      "period_of_report": "2025-04-11",
+      "accession_number": "0000370238-25-000003",
+      "filing_url": "https://mock.invalid/filings/JPM/0000370238-25-000003",
+      "description": "Mock 10-Q filing for JPM."
+    },
+    {
+      "symbol": "JPM",
+      "form_type": "8-K",
+      "filed_at": "2025-01-07T00:00:00+00:00",
+      "period_of_report": "2024-12-08",
+      "accession_number": "0000391562-25-000000",
+      "filing_url": "https://mock.invalid/filings/JPM/0000391562-25-000000",
+      "description": "Mock 8-K filing for JPM."
+    },
+    {
+      "symbol": "JPM",
+      "form_type": "8-K",
+      "filed_at": "2024-12-20T00:00:00+00:00",
+      "period_of_report": "2024-11-20",
+      "accession_number": "0000349220-24-000007",
+      "filing_url": "https://mock.invalid/filings/JPM/0000349220-24-000007",
+      "description": "Mock 8-K filing for JPM."
+    },
+    {
+      "symbol": "JPM",
+      "form_type": "10-Q",
+      "filed_at": "2024-09-17T00:00:00+00:00",
+      "period_of_report": "2024-08-18",
+      "accession_number": "0000321385-24-000005",
+      "filing_url": "https://mock.invalid/filings/JPM/0000321385-24-000005",
+      "description": "Mock 10-Q filing for JPM."
+    },
+    {
+      "symbol": "JPM",
+      "form_type": "10-Q",
+      "filed_at": "2024-09-13T00:00:00+00:00",
+      "period_of_report": "2024-08-14",
+      "accession_number": "0000389377-24-000004",
+      "filing_url": "https://mock.invalid/filings/JPM/0000389377-24-000004",
+      "description": "Mock 10-Q filing for JPM."
+    },
+    {
+      "symbol": "JPM",
+      "form_type": "8-K",
+      "filed_at": "2024-06-17T00:00:00+00:00",
+      "period_of_report": "2024-05-18",
+      "accession_number": "0000346996-24-000008",
+      "filing_url": "https://mock.invalid/filings/JPM/0000346996-24-000008",
+      "description": "Mock 8-K filing for JPM."
+    },
+    {
+      "symbol": "JPM",
+      "form_type": "10-Q",
+      "filed_at": "2024-05-17T00:00:00+00:00",
+      "period_of_report": "2024-04-17",
+      "accession_number": "0000398987-24-000002",
+      "filing_url": "https://mock.invalid/filings/JPM/0000398987-24-000002",
+      "description": "Mock 10-Q filing for JPM."
+    }
+  ]
+}
