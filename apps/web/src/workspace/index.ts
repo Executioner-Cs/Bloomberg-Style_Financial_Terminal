@@ -16,8 +16,15 @@ export {
 } from './stores';
 export type { PanelApp, PanelProps } from './types';
 export { registerPanelApp, getPanelApp, listPanelApps } from './panel-registry';
+export { WorkspaceShell, type WorkspaceShellProps } from './WorkspaceShell';
+export { PanelHost, type WorkspacePanelParams } from './panel-host';
 export {
-  WorkspaceShell,
-  type WorkspaceShellProps,
-  type WorkspacePanelParams,
-} from './WorkspaceShell';
+  saveSnapshot,
+  loadSnapshot,
+  clearSnapshot,
+  getPresetSlugFromUrl,
+  buildPresetUrl,
+  buildSnapshot,
+  WORKSPACE_SNAPSHOT_VERSION,
+  type WorkspaceSnapshot,
+} from './layout-serializer';
