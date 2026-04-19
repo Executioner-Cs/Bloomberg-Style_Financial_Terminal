@@ -19,12 +19,23 @@ async function buildServer(): Promise<FastifyInstance> {
     },
   });
 
+  // CORS_ALLOWED_ORIGINS is required — no localhost fallback. The server refuses to
+  // start if unset to prevent silent permissive CORS in staging or production.
+  // Set in .env: CORS_ALLOWED_ORIGINS=https://localhost:5173,http://localhost:5173
+  const rawCorsOrigins = process.env['CORS_ALLOWED_ORIGINS'];
+  if (!rawCorsOrigins) {
+    throw new Error(
+      'CORS_ALLOWED_ORIGINS env var is required. ' +
+        'Set it in your .env file, e.g.: CORS_ALLOWED_ORIGINS=https://localhost:5173',
+    );
+  }
+  const corsOrigins = rawCorsOrigins
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
   await server.register(fastifyCors, {
-    // Default includes both https (ADR-004 local dev) and http (plain vite dev fallback).
-    // In production/staging CORS_ALLOWED_ORIGINS is set explicitly via env var.
-    origin: (
-      process.env['CORS_ALLOWED_ORIGINS'] ?? 'https://localhost:5173,http://localhost:5173'
-    ).split(','),
+    origin: corsOrigins,
     credentials: true,
   });
 
