@@ -8,37 +8,39 @@ equity screening, and a plugin architecture for quant research tools.
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 18 + TypeScript (strict), Vite 5, TanStack Query/Router, Zustand |
-| Charting | TradingView Lightweight Charts (Apache 2.0) |
-| Data Grids | AG Grid Community |
-| Backend | Python 3.12 + FastAPI, Pydantic v2 |
-| WS Gateway | Node.js 20 + Fastify |
-| Background Jobs | Celery + Redis |
-| Time-Series DB | ClickHouse |
-| Relational DB | PostgreSQL 16 |
-| Cache | Redis 7 Stack (includes RediSearch) |
-| Infrastructure | Docker Compose (dev), AWS ECS Fargate (prod) |
+| Layer           | Technology                                                             |
+| --------------- | ---------------------------------------------------------------------- |
+| Frontend        | React 18 + TypeScript (strict), Vite 5, TanStack Query/Router, Zustand |
+| Charting        | TradingView Lightweight Charts (Apache 2.0)                            |
+| Data Grids      | AG Grid Community                                                      |
+| Backend         | Python 3.12 + FastAPI, Pydantic v2                                     |
+| WS Gateway      | Node.js 20 + Fastify                                                   |
+| Background Jobs | Celery + Redis                                                         |
+| Time-Series DB  | ClickHouse                                                             |
+| Relational DB   | PostgreSQL 16                                                          |
+| Cache           | Redis 7 Stack (includes RediSearch)                                    |
+| Infrastructure  | Docker Compose (dev), AWS ECS Fargate (prod)                           |
 
 ## Data Sources
 
-| Source | Coverage | Latency |
-|--------|----------|---------|
-| Marketstack | EOD equities, ETFs, indices | EOD |
-| Alpha Vantage | Equities, FX (fallback) | EOD / delayed |
-| Financial Modeling Prep | Fundamentals, financial statements | Quarterly refresh |
-| SEC EDGAR | US company filings (8-K, 10-K, 10-Q), XBRL | Near real-time |
-| FRED | Macro series (GDP, CPI, rates, yield curve) | Daily |
-| CoinGecko | Crypto market data | Near real-time |
-| Binance / Coinbase WS | Live crypto prices | Real-time stream |
-| StockData.org | Financial news | 15-min refresh |
+All sources are permanently free (ADR-005). No paid tiers, no credit card required.
+
+| Source                | Coverage                                         | Latency          | Phase       |
+| --------------------- | ------------------------------------------------ | ---------------- | ----------- |
+| yfinance              | EOD equities, ETFs, indices (top 30 S&P)         | EOD              | 1 ✅        |
+| CoinGecko             | Crypto market data (top 20 coins)                | Near real-time   | 1 ✅        |
+| FRED                  | Macro series (GDP, CPI, FEDFUNDS, DGS10, UNRATE) | Weekly           | 1 ✅        |
+| SEC EDGAR             | US company filings (8-K, 10-K, 10-Q)             | Daily            | 1 (stub), 4 |
+| NewsAPI               | Financial news (100 req/day free)                | 15-min refresh   | 1 (stub), 4 |
+| Finnhub               | Supplemental real-time quotes (60 req/min)       | Real-time        | 1 ✅        |
+| Binance / Coinbase WS | Live crypto prices                               | Real-time stream | 3           |
 
 ---
 
 ## Quick Start (Local Development)
 
 ### Prerequisites
+
 - Docker Desktop
 - Node.js 20 + pnpm 9
 - Python 3.12
@@ -56,6 +58,7 @@ pnpm install
 ```bash
 cp .env.example .env
 # Fill in API keys (see .env.example for documentation of every variable)
+# Or set USE_MOCK_DATA=true to run fully offline against mock_data/ (ADR-006)
 ```
 
 ### 3. Start all services
@@ -101,19 +104,32 @@ bloomberg-terminal/
 
 ---
 
+## What's Working Today
+
+As of 2026-04-18 (Phase 1 complete):
+
+- **Ingestion**: CoinGecko crypto OHLCV (daily 00:05 UTC), yfinance equity OHLCV (daily 21:30 UTC), FRED macro series (weekly Monday 08:00 UTC) — all idempotent, all writing to ClickHouse
+- **Mock mode**: `USE_MOCK_DATA=true` serves everything from committed `mock_data/` JSON — zero live API calls, zero keys required (ADR-006)
+- **Integration clients**: yfinance, FRED, CoinGecko, EDGAR, NewsAPI, Finnhub — all behind a uniform async interface with mock fallback
+- **Persistence**: PostgreSQL (instruments + metadata), ClickHouse (OHLCV + macro_series), Redis (cache + Celery broker)
+- **Terminal shell**: React SPA loads at `http://localhost:5173`, renders blank workspace (panels land in Phase 2)
+- **Tests**: 134 passing, 72.93% coverage, mypy strict clean on both api and worker
+
 ## Implementation Phases
 
-| Phase | Scope | Status |
-|-------|-------|--------|
-| 0 | Foundation: monorepo, Docker stack, blank terminal shell | In Progress |
-| 1 | Data ingestion: EOD prices, crypto, macro → ClickHouse | Planned |
-| 2 | Terminal UI: chart + watchlist + command palette | Planned |
-| 3 | Real-time prices: Binance WS, live crypto streaming | Planned |
-| 4 | Fundamentals + filings: FMP, EDGAR, news | Planned |
-| 5 | Screener + alerts | Planned |
-| 6 | Macro dashboard + polish | Planned |
-| 7 | Auth + multi-user | Planned |
-| 8 | Plugin system + production deployment | Planned |
+See [ROADMAP.md](./ROADMAP.md) for the full phase-by-phase plan with scope, exit criteria, and dependencies.
+
+| Phase | Scope                                                              | Status         |
+| ----- | ------------------------------------------------------------------ | -------------- |
+| 0     | Foundation: monorepo, Docker stack, blank terminal shell           | ✅ Complete    |
+| 1     | Data ingestion: mock layer + 5 integrations + workers → ClickHouse | ✅ Complete    |
+| 2     | Terminal UI: chart + watchlist + command palette                   | 🚧 In Progress |
+| 3     | Real-time prices: Binance WS, live crypto streaming                | Planned        |
+| 4     | Fundamentals + filings + news panels                               | Planned        |
+| 5     | Screener + alerts engine                                           | Planned        |
+| 6     | Macro dashboard + polish                                           | Planned        |
+| 7     | Auth + multi-user                                                  | Planned        |
+| 8     | Plugin system + production deployment                              | Planned        |
 
 ---
 

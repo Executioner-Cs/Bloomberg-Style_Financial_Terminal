@@ -1,6 +1,6 @@
 # CLAUDE.md — Bloomberg Terminal Engineering Governance
 
-# Last updated: 2026-04-15
+# Last updated: 2026-04-18
 
 # Authority: This document governs ALL code — human-written or AI-generated.
 
@@ -1001,6 +1001,7 @@ All skills live in `~/.claude/skills/` and are invoked via the Skill tool.
 
 Installed via: `pip install graphifyy && graphify install`
 Skill: `~/.claude/skills/graphify/SKILL.md` | Trigger: `/graphify`
+Last regenerated: 2026-04-18 (post-Phase-1 merge). Re-run after any large refactor.
 
 Run `/graphify .` from the project root to build an interactive knowledge graph of the
 codebase (AST extraction + semantic clustering). Useful before large refactors or when
