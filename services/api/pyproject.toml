@@ -39,6 +39,15 @@ dependencies = [
     "python-dateutil>=2.9.0",
     "pytz>=2024.1",
     "orjson>=3.10.0",    # Faster JSON serialization
+    # Data providers — ADR-005 approved free sources
+    # yfinance: unofficial Yahoo Finance wrapper. Primary equities OHLCV source.
+    # No API key required. Risk: unofficial; Yahoo can block. Mitigation: mock_data/ fallback.
+    "yfinance>=0.2.40",
+    # pandas: required by yfinance (returns DataFrames). Pinned to major version for ABI stability.
+    "pandas>=2.2.0",
+    # fredapi: official FRED Python client. Macro series (GDP, CPI, rates).
+    # Requires free FRED_API_KEY from fred.stlouisfed.org.
+    "fredapi>=0.5.2",
 ]
 
 [project.optional-dependencies]
@@ -100,6 +109,22 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = ["src.db.redis"]
 disallow_untyped_calls = false
+
+# yfinance has no py.typed marker or stubs. Unofficial Yahoo Finance wrapper — ADR-005.
+[[tool.mypy.overrides]]
+module = ["yfinance", "yfinance.*"]
+ignore_missing_imports = true
+
+# pandas ships its own stubs but the integration surface we use (DataFrame → dict)
+# is well-typed. ignore_missing_imports guards against stub version mismatches.
+[[tool.mypy.overrides]]
+module = ["pandas", "pandas.*"]
+ignore_missing_imports = true
+
+# fredapi has no py.typed marker or stubs. Official FRED client — ADR-005.
+[[tool.mypy.overrides]]
+module = ["fredapi", "fredapi.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
