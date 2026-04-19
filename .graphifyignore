@@ -1,0 +1,16 @@
+node_modules/
+dist/
+build/
+.turbo/
+.mypy_cache/
+.ruff_cache/
+.cursor/
+.claude/
+.git/
+.github/
+coverage/
+graphify-out/
+*.min.js
+*.min.css
+pnpm-lock.yaml
+*.lock
