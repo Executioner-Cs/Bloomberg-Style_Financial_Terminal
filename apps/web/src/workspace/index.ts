@@ -16,3 +16,8 @@ export {
 } from './stores';
 export type { PanelApp, PanelProps } from './types';
 export { registerPanelApp, getPanelApp, listPanelApps } from './panel-registry';
+export {
+  WorkspaceShell,
+  type WorkspaceShellProps,
+  type WorkspacePanelParams,
+} from './WorkspaceShell';
