@@ -24,21 +24,17 @@
  */
 
 import type { LayoutJson, PanelInstance } from './stores/workspace.store';
+import { WORKSPACE_STORAGE_KEY, WORKSPACE_QUERY_PARAM } from './constants';
 
 // ------------------------------------------------------------------
 // Constants — every value documented per CLAUDE.md Rule 1.
 // ------------------------------------------------------------------
 
-/**
- * localStorage key for the full workspace snapshot.
- *
- * The `.v1` suffix is load-bearing: it namespaces the key to the
- * current schema generation. If a future migration is impossible
- * (e.g. a dockview major-version layout-JSON break), bump the suffix
- * to `.v2` instead of running an ad-hoc migration, so users get a
- * clean slate without explicit key removal.
- */
-const STORAGE_KEY = 'terminal.workspace.v1';
+// WORKSPACE_STORAGE_KEY and WORKSPACE_QUERY_PARAM are imported from
+// constants.ts — the single source of truth for workspace string literals.
+// Local aliases keep the rest of this file readable without a rename.
+const STORAGE_KEY = WORKSPACE_STORAGE_KEY;
+const WS_QUERY_PARAM = WORKSPACE_QUERY_PARAM;
 
 /**
  * Schema version embedded in every saved snapshot.
@@ -48,15 +44,6 @@ const STORAGE_KEY = 'terminal.workspace.v1';
  * signals the shell to fall back to the default preset.
  */
 const CURRENT_VERSION = 1;
-
-/**
- * URL query parameter name for the workspace preset deep-link.
- *
- * Chosen to be short and unambiguous in a terminal context.
- * `ws` is not used by any browser API or framework router.
- * Example: `https://terminal.example.com/?ws=equities`
- */
-const WS_QUERY_PARAM = 'ws';
 
 // ------------------------------------------------------------------
 // Public types
@@ -129,6 +116,12 @@ function migrate(raw: unknown): WorkspaceSnapshot | null {
 // ------------------------------------------------------------------
 // localStorage persistence
 // ------------------------------------------------------------------
+
+// Encryption assumption: WorkspaceSnapshot currently stores panel types,
+// dockview layout JSON (panel positions/sizes), and active symbol strings only.
+// No credentials, tokens, or personally-identifying data are included.
+// If future panel props include sensitive data (e.g. API keys, portfolio
+// positions), add AES-GCM encryption here before calling setItem.
 
 /**
  * Persist a workspace snapshot to localStorage.

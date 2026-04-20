@@ -32,6 +32,7 @@ import type { DockviewApi } from 'dockview-react';
 import { useWorkspaceStore } from './stores/workspace.store';
 import { buildSnapshot, clearSnapshot } from './layout-serializer';
 import type { PanelInstance } from './stores/workspace.store';
+import { DOCKVIEW_COMPONENT_NAME } from './constants';
 
 // ------------------------------------------------------------------
 // Constants — every value documented per CLAUDE.md Rule 1.
@@ -69,8 +70,8 @@ const DEFAULT_FILINGS_SYMBOL = 'AAPL';
  */
 const MACRO_GRID_SERIES = ['FEDFUNDS', 'DGS10', 'CPIAUCSL', 'UNRATE'] as const;
 
-/** Component name registered in DockviewReact — must match WorkspaceShell.tsx. */
-const DOCKVIEW_COMPONENT = 'workspace-panel';
+/** Component name registered in DockviewReact — imported from constants.ts. */
+const DOCKVIEW_COMPONENT = DOCKVIEW_COMPONENT_NAME;
 
 // ------------------------------------------------------------------
 // Public type

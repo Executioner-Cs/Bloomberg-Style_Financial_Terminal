@@ -56,7 +56,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   ...EMPTY_STATE,
   addPanel: (panel): void =>
     set(
-      (state): Pick<WorkspaceState, 'panels'> => ({
+      (state): Partial<WorkspaceState> => ({
         panels: { ...state.panels, [panel.panelId]: panel },
       }),
     ),

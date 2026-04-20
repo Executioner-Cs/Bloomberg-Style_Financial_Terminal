@@ -20,7 +20,6 @@ from __future__ import annotations
 
 import hashlib
 import logging
-from typing import cast
 
 import redis.asyncio as aioredis
 
@@ -135,7 +134,12 @@ class NewsService:
         get_news = getattr(self._mock, "get_news", None)
         if get_news is None:
             return NewsResponse(articles=[], total=0, page=page)
-        return cast(NewsResponse, get_news(symbol=symbol, page=page))
+        result = get_news(symbol=symbol, page=page)
+        if not isinstance(result, NewsResponse):
+            raise TypeError(
+                f"MockDataLoader.get_news returned {type(result)!r}, expected NewsResponse"
+            )
+        return result
 
 
 def build_news_client() -> NewsAPIClient | None:

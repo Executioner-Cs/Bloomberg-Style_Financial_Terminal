@@ -19,7 +19,6 @@ until then, the service falls back to an empty response.
 from __future__ import annotations
 
 import logging
-from typing import cast
 
 import redis.asyncio as aioredis
 
@@ -101,7 +100,12 @@ class FilingsService:
         get_filings = getattr(self._mock, "get_filings", None)
         if get_filings is None:
             return FilingsResponse(symbol=symbol, filings=[], total=0)
-        return cast(FilingsResponse, get_filings(symbol=symbol, form_type=form_type))
+        result = get_filings(symbol=symbol, form_type=form_type)
+        if not isinstance(result, FilingsResponse):
+            raise TypeError(
+                f"MockDataLoader.get_filings returned {type(result)!r}, expected FilingsResponse"
+            )
+        return result
 
 
 def build_edgar_client() -> EDGARClient | None:

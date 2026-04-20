@@ -22,11 +22,12 @@
 import type { DockviewApi } from 'dockview-react';
 import type { PanelInstance } from './stores/workspace.store';
 import { useWorkspaceStore } from './stores/workspace.store';
+import { DOCKVIEW_COMPONENT_NAME } from './constants';
 
 let _api: DockviewApi | null = null;
 
-/** Component key used in DockviewReact — must stay in sync with WorkspaceShell. */
-const DOCKVIEW_COMPONENT = 'workspace-panel';
+/** Component key used in DockviewReact — sourced from constants.ts. */
+const DOCKVIEW_COMPONENT = DOCKVIEW_COMPONENT_NAME;
 
 // ------------------------------------------------------------------
 // API ref management
