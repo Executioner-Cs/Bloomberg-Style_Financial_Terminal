@@ -14,6 +14,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Delivers the **terminal core** capability tier — workspace shell plus the first
 six panels (Chart, Quote, Watchlist, Macro, News, Filings).
 
+**User-facing additions:**
+
+- Workspace shell: open, close, and rearrange panels by dragging tiles (powered by dockview)
+- Chart panel: interactive OHLCV candlestick chart with timeframe switcher (1m → 1M); keyboard shortcuts D/W/M change resolution when the panel is focused
+- Command palette (Ctrl+K): fuzzy-search all registered panels and instruments; open any panel directly from the keyboard
+- Symbol-linking bus: changing the active symbol in one panel propagates to all linked panels automatically
+- Three layout presets (Equities, Macro, Filings Research) accessible from the command palette
+- Workspace state persisted to `localStorage` — layout survives browser close and reopen
+- URL deep-linking: `?ws=equities` loads the named preset on first visit (useful for shared links)
+- Status bar: connection status badge and UTC clock in the bottom bar
+
+**Audit fixes (this sprint):**
+
+- Real health-check endpoint (`/health`) now pings Postgres, ClickHouse, and Redis; returns `"degraded"` or `"error"` on failures
+- API request timeout configurable via `VITE_API_TIMEOUT_MS` env var (was hardcoded 30 s)
+- `isChartPanelProps` type guard added — `JSON.parse` output validated before use
+- Workspace constants centralised into a single source of truth (`constants.ts`)
+- Four ADRs: ADR-007 (workspace shell), ADR-008 (command palette), ADR-009 (filings cache), ADR-010 (CSS design tokens)
+- CI enforcement scripts: `check-hardcoding.sh`, `check-port-registry.sh`, `check-adr-required.sh`
+- EDGAR user-agent validated at startup — rejects `@example.com` placeholders (SEC ToS)
+- News query input validated with regex + min-length (OWASP A03 input validation)
+- Unit test suite: API client (10 tests), chart panel adapter (18), terminal-context store (9), workspace API ref (10)
+
 **Backend (Stage A, shipped):**
 
 - `MacroService` + `/macro`, `/macro/{series_id}` routers with cache-first pattern (Redis)

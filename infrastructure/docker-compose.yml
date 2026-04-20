@@ -92,6 +92,8 @@ services:
       DATABASE_URL: postgresql+asyncpg://terminal:terminal_dev@postgres:5432/terminal
       SYNC_DATABASE_URL: postgresql://terminal:terminal_dev@postgres:5432/terminal
       CLICKHOUSE_HOST: clickhouse
+      # Redis DB 0 — API service cache (sessions, rate-limit counters, response cache).
+      # DB 0 is the Redis default; keeps the API cache isolated from Celery state.
       REDIS_URL: redis://redis:6379/0
       # MOCK_DATA_DIR overrides the .git-walk auto-detection inside the container.
       # The mock_data/ folder is mounted read-only at /mock_data. ADR-006.
@@ -130,7 +132,11 @@ services:
       DATABASE_URL: postgresql+asyncpg://terminal:terminal_dev@postgres:5432/terminal
       SYNC_DATABASE_URL: postgresql://terminal:terminal_dev@postgres:5432/terminal
       CLICKHOUSE_HOST: clickhouse
+      # Redis DB 1 — Celery task queue (broker). Separate from API cache (DB 0)
+      # so a broker flush does not evict cached API responses, and vice versa.
       CELERY_BROKER_URL: redis://redis:6379/1
+      # Redis DB 2 — Celery result backend. Kept separate from the broker (DB 1)
+      # so result GC (CELERY_RESULT_EXPIRES) does not compete with pending tasks.
       CELERY_RESULT_BACKEND: redis://redis:6379/2
       # MOCK_DATA_DIR overrides the .git-walk auto-detection inside the container.
       # The mock_data/ folder is mounted read-only at /mock_data. ADR-006.
@@ -160,7 +166,9 @@ services:
     env_file:
       - ../.env
     environment:
+      # Redis DB 1 — Celery task queue (broker). Matches worker service DB assignment.
       CELERY_BROKER_URL: redis://redis:6379/1
+      # Redis DB 2 — Celery result backend. Matches worker service DB assignment.
       CELERY_RESULT_BACKEND: redis://redis:6379/2
       MOCK_DATA_DIR: /mock_data
     volumes:
@@ -184,6 +192,8 @@ services:
     env_file:
       - ../.env
     environment:
+      # Redis DB 0 — shared with the API service for Pub/Sub price update fanout.
+      # DB 0 is also used for rate-limit counters that span both API and WS gateway.
       REDIS_URL: redis://redis:6379/0
       WS_GATEWAY_PORT: 3001
       WS_GATEWAY_INTERNAL_API_URL: http://api:8000
