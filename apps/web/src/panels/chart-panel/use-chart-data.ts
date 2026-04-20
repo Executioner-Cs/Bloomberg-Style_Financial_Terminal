@@ -123,6 +123,11 @@ type UseChartDataResult = {
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
+  /**
+   * True when the chart is rendering locally-generated mock data because the
+   * backend was unreachable. Use to show a "DEMO" indicator in the panel UI.
+   */
+  isUsingMockData: boolean;
   /** Triggers a manual refetch. Returns a promise that resolves when the query settles. */
   refetch: () => Promise<void>;
 };
@@ -150,9 +155,15 @@ export function useChartData(
     queryFn: async (): Promise<OHLCVResponse> => {
       try {
         return await fetchOHLCV(symbol, timeframe);
-      } catch {
-        // Backend not reachable in local dev — return mock bars so the chart
-        // renders something meaningful without the API running.
+      } catch (err) {
+        // Backend not reachable — serve mock bars so the chart remains usable
+        // in local dev without the API running. Log so the dev knows this is
+        // mock data, not live market data.
+        console.warn('[use-chart-data] API unreachable — serving mock data', {
+          symbol,
+          timeframe,
+          err,
+        });
         return generateMockBars(symbol, timeframe);
       }
     },
@@ -175,6 +186,8 @@ export function useChartData(
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,
+    // OHLCVResponse.source === 'mock' when the backend was unreachable.
+    isUsingMockData: query.data?.source === 'mock',
     refetch,
   };
 }

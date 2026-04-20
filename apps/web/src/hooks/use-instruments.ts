@@ -82,9 +82,10 @@ export function useInstruments(): UseQueryResult<InstrumentsResult, Error> {
     queryFn: async (): Promise<InstrumentListResponse> => {
       try {
         return await fetchInstruments({ limit: 500, offset: 0 });
-      } catch {
-        // Backend not reachable in local dev — return placeholder data so the
-        // command palette remains functional without the API running.
+      } catch (err) {
+        // Backend not reachable — command palette stays functional with
+        // placeholder instruments. Log so dev knows this is placeholder data.
+        console.warn('[use-instruments] API unreachable — serving placeholder instruments', err);
         return PLACEHOLDER_LIST;
       }
     },
