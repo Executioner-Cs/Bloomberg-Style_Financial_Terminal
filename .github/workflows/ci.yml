@@ -139,6 +139,31 @@ jobs:
         run: pytest tests/
 
   # ----------------------------------------------------------------
+  # Architecture governance — hardcoding + port registry + ADR checks
+  # ----------------------------------------------------------------
+  governance:
+    name: Architecture Governance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Make scripts executable
+        run: chmod +x scripts/check-hardcoding.sh scripts/check-port-registry.sh scripts/check-adr-required.sh
+
+      - name: Hardcoding check
+        run: scripts/check-hardcoding.sh
+
+      - name: Port registry check
+        run: scripts/check-port-registry.sh
+
+      - name: ADR required check
+        # Only run on PRs — needs a base ref to diff against
+        if: github.event_name == 'pull_request'
+        run: scripts/check-adr-required.sh origin/${{ github.base_ref }}
+
+  # ----------------------------------------------------------------
   # Security audit
   # ----------------------------------------------------------------
   security:
