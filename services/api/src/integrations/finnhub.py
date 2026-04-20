@@ -85,7 +85,8 @@ class FinnhubClient(BaseIntegrationClient):
         Args:
             symbol: Ticker symbol, e.g. "AAPL". Must be a valid Finnhub symbol.
         """
-        data: dict[str, Any] = await self.get(
+        # TODO(audit-H4): replace Any with dict[str, object] + isinstance narrowing
+        data: dict[str, Any] = await self.get(  # type: ignore[assignment]
             "/api/v1/quote",
             params={"symbol": symbol, "token": self._api_key},
         )

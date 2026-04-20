@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any
+from collections.abc import Mapping
 
 import httpx
 
@@ -92,9 +92,9 @@ class BaseIntegrationClient:
     async def get(
         self,
         path: str,
-        params: dict[str, Any] | None = None,
+        params: Mapping[str, str | int | float | bool | None] | None = None,
         max_retries: int = DEFAULT_MAX_RETRIES,
-    ) -> Any:
+    ) -> object:
         """
         Perform a GET request with retry and exponential backoff.
         Raises IntegrationError on unrecoverable failures.

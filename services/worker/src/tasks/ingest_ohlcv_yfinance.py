@@ -23,6 +23,7 @@ import clickhouse_connect
 
 from src.celery_app import app
 from src.config import settings
+from src.tasks.types import OHLCVTaskResult
 from src.integrations.base import IntegrationError
 from src.integrations.mock_loader import MockDataLoader, MockDataError
 from src.integrations.yfinance import YFinanceClient
@@ -38,7 +39,7 @@ logger = logging.getLogger(__name__)
     queue="ingestion",
     bind=True,
 )
-def ingest_yfinance_ohlcv(self: object) -> dict[str, object]:
+def ingest_yfinance_ohlcv(self: object) -> OHLCVTaskResult:
     """
     Fetch EOD OHLCV for all tracked equity symbols and write to ClickHouse.
 
@@ -50,7 +51,7 @@ def ingest_yfinance_ohlcv(self: object) -> dict[str, object]:
     return asyncio.run(_ingest_yfinance_ohlcv_async())
 
 
-async def _ingest_yfinance_ohlcv_async() -> dict[str, object]:
+async def _ingest_yfinance_ohlcv_async() -> OHLCVTaskResult:
     """Async implementation called by the synchronous Celery task wrapper."""
     symbols: list[str] = settings.yfinance_equity_symbols
 

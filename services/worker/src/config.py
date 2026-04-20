@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -116,6 +116,25 @@ class WorkerSettings(BaseSettings):
         default="Bloomberg-Terminal/1.0 user@example.com",
         description="User-Agent for EDGAR. REQUIRED by SEC ToS.",
     )
+
+    @field_validator("edgar_user_agent")
+    @classmethod
+    def edgar_user_agent_must_be_real(cls, v: str) -> str:
+        """
+        Reject placeholder user-agents before the worker starts.
+
+        SEC ToS requires a real contact email in the User-Agent header for
+        EDGAR access. Shipping with 'example.com' would violate the ToS and
+        risk IP-level blocking of the entire terminal. Fail loudly at startup
+        rather than silently during a task run. Set EDGAR_USER_AGENT to a real
+        'Name/Version your@real-email.com' value in production.
+        """
+        if "example.com" in v:
+            raise ValueError(
+                "EDGAR_USER_AGENT must contain a real contact email (SEC ToS requirement). "
+                "Set EDGAR_USER_AGENT=<AppName>/<Version> <your@email.com> in your .env file."
+            )
+        return v
 
     # ─── yfinance (ADR-005) ───────────────────────────────────────────────────
     yfinance_requests_per_minute: int = Field(

@@ -51,7 +51,12 @@ async def list_news(
     q: str | None = Query(
         default=None,
         description="Optional free-form query, e.g. 'inflation' or 'AI chips'.",
+        min_length=1,
         max_length=100,
+        # Restrict to safe characters — word chars, spaces, hyphens, dots.
+        # Prevents injection of shell metacharacters or URL-breaking sequences
+        # through the query string before it reaches the NewsAPI upstream.
+        pattern=r"^[\w\s\-\.]+$",
     ),
     page: int = Query(default=1, ge=1, le=20, description="1-indexed page number."),
     page_size: int = Query(

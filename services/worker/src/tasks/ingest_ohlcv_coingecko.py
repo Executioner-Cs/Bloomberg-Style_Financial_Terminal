@@ -23,10 +23,12 @@ from pathlib import Path
 
 import clickhouse_connect
 import redis.asyncio as aioredis
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from src.celery_app import app
 from src.config import settings
+from src.tasks.types import OHLCVTaskResult, SeedTaskResult
 from src.integrations.base import IntegrationError
 from src.integrations.coingecko import CoinGeckoClient
 from src.models.instrument import Instrument
@@ -63,7 +65,7 @@ def _find_mock_data_dir() -> Path:
     queue="ingestion",
     bind=True,
 )
-def ingest_coingecko_ohlcv(self: object) -> dict[str, object]:
+def ingest_coingecko_ohlcv(self: object) -> OHLCVTaskResult:
     """
     Fetch OHLCV bars for top-N crypto coins and write them to ClickHouse.
 
@@ -78,7 +80,7 @@ def ingest_coingecko_ohlcv(self: object) -> dict[str, object]:
     return asyncio.run(_ingest_coingecko_ohlcv_async())
 
 
-async def _ingest_coingecko_ohlcv_async() -> dict[str, object]:
+async def _ingest_coingecko_ohlcv_async() -> OHLCVTaskResult:
     """Async implementation called by the synchronous Celery task wrapper."""
     from src.cache import keys as cache_keys
 
@@ -173,6 +175,7 @@ async def _ingest_coingecko_ohlcv_async() -> dict[str, object]:
         "inserted": total_inserted,
         "failed": failed_coins,
         "coins_processed": len(top_coins),
+        "mode": "live",
     }
 
 
@@ -187,7 +190,7 @@ async def _ingest_coingecko_ohlcv_async() -> dict[str, object]:
     queue="ingestion",
     bind=True,
 )
-def seed_crypto_instruments(self: object) -> dict[str, object]:
+def seed_crypto_instruments(self: object) -> SeedTaskResult:
     """
     Upsert the top-N crypto coins into the instruments PostgreSQL table.
 
@@ -197,7 +200,7 @@ def seed_crypto_instruments(self: object) -> dict[str, object]:
     return asyncio.run(_seed_crypto_instruments_async())
 
 
-async def _seed_crypto_instruments_async() -> dict[str, object]:
+async def _seed_crypto_instruments_async() -> SeedTaskResult:
     """Async implementation called by the synchronous Celery task wrapper."""
     client = CoinGeckoClient()
     engine = create_async_engine(settings.database_url, pool_pre_ping=True)
@@ -222,10 +225,10 @@ async def _seed_crypto_instruments_async() -> dict[str, object]:
                 )
                 await repo.upsert(instrument)
                 upserted += 1
-            except Exception:
-                # Per-coin DB upsert failure (PostgreSQL constraint, network timeout).
-                # Broad catch is intentional: per-item resilience so one bad coin
-                # does not abort the entire seeding run. All failures are logged above.
+            except SQLAlchemyError:
+                # Per-coin DB upsert failure (PostgreSQL constraint, connection timeout).
+                # SQLAlchemyError is intentional scope: per-item resilience so one bad
+                # coin does not abort the entire seeding run. Unexpected errors propagate.
                 logger.exception("Failed to upsert instrument for coin %s", coin.id)
                 failed.append(coin.id)
 

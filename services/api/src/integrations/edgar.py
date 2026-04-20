@@ -164,7 +164,8 @@ class EDGARClient(BaseIntegrationClient):
         if start_date is not None:
             params["startdt"] = start_date.isoformat()
 
-        data: dict[str, Any] = await self.get(
+        # TODO(audit-H4): replace Any with dict[str, object] + isinstance narrowing
+        data: dict[str, Any] = await self.get(  # type: ignore[assignment]
             "/LATEST/search-index",
             params=params,
         )

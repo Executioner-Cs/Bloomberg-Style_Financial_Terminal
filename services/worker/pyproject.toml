@@ -62,6 +62,9 @@ target-version = ["py312"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
+# pydantic.mypy plugin: teaches mypy about BaseSettings env-var injection so
+# WorkerSettings() (no args) does not trigger [call-arg] errors.
+plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
 # celery does not ship a py.typed marker or type stubs and has no plans to do so.

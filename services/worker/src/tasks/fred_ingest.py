@@ -22,6 +22,7 @@ import clickhouse_connect
 
 from src.celery_app import app
 from src.config import settings
+from src.tasks.types import OHLCVTaskResult
 from src.integrations.base import IntegrationError
 from src.integrations.fred import FredClient
 from src.integrations.mock_loader import MockDataLoader, MockDataError
@@ -37,7 +38,7 @@ logger = logging.getLogger(__name__)
     queue="ingestion",
     bind=True,
 )
-def refresh_macro_series(self: object) -> dict[str, object]:
+def refresh_macro_series(self: object) -> OHLCVTaskResult:
     """
     Fetch macro observations for all tracked FRED series and write to ClickHouse.
 
@@ -49,7 +50,7 @@ def refresh_macro_series(self: object) -> dict[str, object]:
     return asyncio.run(_refresh_macro_series_async())
 
 
-async def _refresh_macro_series_async() -> dict[str, object]:
+async def _refresh_macro_series_async() -> OHLCVTaskResult:
     """Async implementation called by the synchronous Celery task wrapper."""
     series_ids: list[str] = settings.fred_series_ids
 

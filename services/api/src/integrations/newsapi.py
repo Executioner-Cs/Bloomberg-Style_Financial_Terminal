@@ -13,9 +13,10 @@ from __future__ import annotations
 
 import logging
 from datetime import UTC, datetime
-from typing import Any
 
-from src.integrations.base import BaseIntegrationClient
+import httpx
+
+from src.integrations.base import BaseIntegrationClient, IntegrationError
 from src.schemas.news import NewsArticle, NewsResponse
 
 logger = logging.getLogger(__name__)
@@ -62,10 +63,8 @@ class NewsAPIClient(BaseIntegrationClient):
             "X-Api-Key": self._api_key or "",
         }
 
-    def _get_client(self) -> Any:
+    def _get_client(self) -> httpx.AsyncClient:
         """Override to apply the configured timeout from settings."""
-        import httpx
-
         if self._client is None or self._client.is_closed:
             self._client = httpx.AsyncClient(
                 base_url=self.base_url,
@@ -90,7 +89,7 @@ class NewsAPIClient(BaseIntegrationClient):
             return None
 
     def _article_from_raw(
-        self, raw: dict[str, Any], symbol: str | None = None
+        self, raw: dict[str, object], symbol: str | None = None
     ) -> NewsArticle | None:
         """
         Convert a raw NewsAPI article dict to a NewsArticle schema.
@@ -98,28 +97,34 @@ class NewsAPIClient(BaseIntegrationClient):
         Returns None if mandatory fields (title, url, publishedAt) are missing.
         NewsAPI sometimes returns removed articles with '[Removed]' fields.
         """
-        title: str | None = raw.get("title")
-        url: str | None = raw.get("url")
-        published_raw: str | None = raw.get("publishedAt")
+        title_raw = raw.get("title")
+        url_raw = raw.get("url")
+        published_raw = raw.get("publishedAt")
 
-        if not title or not url or not published_raw:
+        # isinstance narrowing required: raw values are `object`, not str.
+        if not isinstance(title_raw, str) or not isinstance(url_raw, str) or not isinstance(published_raw, str):
             return None
 
         # NewsAPI marks removed articles with literal "[Removed]" values.
-        if title == "[Removed]" or url == "[Removed]":
+        if title_raw == "[Removed]" or url_raw == "[Removed]":
             return None
 
         published_at = self._parse_published_at(published_raw)
         if published_at is None:
             return None
 
-        source: dict[str, Any] = raw.get("source", {})
-        source_name: str = source.get("name") or "Unknown"
+        source_raw = raw.get("source", {})
+        source: dict[str, object] = source_raw if isinstance(source_raw, dict) else {}
+        source_name_val = source.get("name")
+        source_name: str = source_name_val if isinstance(source_name_val, str) else "Unknown"
+
+        description_raw = raw.get("description")
+        description: str | None = description_raw if isinstance(description_raw, str) else None
 
         return NewsArticle(
-            title=title,
-            description=raw.get("description"),
-            url=url,
+            title=title_raw,
+            description=description,
+            url=url_raw,
             published_at=published_at,
             source_name=source_name,
             symbol=symbol,
@@ -160,15 +165,23 @@ class NewsAPIClient(BaseIntegrationClient):
             # Default to business category when no query is given.
             params["category"] = "business"
 
-        data: dict[str, Any] = await self.get("/v2/top-headlines", params=params)
+        raw_response = await self.get("/v2/top-headlines", params=params)
+        if not isinstance(raw_response, dict):
+            raise IntegrationError(self.provider_name, 0, "Unexpected response shape from NewsAPI")
+        data: dict[str, object] = raw_response
 
         articles: list[NewsArticle] = []
-        for raw_article in data.get("articles", []):
+        raw_articles = data.get("articles", [])
+        article_list = raw_articles if isinstance(raw_articles, list) else []
+        for raw_article in article_list:
+            if not isinstance(raw_article, dict):
+                continue
             article = self._article_from_raw(raw_article, symbol=symbol)
             if article is not None:
                 articles.append(article)
 
-        total: int = data.get("totalResults", len(articles))
+        total_raw = data.get("totalResults", len(articles))
+        total: int = total_raw if isinstance(total_raw, int) else len(articles)
 
         return NewsResponse(articles=articles, total=total, page=page)
 
