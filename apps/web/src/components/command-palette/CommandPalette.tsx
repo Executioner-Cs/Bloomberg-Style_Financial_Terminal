@@ -21,7 +21,7 @@
  *
  * Plan ref: B14.
  */
-import { useEffect, useMemo, useState, type JSX } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 import { Command } from 'cmdk';
 import { useNavigate } from '@tanstack/react-router';
 import type { InstrumentResponse } from '@terminal/types';
@@ -41,6 +41,53 @@ const ASSET_CLASS_LABEL: Record<string, string> = {
   forex: 'FX',
 };
 
+// ------------------------------------------------------------------
+// Memoised instrument row — prevents re-renders of untouched rows
+// when the query or selection changes (CLAUDE.md Part XII).
+// ------------------------------------------------------------------
+
+type InstrumentRowProps = {
+  instrument: InstrumentResponse;
+  /** Stable callback — wrapped in useCallback in the parent. */
+  onSelect: (instrument: InstrumentResponse) => void;
+};
+
+/**
+ * Single row in the instrument results list.
+ * Memoised on symbol equality so ticking query state does not re-render
+ * the entire list — only rows whose instrument data changed.
+ */
+const InstrumentRow = memo(
+  function InstrumentRow({ instrument, onSelect }: InstrumentRowProps): JSX.Element {
+    return (
+      <Command.Item
+        value={instrument.symbol}
+        onSelect={(): void => onSelect(instrument)}
+        className="flex items-center justify-between px-3.5 py-[9px] cursor-pointer select-none aria-selected:bg-[var(--color-bg-hover)]"
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="text-[13px] font-semibold text-[var(--color-accent)] tracking-wider shrink-0 w-[120px]">
+            {instrument.symbol.toUpperCase()}
+          </span>
+          <span className="text-[12px] text-[var(--color-text-secondary)] overflow-hidden text-ellipsis whitespace-nowrap">
+            {instrument.name}
+          </span>
+        </div>
+
+        <span className="py-px px-1.5 border border-[var(--color-border)] rounded-[2px] text-[var(--color-text-muted)] text-[9px] tracking-[0.08em] shrink-0">
+          {ASSET_CLASS_LABEL[instrument.asset_class] ?? instrument.asset_class.toUpperCase()}
+        </span>
+      </Command.Item>
+    );
+  },
+  (prev, next) =>
+    prev.instrument.symbol === next.instrument.symbol && prev.onSelect === next.onSelect,
+);
+
+// ------------------------------------------------------------------
+// CommandPalette
+// ------------------------------------------------------------------
+
 /**
  * Global command palette — opened with Ctrl+K. Renders as a floating dialog
  * over the terminal with two result groups: instrument search and workspace
@@ -53,39 +100,58 @@ export default function CommandPalette(): JSX.Element {
   const navigate = useNavigate();
   const { data } = useInstruments();
 
+  // Ref mirrors open state so the keydown handler can read the current value
+  // without being re-registered on every toggle (FE-H2).
+  const isOpenRef = useRef(false);
+  useEffect(() => {
+    isOpenRef.current = open;
+  }, [open]);
+
   // Preset list is static — computed once, never changes at runtime.
   const presets = useMemo(() => listPresets(), []);
 
-  // Global Ctrl+K listener — prevents browser address-bar shortcut.
+  // Global Ctrl+K / Escape listener — registered once with [] deps.
+  // Reads open state via isOpenRef to avoid stale closure without re-attaching
+  // on every toggle (FE-H2: stable handler).
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent): void {
       if (event.ctrlKey && event.key === 'k') {
         event.preventDefault();
         setOpen((prev) => !prev);
       }
-      if (event.key === 'Escape' && open) {
+      if (event.key === 'Escape' && isOpenRef.current) {
         setOpen(false);
         setQuery('');
       }
     }
     window.addEventListener('keydown', handleKeyDown);
     return (): void => window.removeEventListener('keydown', handleKeyDown);
-  }, [open]);
+  }, []); // stable — open state read via ref
 
-  function handleSelect(instrument: InstrumentResponse): void {
-    setOpen(false);
-    setQuery('');
-    void navigate({ to: '/chart/$symbol', params: { symbol: instrument.symbol } });
-  }
+  // useCallback prevents new function refs on every render, which would
+  // invalidate InstrumentRow memo equality check (FE-H3).
+  const handleSelect = useCallback(
+    (instrument: InstrumentResponse): void => {
+      setOpen(false);
+      setQuery('');
+      void navigate({ to: '/chart/$symbol', params: { symbol: instrument.symbol } });
+    },
+    [navigate],
+  );
 
-  function handlePresetSelect(slug: string): void {
+  const handlePresetSelect = useCallback((slug: string): void => {
     const api = getWorkspaceApi();
     // Guard: palette may open before the workspace route is active.
     if (!api) return;
     setOpen(false);
     setQuery('');
     switchToPreset(slug, api);
-  }
+  }, []);
+
+  const handleBackdropClick = useCallback((): void => {
+    setOpen(false);
+    setQuery('');
+  }, []);
 
   function getResults(): InstrumentResponse[] {
     if (data === undefined) return [];
@@ -122,10 +188,7 @@ export default function CommandPalette(): JSX.Element {
       {/* Backdrop */}
       <div
         aria-hidden="true"
-        onClick={(): void => {
-          setOpen(false);
-          setQuery('');
-        }}
+        onClick={handleBackdropClick}
         className="fixed inset-0 z-[49] bg-black/65 backdrop-blur-[2px]"
       />
 
@@ -159,26 +222,11 @@ export default function CommandPalette(): JSX.Element {
             </Command.Empty>
 
             {results.map((instrument) => (
-              <Command.Item
+              <InstrumentRow
                 key={instrument.symbol}
-                value={instrument.symbol}
-                onSelect={(): void => handleSelect(instrument)}
-                className="flex items-center justify-between px-3.5 py-[9px] cursor-pointer select-none aria-selected:bg-[var(--color-bg-hover)]"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="text-[13px] font-semibold text-[var(--color-accent)] tracking-wider shrink-0 w-[120px]">
-                    {instrument.symbol.toUpperCase()}
-                  </span>
-                  <span className="text-[12px] text-[var(--color-text-secondary)] overflow-hidden text-ellipsis whitespace-nowrap">
-                    {instrument.name}
-                  </span>
-                </div>
-
-                <span className="py-px px-1.5 border border-[var(--color-border)] rounded-[2px] text-[var(--color-text-muted)] text-[9px] tracking-[0.08em] shrink-0">
-                  {ASSET_CLASS_LABEL[instrument.asset_class] ??
-                    instrument.asset_class.toUpperCase()}
-                </span>
-              </Command.Item>
+                instrument={instrument}
+                onSelect={handleSelect}
+              />
             ))}
 
             {/* Workspace group — preset switching */}
