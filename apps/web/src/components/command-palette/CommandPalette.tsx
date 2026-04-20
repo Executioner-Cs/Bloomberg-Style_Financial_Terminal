@@ -120,13 +120,7 @@ export default function CommandPalette(): JSX.Element {
           setOpen(false);
           setQuery('');
         }}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 49,
-          background: 'rgba(0, 0, 0, 0.65)',
-          backdropFilter: 'blur(2px)',
-        }}
+        className="fixed inset-0 z-[49] bg-black/65 backdrop-blur-[2px]"
       />
 
       {/* Dialog */}
@@ -134,91 +128,27 @@ export default function CommandPalette(): JSX.Element {
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
-        style={{
-          position: 'fixed',
-          top: '18%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 50,
-          width: '600px',
-          maxWidth: '92vw',
-          background: 'var(--color-bg-panel)',
-          border: '1px solid var(--color-accent)',
-          borderRadius: '4px',
-          overflow: 'hidden',
-          boxShadow: '0 24px 64px rgba(0, 0, 0, 0.85)',
-        }}
+        className="fixed top-[18%] left-1/2 -translate-x-1/2 z-50 w-[600px] max-w-[92vw] bg-[var(--color-bg-panel)] border border-[var(--color-accent)] rounded-[4px] overflow-hidden shadow-[0_24px_64px_rgba(0,0,0,0.85)]"
       >
         <Command shouldFilter={false} loop>
           {/* Search input */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              padding: '0 12px',
-              borderBottom: '1px solid var(--color-border)',
-            }}
-          >
-            <span
-              style={{
-                color: 'var(--color-accent)',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '14px',
-                marginRight: '10px',
-                flexShrink: 0,
-              }}
-            >
-              {'>'}
-            </span>
+          <div className="flex items-center px-3 border-b border-[var(--color-border)]">
+            <span className="text-[var(--color-accent)] text-[14px] mr-2.5 shrink-0">{'>'}</span>
             <Command.Input
               autoFocus
               value={query}
               onValueChange={setQuery}
               placeholder="Search instruments — type a symbol or name"
-              style={{
-                flex: 1,
-                padding: '14px 0',
-                background: 'transparent',
-                border: 'none',
-                outline: 'none',
-                color: 'var(--color-text-primary)',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '13px',
-                letterSpacing: '0.02em',
-              }}
+              className="flex-1 py-[14px] bg-transparent border-0 outline-none text-[var(--color-text-primary)] text-[13px] tracking-[0.02em]"
             />
-            <kbd
-              style={{
-                padding: '2px 6px',
-                border: '1px solid var(--color-border)',
-                borderRadius: '3px',
-                color: 'var(--color-text-muted)',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '10px',
-                flexShrink: 0,
-              }}
-            >
+            <kbd className="py-0.5 px-1.5 border border-[var(--color-border)] rounded-[3px] text-[var(--color-text-muted)] text-[10px] shrink-0">
               ESC
             </kbd>
           </div>
 
           {/* Results */}
-          <Command.List
-            style={{
-              maxHeight: '340px',
-              overflowY: 'auto',
-              padding: '4px 0',
-            }}
-          >
-            <Command.Empty
-              style={{
-                padding: '24px',
-                textAlign: 'center',
-                color: 'var(--color-text-muted)',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '12px',
-              }}
-            >
+          <Command.List className="max-h-[340px] overflow-y-auto py-1">
+            <Command.Empty className="p-6 text-center text-[var(--color-text-muted)] text-[12px]">
               No instruments found for &ldquo;{query}&rdquo;
             </Command.Empty>
 
@@ -227,59 +157,18 @@ export default function CommandPalette(): JSX.Element {
                 key={instrument.symbol}
                 value={instrument.symbol}
                 onSelect={(): void => handleSelect(instrument)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '9px 14px',
-                  cursor: 'pointer',
-                  userSelect: 'none',
-                }}
-                // cmdk sets data-selected on the focused item
-                data-selected-style={{
-                  background: 'var(--color-bg-hover)',
-                }}
+                className="flex items-center justify-between px-3.5 py-[9px] cursor-pointer select-none aria-selected:bg-[var(--color-bg-hover)]"
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      color: 'var(--color-accent)',
-                      letterSpacing: '0.05em',
-                      flexShrink: 0,
-                      width: '120px',
-                    }}
-                  >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-[13px] font-semibold text-[var(--color-accent)] tracking-wider shrink-0 w-[120px]">
                     {instrument.symbol.toUpperCase()}
                   </span>
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '12px',
-                      color: 'var(--color-text-secondary)',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
+                  <span className="text-[12px] text-[var(--color-text-secondary)] overflow-hidden text-ellipsis whitespace-nowrap">
                     {instrument.name}
                   </span>
                 </div>
 
-                <span
-                  style={{
-                    padding: '1px 6px',
-                    border: '1px solid var(--color-border)',
-                    borderRadius: '2px',
-                    color: 'var(--color-text-muted)',
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: '9px',
-                    letterSpacing: '0.08em',
-                    flexShrink: 0,
-                  }}
-                >
+                <span className="py-px px-1.5 border border-[var(--color-border)] rounded-[2px] text-[var(--color-text-muted)] text-[9px] tracking-[0.08em] shrink-0">
                   {ASSET_CLASS_LABEL[instrument.asset_class] ??
                     instrument.asset_class.toUpperCase()}
                 </span>
@@ -290,10 +179,7 @@ export default function CommandPalette(): JSX.Element {
             {presetResults.length > 0 && (
               <Command.Group
                 heading="Workspace"
-                style={{
-                  paddingTop: '4px',
-                  borderTop: results.length > 0 ? '1px solid var(--color-border)' : undefined,
-                }}
+                className={`pt-1 ${results.length > 0 ? 'border-t border-[var(--color-border)]' : ''}`}
               >
                 {presetResults.map((preset) => {
                   const Icon = preset.icon;
@@ -302,36 +188,13 @@ export default function CommandPalette(): JSX.Element {
                       key={preset.slug}
                       value={`workspace-preset-${preset.slug}`}
                       onSelect={(): void => handlePresetSelect(preset.slug)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        padding: '9px 14px',
-                        cursor: 'pointer',
-                        userSelect: 'none',
-                      }}
+                      className="flex items-center gap-2.5 px-3.5 py-[9px] cursor-pointer select-none aria-selected:bg-[var(--color-bg-hover)]"
                     >
-                      <Icon size={13} style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
-                      <span
-                        style={{
-                          fontFamily: 'var(--font-mono)',
-                          fontSize: '13px',
-                          color: 'var(--color-text-primary)',
-                          flexShrink: 0,
-                        }}
-                      >
+                      <Icon size={13} className="text-[var(--color-accent)] shrink-0" />
+                      <span className="text-[13px] text-[var(--color-text-primary)] shrink-0">
                         Switch to {preset.displayName}
                       </span>
-                      <span
-                        style={{
-                          fontFamily: 'var(--font-mono)',
-                          fontSize: '11px',
-                          color: 'var(--color-text-muted)',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
+                      <span className="text-[11px] text-[var(--color-text-muted)] overflow-hidden text-ellipsis whitespace-nowrap">
                         {preset.description}
                       </span>
                     </Command.Item>
@@ -342,18 +205,7 @@ export default function CommandPalette(): JSX.Element {
           </Command.List>
 
           {/* Footer */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '6px 14px',
-              borderTop: '1px solid var(--color-border)',
-              color: 'var(--color-text-muted)',
-              fontFamily: 'var(--font-mono)',
-              fontSize: '10px',
-            }}
-          >
+          <div className="flex items-center justify-between px-3.5 py-1.5 border-t border-[var(--color-border)] text-[var(--color-text-muted)] text-[10px]">
             <span>
               {results.length} instrument{results.length !== 1 ? 's' : ''}
               {query.length === 0 ? ' · type to search' : ''}

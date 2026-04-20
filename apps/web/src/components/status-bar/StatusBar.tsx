@@ -39,48 +39,16 @@ export default function StatusBar(): JSX.Element {
   return (
     <div
       aria-label="Status bar"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        height: '24px',
-        padding: '0 12px',
-        background: 'var(--color-bg-secondary)',
-        borderTop: '1px solid var(--color-border)',
-        flexShrink: 0,
-      }}
+      className="flex items-center justify-between h-6 px-3 bg-[var(--color-bg-secondary)] border-t border-[var(--color-border)] shrink-0"
     >
       {/* Left: version + connection status */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          fontFamily: 'var(--font-mono)',
-          fontSize: '10px',
-          color: 'var(--color-text-muted)',
-          letterSpacing: '0.05em',
-        }}
-      >
-        <span style={{ color: 'var(--color-accent)', fontWeight: 600 }}>BLOOMBERG TERMINAL</span>
+      <div className="flex items-center gap-3 text-[10px] text-[var(--color-text-muted)] tracking-wider">
+        <span className="text-[var(--color-accent)] font-semibold">BLOOMBERG TERMINAL</span>
         <span>v0.0.1</span>
-        <span
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-          }}
-        >
+        <span className="flex items-center gap-1">
           <span
             aria-label="Connection status: connected"
-            style={{
-              display: 'inline-block',
-              width: '6px',
-              height: '6px',
-              borderRadius: '50%',
-              background: 'var(--color-positive)',
-              flexShrink: 0,
-            }}
+            className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--color-positive)] shrink-0"
           />
           <span>CONNECTED</span>
         </span>
@@ -89,12 +57,7 @@ export default function StatusBar(): JSX.Element {
       {/* Right: UTC clock */}
       <span
         aria-label="UTC clock"
-        style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: '10px',
-          color: 'var(--color-text-muted)',
-          letterSpacing: '0.05em',
-        }}
+        className="text-[10px] text-[var(--color-text-muted)] tracking-wider"
       >
         {utcTime}
       </span>

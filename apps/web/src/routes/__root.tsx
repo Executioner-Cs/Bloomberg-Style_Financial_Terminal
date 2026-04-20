@@ -12,12 +12,9 @@ import StatusBar from '@/components/status-bar';
 
 export default function RootLayout(): JSX.Element {
   return (
-    <div
-      className="terminal-shell"
-      style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
-    >
+    <div className="terminal-shell flex flex-col h-full">
       <CommandPalette />
-      <main role="main" style={{ flex: 1, overflow: 'hidden' }}>
+      <main role="main" className="flex-1 overflow-hidden">
         <Outlet />
       </main>
       <StatusBar />

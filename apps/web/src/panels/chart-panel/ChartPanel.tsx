@@ -199,40 +199,15 @@ export function ChartPanel({
   }, [isActive, handleTimeframeChange, handleTimeframeShortcut]);
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        background: 'var(--color-bg-panel)',
-        border: '1px solid var(--color-border)',
-      }}
-    >
+    <div className="flex flex-col h-full bg-[var(--color-bg-panel)] border border-[var(--color-border)]">
       {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '6px 10px',
-          borderBottom: '1px solid var(--color-border)',
-          flexShrink: 0,
-        }}
-      >
-        <span
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '12px',
-            fontWeight: 600,
-            color: 'var(--color-accent)',
-            letterSpacing: '0.05em',
-          }}
-        >
+      <div className="flex items-center justify-between py-1.5 px-2.5 border-b border-[var(--color-border)] shrink-0">
+        <span className="text-[12px] font-semibold text-[var(--color-accent)] tracking-wider">
           {symbol.toUpperCase()}
         </span>
 
         {/* Timeframe selector */}
-        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+        <div className="flex gap-1 items-center">
           {TIMEFRAME_OPTIONS.map((tf) => (
             <button
               key={tf}
@@ -240,17 +215,11 @@ export function ChartPanel({
               aria-pressed={timeframe === tf}
               aria-label={`Select ${tf} timeframe`}
               onClick={() => handleTimeframeChange(tf)}
-              style={{
-                padding: '2px 8px',
-                background: timeframe === tf ? 'var(--color-accent)' : 'transparent',
-                border: `1px solid ${timeframe === tf ? 'var(--color-accent)' : 'var(--color-border)'}`,
-                borderRadius: '2px',
-                color: timeframe === tf ? '#000' : 'var(--color-text-secondary)',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '11px',
-                cursor: 'pointer',
-                letterSpacing: '0.05em',
-              }}
+              className={`py-0.5 px-2 text-[11px] cursor-pointer tracking-wider border rounded-[2px] ${
+                timeframe === tf
+                  ? 'bg-[var(--color-accent)] border-[var(--color-accent)] text-black'
+                  : 'bg-transparent border-[var(--color-border)] text-[var(--color-text-secondary)]'
+              }`}
             >
               {tf}
             </button>
@@ -261,17 +230,7 @@ export function ChartPanel({
             type="button"
             onClick={onClose}
             aria-label="Close chart panel"
-            style={{
-              marginLeft: '8px',
-              padding: '2px 6px',
-              background: 'transparent',
-              border: '1px solid var(--color-border)',
-              borderRadius: '2px',
-              color: 'var(--color-text-muted)',
-              fontFamily: 'var(--font-mono)',
-              fontSize: '11px',
-              cursor: 'pointer',
-            }}
+            className="ml-2 py-0.5 px-1.5 bg-transparent border border-[var(--color-border)] rounded-[2px] text-[var(--color-text-muted)] text-[11px] cursor-pointer"
           >
             ✕
           </button>
@@ -279,19 +238,17 @@ export function ChartPanel({
       </div>
 
       {/* Chart area */}
-      <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+      <div className="flex-1 relative overflow-hidden">
         {isLoading && <PanelSkeleton rows={8} />}
         {isError && error !== null && <PanelError error={error} onRetry={handleRetry} />}
+        {/*
+         * The container div always remains mounted so lightweight-charts has a DOM
+         * element to attach to. Hidden (not removed) while loading or erroring.
+         */}
         <div
           ref={containerRef}
           aria-label={`Price chart for ${symbol}`}
-          style={{
-            width: '100%',
-            height: '100%',
-            // Hide the container while loading/erroring so the chart DOM
-            // element still exists for the chart to mount into.
-            visibility: isLoading || isError ? 'hidden' : 'visible',
-          }}
+          className={`w-full h-full ${isLoading || isError ? 'invisible' : 'visible'}`}
         />
       </div>
     </div>

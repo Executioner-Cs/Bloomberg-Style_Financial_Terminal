@@ -9,57 +9,17 @@ import type { JSX } from 'react';
 
 export default function IndexPage(): JSX.Element {
   return (
-    <div
-      style={{
-        display: 'flex',
-        height: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'column',
-        gap: '16px',
-        fontFamily: 'var(--font-mono)',
-        userSelect: 'none',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '8px',
-        }}
-      >
-        <span
-          style={{
-            fontSize: '11px',
-            fontWeight: 700,
-            letterSpacing: '0.2em',
-            color: 'var(--color-accent)',
-          }}
-        >
+    <div className="flex h-full items-center justify-center flex-col gap-4 select-none">
+      <div className="flex flex-col items-center gap-2">
+        <span className="text-[11px] font-bold tracking-[0.2em] text-[var(--color-accent)]">
           BLOOMBERG TERMINAL v0.0.1
         </span>
-        <span
-          style={{
-            fontSize: '11px',
-            letterSpacing: '0.1em',
-            color: 'var(--color-text-muted)',
-          }}
-        >
+        <span className="text-[11px] tracking-widest text-[var(--color-text-muted)]">
           PRESS Ctrl+K TO BEGIN
         </span>
       </div>
 
-      <div
-        style={{
-          display: 'flex',
-          gap: '24px',
-          fontSize: '10px',
-          letterSpacing: '0.05em',
-          color: 'var(--color-text-muted)',
-          opacity: 0.6,
-        }}
-      >
+      <div className="flex gap-6 text-[10px] tracking-wider text-[var(--color-text-muted)] opacity-60">
         <span>↑↓ NAVIGATE</span>
         <span>ENTER SELECT</span>
         <span>ESC CLOSE</span>
