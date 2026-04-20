@@ -45,7 +45,7 @@ const DEFAULT_CHART_SYMBOL = 'AAPL';
  * runtime assertion."
  */
 function isChartPanelProps(v: unknown): v is Partial<ChartPanelProps> {
-  if (typeof v !== 'object' || v === null) return false;
+  if (typeof v !== 'object' || v === null || Array.isArray(v)) return false;
   const obj = v as Record<string, unknown>;
   if ('symbol' in obj && typeof obj['symbol'] !== 'string') return false;
   if ('timeframe' in obj && typeof obj['timeframe'] !== 'string') return false;

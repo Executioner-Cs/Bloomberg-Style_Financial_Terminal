@@ -171,6 +171,7 @@ describe('ChartPanel', () => {
 
     renderChartPanel({ symbol: 'solana' });
 
-    expect(mockUseChartData).toHaveBeenCalledWith('solana', '1D');
+    // isActive is passed as the third arg (FE-C1: polling paused when panel inactive)
+    expect(mockUseChartData).toHaveBeenCalledWith('solana', '1D', false);
   });
 });
