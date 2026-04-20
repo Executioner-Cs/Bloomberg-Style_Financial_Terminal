@@ -113,10 +113,21 @@ type UseChartDataResult = {
 /**
  * Fetch and transform OHLCV data for a given symbol and timeframe.
  *
+ * Polling is paused when the panel is not visible (isVisible = false) per
+ * CLAUDE.md Part XII: "Pause TanStack Query polling when not visible in the
+ * layout (enabled: isVisible on every useQuery inside a panel)."
+ *
  * @param symbol    - CoinGecko coin id, e.g. "bitcoin"
  * @param timeframe - Bar resolution, e.g. "1D"
+ * @param isVisible - Whether this panel is currently mounted and visible in the
+ *                    workspace layout. Defaults to true so the hook works outside
+ *                    a panel context (e.g. tests). Pass the panel's isActive prop.
  */
-export function useChartData(symbol: string, timeframe: Timeframe): UseChartDataResult {
+export function useChartData(
+  symbol: string,
+  timeframe: Timeframe,
+  isVisible: boolean = true,
+): UseChartDataResult {
   const query = useQuery({
     queryKey: ['ohlcv', symbol, timeframe],
     queryFn: async (): Promise<OHLCVResponse> => {
@@ -129,14 +140,18 @@ export function useChartData(symbol: string, timeframe: Timeframe): UseChartData
       }
     },
     gcTime: 5 * 60_000,
-    enabled: symbol.length > 0,
+    // Disable query entirely when the symbol is empty OR when the panel is not
+    // visible — prevents background polling from wasting network and CPU.
+    enabled: symbol.length > 0 && isVisible,
   });
 
   const chartBars = useMemo(() => (query.data?.bars ?? []).map(toChartBar), [query.data?.bars]);
 
+  // Stable refetch reference — useCallback with [query] would re-create on every
+  // render since query is a new object each render. query.refetch is stable.
   const refetch = useCallback(async (): Promise<void> => {
     await query.refetch();
-  }, [query]);
+  }, [query.refetch]);
 
   return {
     chartBars,

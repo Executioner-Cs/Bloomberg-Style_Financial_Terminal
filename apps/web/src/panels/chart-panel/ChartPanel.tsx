@@ -9,7 +9,7 @@
  * Accessibility: aria-label on the container, timeframe buttons are
  * keyboard-navigable when the panel is active.
  */
-import { useEffect, useRef, useState, useCallback, type JSX } from 'react';
+import { useEffect, useRef, useState, useCallback, type JSX, useMemo } from 'react';
 import { createChart, type IChartApi, type ISeriesApi } from 'lightweight-charts';
 import type { Timeframe } from '@terminal/types';
 import { PanelSkeleton } from '@terminal/ui-components';
@@ -51,25 +51,37 @@ type ChartPanelProps = {
   isActive: boolean;
   /** Called when the panel's close button is clicked. */
   onClose: () => void;
-  /** CoinGecko coin id, e.g. "bitcoin". */
+  /** Symbol to chart — equity ticker or CoinGecko coin id. */
   symbol: string;
   /** Initial timeframe selection. Defaults to '1D'. */
   timeframe?: Timeframe;
+  /**
+   * Called when the user selects a different timeframe.
+   * Used by the workspace adapter to persist timeframe in the layout store.
+   */
+  onTimeframeChange?: (tf: Timeframe) => void;
 };
 
 export function ChartPanel({
-  panelId: _panelId, // reserved for layout state management — not yet used
-  isActive: _isActive, // reserved for keyboard shortcut activation — not yet used
+  panelId: _panelId,
+  isActive,
   onClose,
   symbol,
   timeframe: initialTimeframe = '1D',
+  onTimeframeChange,
 }: ChartPanelProps): JSX.Element {
   const [timeframe, setTimeframe] = useState<Timeframe>(initialTimeframe);
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
 
-  const { chartBars, isLoading, isError, error, refetch } = useChartData(symbol, timeframe);
+  // Pass isActive so polling pauses when the panel is not focused/visible.
+  // CLAUDE.md Part XII: "Pause TanStack Query polling when not visible in the layout."
+  const { chartBars, isLoading, isError, error, refetch } = useChartData(
+    symbol,
+    timeframe,
+    isActive,
+  );
 
   /** Void-wrapped refetch for use as a callback where Promise return is unexpected. */
   const handleRetry = useCallback((): void => {
@@ -145,9 +157,46 @@ export function ChartPanel({
     chartRef.current?.timeScale().fitContent();
   }, [chartBars]);
 
-  const handleTimeframeChange = useCallback((tf: Timeframe) => {
-    setTimeframe(tf);
-  }, []);
+  const handleTimeframeChange = useCallback(
+    (tf: Timeframe) => {
+      setTimeframe(tf);
+      onTimeframeChange?.(tf);
+    },
+    [onTimeframeChange],
+  );
+
+  // Keyboard shortcuts — only active when this panel has focus (isActive).
+  // CLAUDE.md Part XVI: "Every panel must be fully keyboard-navigable.
+  // Register shortcuts with useKeyboardShortcuts when isActive === true."
+  //
+  // Timeframe shortcuts: D → 1D, W → 1W, M → 1M (single-key, no modifier).
+  // These follow Bloomberg Terminal convention for timeframe selection.
+  const handleTimeframeShortcut = useMemo(
+    () => ({
+      d: '1D' as Timeframe,
+      w: '1W' as Timeframe,
+      m: '1M' as Timeframe,
+    }),
+    [],
+  );
+
+  useEffect(() => {
+    if (!isActive) return;
+
+    function onKeyDown(event: KeyboardEvent): void {
+      // Ignore shortcuts when the user is typing in an input/textarea.
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+      const tf = handleTimeframeShortcut[event.key as keyof typeof handleTimeframeShortcut];
+      if (tf !== undefined) {
+        handleTimeframeChange(tf);
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown);
+    return (): void => window.removeEventListener('keydown', onKeyDown);
+  }, [isActive, handleTimeframeChange, handleTimeframeShortcut]);
 
   return (
     <div
