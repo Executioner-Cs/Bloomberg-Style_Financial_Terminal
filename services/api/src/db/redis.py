@@ -21,6 +21,22 @@ from src.config import settings
 _client: aioredis.Redis | None = None
 
 
+async def ping_redis() -> str:
+    """
+    Verify Redis connectivity by sending the PING command.
+
+    Returns "ok" on success or "error: <detail>" on failure.
+    Uses the shared client from get_redis() — not a separate connection.
+    Used by the /health endpoint to report real dependency status.
+    """
+    try:
+        client = get_redis()
+        await client.ping()
+        return "ok"
+    except Exception as exc:  # noqa: BLE001 — health probe must not raise; callers check the string
+        return f"error: {exc}"
+
+
 def get_redis() -> aioredis.Redis:
     """
     FastAPI dependency that returns the shared async Redis client.

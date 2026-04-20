@@ -25,6 +25,21 @@ from src.config import settings
 _client: AsyncClient | None = None
 
 
+async def ping_clickhouse() -> str:
+    """
+    Verify ClickHouse connectivity by executing SELECT 1.
+
+    Returns "ok" on success or "error: <detail>" on failure.
+    Used by the /health endpoint to report real dependency status.
+    """
+    try:
+        client = await get_clickhouse_client()
+        await client.query("SELECT 1")
+        return "ok"
+    except Exception as exc:  # noqa: BLE001 — health probe must not raise; callers check the string
+        return f"error: {exc}"
+
+
 async def get_clickhouse_client() -> AsyncClient:
     """
     FastAPI dependency that returns the shared ClickHouse async client.

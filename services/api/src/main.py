@@ -10,14 +10,13 @@ from __future__ import annotations
 import asyncio
 import logging
 
-import clickhouse_connect
-import redis.asyncio as aioredis
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import create_async_engine
 
 from .config import settings
+from .db.clickhouse import ping_clickhouse
+from .db.postgres import ping_postgres
+from .db.redis import ping_redis
 from .middleware.request_id import RequestIDMiddleware
 
 logger = logging.getLogger(__name__)
@@ -28,68 +27,23 @@ logger = logging.getLogger(__name__)
 _HEALTH_CHECK_TIMEOUT_SECONDS = 2.0
 
 
-async def _check_postgres() -> str:
+async def _bounded_ping(ping_fn: object) -> str:
     """
-    Ping PostgreSQL with a SELECT 1 query.
+    Run a DB ping coroutine with a hard _HEALTH_CHECK_TIMEOUT_SECONDS ceiling.
 
-    Returns "ok" on success or "error: <message>" on failure.
-    Uses a short-lived engine — not the app's connection pool — so health checks
-    do not consume pool connections.
-    """
-    try:
-        engine = create_async_engine(
-            settings.database_url,
-            pool_size=1,
-            max_overflow=0,
-            pool_pre_ping=True,
-        )
-        async with asyncio.timeout(_HEALTH_CHECK_TIMEOUT_SECONDS):
-            async with engine.connect() as conn:
-                await conn.execute(text("SELECT 1"))
-        await engine.dispose()
-        return "ok"
-    except Exception as exc:  # noqa: BLE001 — health endpoint must not crash on any DB error
-        return f"error: {exc}"
+    Accepts the return value of a ping_*() coroutine function (i.e., an awaitable
+    that resolves to a status string). Returns "error: timed out after Xs" if the
+    dependency does not respond within the allowed window.
 
-
-async def _check_clickhouse() -> str:
-    """
-    Ping ClickHouse with a SELECT 1 query via the HTTP interface.
-
-    Returns "ok" on success or "error: <message>" on failure.
+    The `object` input type is used because mypy cannot statically express
+    "a coroutine that returns str" without a TypeVar in the caller — the actual
+    type is Coroutine[Any, Any, str].
     """
     try:
-        client = await clickhouse_connect.get_async_client(
-            host=settings.clickhouse_host,
-            port=settings.clickhouse_http_port,
-            database=settings.clickhouse_database,
-            username=settings.clickhouse_user,
-            password=settings.clickhouse_password,
-        )
-        async with asyncio.timeout(_HEALTH_CHECK_TIMEOUT_SECONDS):
-            await client.query("SELECT 1")
-        await client.close()
-        return "ok"
-    except Exception as exc:  # noqa: BLE001 — health endpoint must not crash on any DB error
-        return f"error: {exc}"
-
-
-async def _check_redis() -> str:
-    """
-    Ping Redis with the PING command.
-
-    Returns "ok" on success or "error: <message>" on failure.
-    """
-    try:
-        redis: aioredis.Redis = aioredis.from_url(  # type: ignore[no-untyped-call]
-            settings.redis_url, decode_responses=True
-        )
-        async with asyncio.timeout(_HEALTH_CHECK_TIMEOUT_SECONDS):
-            await redis.ping()
-        await redis.aclose()
-        return "ok"
-    except Exception as exc:  # noqa: BLE001 — health endpoint must not crash on any Redis error
-        return f"error: {exc}"
+        result: str = await asyncio.wait_for(ping_fn, _HEALTH_CHECK_TIMEOUT_SECONDS)  # type: ignore[arg-type]
+        return result
+    except TimeoutError:
+        return f"error: timed out after {_HEALTH_CHECK_TIMEOUT_SECONDS}s"
 from .routers import (
     alerts,
     filings,
@@ -159,9 +113,9 @@ def create_app() -> FastAPI:
         the load balancer must read the body to determine liveness.
         """
         postgres_status, clickhouse_status, redis_status = await asyncio.gather(
-            _check_postgres(),
-            _check_clickhouse(),
-            _check_redis(),
+            _bounded_ping(ping_postgres()),
+            _bounded_ping(ping_clickhouse()),
+            _bounded_ping(ping_redis()),
         )
 
         all_ok = all(
