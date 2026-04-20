@@ -7,6 +7,7 @@
 import { Outlet } from '@tanstack/react-router';
 import type { JSX } from 'react';
 
+import { ErrorBoundary } from '@/components/error-boundary/ErrorBoundary';
 import CommandPalette from '@/components/command-palette';
 import StatusBar from '@/components/status-bar';
 
@@ -19,7 +20,11 @@ export default function RootLayout(): JSX.Element {
     <div className="terminal-shell flex flex-col h-full">
       <CommandPalette />
       <main role="main" className="flex-1 overflow-hidden">
-        <Outlet />
+        {/* ErrorBoundary prevents a panel crash from blanking the terminal.
+            CLAUDE.md Part XVII: panel crashes must not crash the terminal. */}
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </main>
       <StatusBar />
     </div>
