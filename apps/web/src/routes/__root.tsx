@@ -10,6 +10,10 @@ import type { JSX } from 'react';
 import CommandPalette from '@/components/command-palette';
 import StatusBar from '@/components/status-bar';
 
+/**
+ * Root layout — wraps every route with the command palette, main outlet,
+ * and status bar. Renders once for the lifetime of the app.
+ */
 export default function RootLayout(): JSX.Element {
   return (
     <div className="terminal-shell flex flex-col h-full">

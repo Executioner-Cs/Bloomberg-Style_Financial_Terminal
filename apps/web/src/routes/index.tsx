@@ -7,6 +7,11 @@
  */
 import type { JSX } from 'react';
 
+/**
+ * Default terminal landing page — shown before any symbol is selected.
+ * Prompts the user to open the command palette. Phase 2 will replace this
+ * with a split Watchlist + Chart view once WatchlistPanel is built.
+ */
 export default function IndexPage(): JSX.Element {
   return (
     <div className="flex h-full items-center justify-center flex-col gap-4 select-none">

@@ -9,7 +9,7 @@ import type { InstrumentListResponse, InstrumentResponse } from '@terminal/types
 import { apiGet } from './client';
 import { API_V1_PREFIX } from './constants';
 
-type FetchInstrumentsParams = {
+export type FetchInstrumentsParams = {
   assetClass?: string;
   limit?: number;
   offset?: number;

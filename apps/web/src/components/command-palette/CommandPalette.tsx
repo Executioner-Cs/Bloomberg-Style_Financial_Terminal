@@ -41,6 +41,12 @@ const ASSET_CLASS_LABEL: Record<string, string> = {
   forex: 'FX',
 };
 
+/**
+ * Global command palette — opened with Ctrl+K. Renders as a floating dialog
+ * over the terminal with two result groups: instrument search and workspace
+ * preset switching. Unmounts itself completely when closed to avoid background
+ * event listener cost.
+ */
 export default function CommandPalette(): JSX.Element {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');

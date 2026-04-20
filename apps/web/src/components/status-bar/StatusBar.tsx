@@ -26,6 +26,11 @@ function formatUtcClock(date: Date): string {
   return `${y}-${mo}-${d} ${h}:${mi}:${s} UTC`;
 }
 
+/**
+ * Persistent bottom bar rendered by the root layout on every route.
+ * Displays terminal version, live connection status, and a UTC clock
+ * updated every second. No data fetching — pure presentational component.
+ */
 export default function StatusBar(): JSX.Element {
   const [utcTime, setUtcTime] = useState<string>(() => formatUtcClock(new Date()));
 
