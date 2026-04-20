@@ -23,7 +23,8 @@ import clickhouse_connect
 
 from src.celery_app import app
 from src.config import settings
-from src.integrations.mock_loader import MockDataLoader
+from src.integrations.base import IntegrationError
+from src.integrations.mock_loader import MockDataLoader, MockDataError
 from src.integrations.yfinance import YFinanceClient
 from src.models.ohlcv import OHLCVRow
 from src.repositories.ohlcv_repository import OHLCVRepository
@@ -76,12 +77,14 @@ async def _ingest_yfinance_ohlcv_async() -> dict[str, object]:
         for symbol in symbols:
             try:
                 rows = loader.get_ohlcv(symbol, "1D")
-                if rows:
-                    await repo.insert_bars(rows)
-                    total_inserted += len(rows)
-            except Exception:
-                logger.exception("Mock OHLCV load failed for symbol %s", symbol)
+            except MockDataError:
+                # Missing mock file for this symbol — expected during dev setup.
+                logger.exception("Mock OHLCV file missing for symbol %s — skipping", symbol)
                 failed.append(symbol)
+                continue
+            if rows:
+                await repo.insert_bars(rows)
+                total_inserted += len(rows)
 
         logger.info(
             "Mock yfinance ingest complete: %d rows, %d symbols failed",
@@ -110,26 +113,31 @@ async def _ingest_yfinance_ohlcv_async() -> dict[str, object]:
     failed_symbols: list[str] = []
 
     for symbol in symbols:
+        # DB errors are intentionally NOT caught here — they propagate so
+        # Celery can retry the whole task (e.g., ClickHouse outage).
+        latest_ts = await repo.get_latest_ts(symbol, "1D")
+        # Fetch 365 days on first run, 2 days on subsequent runs.
+        days = 2 if latest_ts is not None else 365
+
         try:
-            latest_ts = await repo.get_latest_ts(symbol, "1D")
-            # Fetch 365 days on first run, 2 days on subsequent runs.
-            days = 2 if latest_ts is not None else 365
-
             bars: list[OHLCVRow] = await client.get_ohlcv(symbol, days=days)
-            if not bars:
-                continue
-
-            # Filter to rows strictly newer than latest stored timestamp.
-            if latest_ts is not None:
-                bars = [b for b in bars if b.ts > latest_ts]
-
-            if bars:
-                await repo.insert_bars(bars)
-                total_inserted += len(bars)
-
-        except Exception:
-            logger.exception("Failed to ingest OHLCV for equity %s", symbol)
+        except IntegrationError:
+            # yfinance returned an unrecoverable error for this symbol.
+            # Per-symbol failure: log and continue so other symbols are not blocked.
+            logger.exception("yfinance fetch failed for equity %s — skipping", symbol)
             failed_symbols.append(symbol)
+            continue
+
+        if not bars:
+            continue
+
+        # Filter to rows strictly newer than latest stored timestamp.
+        if latest_ts is not None:
+            bars = [b for b in bars if b.ts > latest_ts]
+
+        if bars:
+            await repo.insert_bars(bars)
+            total_inserted += len(bars)
 
     logger.info(
         "yfinance OHLCV ingest complete: %d rows inserted, %d symbols failed",

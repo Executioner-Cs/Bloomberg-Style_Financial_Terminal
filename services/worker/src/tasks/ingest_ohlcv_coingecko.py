@@ -27,6 +27,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from src.celery_app import app
 from src.config import settings
+from src.integrations.base import IntegrationError
 from src.integrations.coingecko import CoinGeckoClient
 from src.models.instrument import Instrument
 from src.models.ohlcv import OHLCVRow
@@ -114,45 +115,51 @@ async def _ingest_coingecko_ohlcv_async() -> dict[str, object]:
     failed_coins: list[str] = []
 
     for coin in top_coins:
+        symbol = coin.id.upper()
+        # DB and Redis errors are intentionally NOT caught here — they propagate
+        # so Celery can retry the whole task (e.g., ClickHouse outage).
+        latest_ts = await repo.get_latest_ts(symbol, "1D")
+        # Fetch 90 days on first run, 2 days on subsequent runs.
+        days = 2 if latest_ts is not None else 90
+
         try:
-            symbol = coin.id.upper()
-            latest_ts = await repo.get_latest_ts(symbol, "1D")
-            # Fetch 90 days on first run, 2 days on subsequent runs.
-            days = 2 if latest_ts is not None else 90
-
             bars: list[OHLCVRow] = await client.get_ohlcv(coin.id, "usd", days)
-            if not bars:
-                continue
-
-            # Filter to rows strictly newer than latest stored timestamp.
-            if latest_ts is not None:
-                bars = [b for b in bars if b.ts > latest_ts]
-
-            if bars:
-                await repo.insert_bars(bars)
-                total_inserted += len(bars)
-
-            # Update Redis quote snapshot from the most recent bar.
-            latest_bar = bars[-1] if bars else None
-            if latest_bar is None:
-                continue
-
-            await redis.setex(
-                cache_keys.quote_snapshot(latest_bar.symbol),
-                settings.coingecko_requests_per_minute * 2,
-                json.dumps(
-                    {
-                        "symbol": latest_bar.symbol,
-                        "price": latest_bar.close,
-                        "ts": latest_bar.ts.isoformat(),
-                        "volume_24h": latest_bar.volume,
-                    }
-                ),
-            )
-
-        except Exception:
-            logger.exception("Failed to ingest OHLCV for coin %s", coin.id)
+        except IntegrationError:
+            # CoinGecko returned an unrecoverable error for this coin
+            # (rate limit exhausted after retries, provider outage).
+            # Per-coin failure: log and continue so other coins are not blocked.
+            logger.exception("CoinGecko fetch failed for coin %s — skipping", coin.id)
             failed_coins.append(coin.id)
+            continue
+
+        if not bars:
+            continue
+
+        # Filter to rows strictly newer than latest stored timestamp.
+        if latest_ts is not None:
+            bars = [b for b in bars if b.ts > latest_ts]
+
+        if bars:
+            await repo.insert_bars(bars)
+            total_inserted += len(bars)
+
+        # Update Redis quote snapshot from the most recent bar.
+        latest_bar = bars[-1] if bars else None
+        if latest_bar is None:
+            continue
+
+        await redis.setex(
+            cache_keys.quote_snapshot(latest_bar.symbol),
+            settings.coingecko_requests_per_minute * 2,
+            json.dumps(
+                {
+                    "symbol": latest_bar.symbol,
+                    "price": latest_bar.close,
+                    "ts": latest_bar.ts.isoformat(),
+                    "volume_24h": latest_bar.volume,
+                }
+            ),
+        )
 
     await client.close()
     await redis.aclose()
@@ -216,6 +223,9 @@ async def _seed_crypto_instruments_async() -> dict[str, object]:
                 await repo.upsert(instrument)
                 upserted += 1
             except Exception:
+                # Per-coin DB upsert failure (PostgreSQL constraint, network timeout).
+                # Broad catch is intentional: per-item resilience so one bad coin
+                # does not abort the entire seeding run. All failures are logged above.
                 logger.exception("Failed to upsert instrument for coin %s", coin.id)
                 failed.append(coin.id)
 

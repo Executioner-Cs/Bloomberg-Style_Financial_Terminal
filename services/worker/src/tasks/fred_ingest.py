@@ -22,8 +22,9 @@ import clickhouse_connect
 
 from src.celery_app import app
 from src.config import settings
+from src.integrations.base import IntegrationError
 from src.integrations.fred import FredClient
-from src.integrations.mock_loader import MockDataLoader
+from src.integrations.mock_loader import MockDataLoader, MockDataError
 from src.models.macro import MacroRow
 from src.repositories.macro_repository import MacroRepository
 
@@ -74,12 +75,14 @@ async def _refresh_macro_series_async() -> dict[str, object]:
         for series_id in series_ids:
             try:
                 rows = loader.get_macro_rows(series_id)
-                if rows:
-                    await repo.insert_rows(rows)
-                    total_inserted += len(rows)
-            except Exception:
-                logger.exception("Mock macro load failed for series %s", series_id)
+            except MockDataError:
+                # Missing mock file for this series — expected during dev setup.
+                logger.exception("Mock macro file missing for series %s — skipping", series_id)
                 failed.append(series_id)
+                continue
+            if rows:
+                await repo.insert_rows(rows)
+                total_inserted += len(rows)
 
         logger.info(
             "Mock FRED ingest complete: %d rows, %d series failed",
@@ -118,27 +121,32 @@ async def _refresh_macro_series_async() -> dict[str, object]:
     failed_series: list[str] = []
 
     for series_id in series_ids:
+        # DB errors are intentionally NOT caught here — they propagate so
+        # Celery can retry the whole task (e.g., ClickHouse outage).
+        latest_ts = await repo.get_latest_ts(series_id)
+
         try:
-            latest_ts = await repo.get_latest_ts(series_id)
             fetched: list[MacroRow] = await client.get_series(
                 series_id,
                 observation_start=latest_ts.date() if latest_ts is not None else None,
             )
-
-            if not fetched:
-                continue
-
-            # Filter to rows strictly newer than latest stored timestamp.
-            if latest_ts is not None:
-                fetched = [r for r in fetched if r.ts > latest_ts]
-
-            if fetched:
-                await repo.insert_rows(fetched)
-                total_inserted += len(fetched)
-
-        except Exception:
-            logger.exception("Failed to ingest FRED series %s", series_id)
+        except IntegrationError:
+            # FRED returned an unrecoverable error for this series.
+            # Per-series failure: log and continue so other series are not blocked.
+            logger.exception("FRED fetch failed for series %s — skipping", series_id)
             failed_series.append(series_id)
+            continue
+
+        if not fetched:
+            continue
+
+        # Filter to rows strictly newer than latest stored timestamp.
+        if latest_ts is not None:
+            fetched = [r for r in fetched if r.ts > latest_ts]
+
+        if fetched:
+            await repo.insert_rows(fetched)
+            total_inserted += len(fetched)
 
     logger.info(
         "FRED macro ingest complete: %d rows inserted, %d series failed",
