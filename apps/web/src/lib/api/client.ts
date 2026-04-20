@@ -9,11 +9,15 @@
 /**
  * Client-side timeout for all API requests.
  *
- * 30s matches the API server's self-imposed ceiling for external provider
- * calls (ADR-005). Browser fetch does not enforce timeouts natively —
- * AbortController is required to prevent hung requests from blocking the UI.
+ * Reads VITE_API_TIMEOUT_MS from the build-time env; falls back to 30 000 ms
+ * to match the API server's self-imposed ceiling for external provider calls
+ * (ADR-005). Browser fetch does not enforce timeouts natively — AbortController
+ * is required to prevent hung requests from blocking the UI.
  */
-const API_REQUEST_TIMEOUT_MS = 30_000;
+const API_REQUEST_TIMEOUT_MS: number =
+  typeof import.meta.env['VITE_API_TIMEOUT_MS'] === 'string'
+    ? Number(import.meta.env['VITE_API_TIMEOUT_MS'])
+    : 30_000;
 
 /** Structured error thrown by apiGet when the server returns a non-2xx status. */
 export class ApiError extends Error {

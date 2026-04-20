@@ -22,12 +22,29 @@ function secureRandom(): number {
 }
 
 /**
+ * Number of mock bars to generate per timeframe for dev/demo mode.
+ * Values represent meaningful historical windows for each resolution:
+ * 180 daily bars ≈ 6 months, 52 weekly bars ≈ 1 year, 24 monthly bars ≈ 2 years.
+ */
+const MOCK_BAR_COUNT: Record<Timeframe, number> = {
+  '1m': 180,
+  '5m': 180,
+  '15m': 180,
+  '30m': 180,
+  '1H': 180,
+  '4H': 90,
+  '1D': 180,
+  '1W': 52,
+  '1M': 24,
+} as const;
+
+/**
  * Generate a seeded random walk of OHLCV bars for local dev when the backend
  * is not running. Prices follow a geometric random walk (±3% per bar) from a
  * base price keyed to the symbol name.
  */
 function generateMockBars(symbol: string, timeframe: Timeframe): OHLCVResponse {
-  const barCount = timeframe === '1M' ? 24 : timeframe === '1W' ? 52 : 180;
+  const barCount = MOCK_BAR_COUNT[timeframe];
   // Base prices keyed to known symbols; unknown symbols default to 100.
   const BASE_PRICES: Record<string, number> = {
     bitcoin: 65_000,
