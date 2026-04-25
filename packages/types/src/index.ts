@@ -15,3 +15,5 @@ export * from './websocket-events';
 export * from './screener';
 export * from './watchlist';
 export * from './alert';
+export * from './macro';
+export * from './filings';

@@ -78,6 +78,16 @@ export default defineConfig(({ mode }) => {
           functions: 60,
           branches: 60,
         },
+        exclude: [
+          // Barrel re-exports — no executable logic; excluded per CLAUDE.md Part XI.
+          // E2E tests cover the panels that these barrels compose.
+          'src/panels/*/index.tsx',
+          'src/panels/index.ts',
+          // Route thin wrappers — covered by Playwright E2E (CLAUDE.md Part XI).
+          'src/routes/**/*.tsx',
+          // Test infrastructure — not application source.
+          'src/test-setup.ts',
+        ],
       },
     },
   };

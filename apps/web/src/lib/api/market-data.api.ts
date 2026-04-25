@@ -5,7 +5,7 @@
  * shapes from @terminal/types. The API client layer is the only place that
  * knows endpoint paths — nothing above this layer constructs URLs.
  */
-import type { BulkQuotesResponse, OHLCVResponse, Timeframe } from '@terminal/types';
+import type { BulkQuotesResponse, OHLCVResponse, Quote, Timeframe } from '@terminal/types';
 
 import { apiGet } from './client';
 import { API_V1_PREFIX } from './constants';
@@ -32,6 +32,15 @@ export async function fetchOHLCV(
     `${API_V1_PREFIX}/market-data/${encodeURIComponent(symbol)}/ohlcv`,
     params,
   );
+}
+
+/**
+ * Fetch a single real-time quote for a symbol.
+ *
+ * @param symbol - CoinGecko coin id or equity ticker, e.g. "bitcoin", "AAPL"
+ */
+export async function fetchQuote(symbol: string): Promise<Quote> {
+  return apiGet<Quote>(`${API_V1_PREFIX}/market-data/${encodeURIComponent(symbol)}/quote`);
 }
 
 /**

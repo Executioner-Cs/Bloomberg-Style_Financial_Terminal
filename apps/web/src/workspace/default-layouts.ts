@@ -60,6 +60,15 @@ const DEFAULT_EQUITIES_SYMBOL = 'AAPL';
 const DEFAULT_FILINGS_SYMBOL = 'AAPL';
 
 /**
+ * Default watchlist symbols for the equities preset.
+ * FAANG + NVDA — the most-watched large-cap tech names; all present in
+ * the yfinance mock data set. Mirrors `DEFAULT_WATCHLIST_SYMBOLS` in
+ * watchlist-panel/app.tsx (both must stay in sync until a shared config
+ * constant is introduced in Phase 7).
+ */
+const DEFAULT_WATCHLIST_SYMBOLS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA'];
+
+/**
  * FRED series shown in the 2×2 Macro preset grid.
  * Order maps to visual positions: [top-left, top-right, bottom-left, bottom-right].
  * Series chosen to cover the four key FOMC-watching metrics:
@@ -116,20 +125,23 @@ function hydrateStore(panels: Record<string, PanelInstance>): void {
  * Equities preset — the default landing layout.
  *
  * Layout (left → right):
- *   [ Chart (large) ] | [ Quote  ]
- *                     | [ News   ]
+ *   [ Chart (large) ] | [ Quote     ]
+ *                     | [ Watchlist ]
+ *                     | [ News      ]
  *
- * All three panels are symbol-linked; clicking a ticker in Quote
- * propagates to Chart and News via terminal-context.activeSymbol.
+ * Chart, Quote, and News are symbol-linked via terminal-context.activeSymbol.
+ * Watchlist is the symbol source (linkable: false) — clicking a row in the
+ * watchlist sets activeSymbol, propagating to Chart, Quote, and News.
  */
 const equitiesPreset: LayoutPreset = {
   slug: 'equities',
   displayName: 'Equities',
-  description: 'Chart, Quote, and News — linked on a single symbol',
+  description: 'Chart, Quote, Watchlist, and News — linked on a single symbol',
   icon: TrendingUp,
   apply(api: DockviewApi): void {
     const chartId = 'equities-chart-0';
     const quoteId = 'equities-quote-0';
+    const watchlistId = 'equities-watchlist-0';
     const newsId = 'equities-news-0';
 
     const panels: Record<string, PanelInstance> = {
@@ -142,6 +154,11 @@ const equitiesPreset: LayoutPreset = {
         panelId: quoteId,
         appId: 'quote',
         props: { symbol: DEFAULT_EQUITIES_SYMBOL },
+      },
+      [watchlistId]: {
+        panelId: watchlistId,
+        appId: 'watchlist',
+        props: { symbols: DEFAULT_WATCHLIST_SYMBOLS },
       },
       [newsId]: {
         panelId: newsId,
@@ -169,13 +186,22 @@ const equitiesPreset: LayoutPreset = {
       position: { direction: 'right', referencePanel: chartId },
     });
 
-    // News docks below Quote in the right column.
+    // Watchlist docks below Quote — the symbol source for the bus.
+    api.addPanel({
+      id: watchlistId,
+      component: DOCKVIEW_COMPONENT,
+      params: { panelId: watchlistId, appId: 'watchlist' },
+      title: 'Watchlist',
+      position: { direction: 'below', referencePanel: quoteId },
+    });
+
+    // News docks below Watchlist in the right column.
     api.addPanel({
       id: newsId,
       component: DOCKVIEW_COMPONENT,
       params: { panelId: newsId, appId: 'news' },
       title: 'News',
-      position: { direction: 'below', referencePanel: quoteId },
+      position: { direction: 'below', referencePanel: watchlistId },
     });
   },
 };

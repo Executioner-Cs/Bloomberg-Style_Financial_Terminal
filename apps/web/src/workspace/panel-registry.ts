@@ -12,6 +12,20 @@
  * which surfaces accidental double-registration (the kind of bug that
  * otherwise silently overwrites a panel's default props).
  *
+ * ## Type erasure boundary
+ *
+ * The backing map stores `PanelApp<unknown>` because TypeScript cannot
+ * represent a heterogeneous generic through a single Map. Each panel
+ * `app.ts` file defines its record as `PanelApp<ConcreteProps>`.
+ *
+ * TypeScript's strict function parameter contravariance means
+ * `FC<PanelProps<ConcreteProps>>` is not directly assignable to
+ * `FC<PanelProps<unknown>>`. The unsafe cast is centralised here in
+ * `registerPanelApp` — it is the ONLY place in the codebase where the
+ * double cast appears. Panel app files call `registerPanelApp(app)` with
+ * no casts; `PanelHost` reads the erased type and the component receives
+ * its concrete props at runtime via the workspace store lookup.
+ *
  * Plan ref: D6.
  */
 
@@ -29,12 +43,15 @@ const panels = new Map<string, PanelApp<unknown>>();
  *
  * Throws if `app.id` is already registered — prevents silent override
  * of defaults or Component swap due to a typo or merge accident.
+ *
+ * The double cast to `PanelApp<unknown>` is the single centralised
+ * type-erasure point for all panel apps. See module JSDoc for rationale.
  */
 export function registerPanelApp<Props>(app: PanelApp<Props>): void {
   if (panels.has(app.id)) {
     throw new Error(`Panel app '${app.id}' is already registered. Panel ids must be unique.`);
   }
-  panels.set(app.id, app as PanelApp<unknown>);
+  panels.set(app.id, app as unknown as PanelApp<unknown>);
 }
 
 /**

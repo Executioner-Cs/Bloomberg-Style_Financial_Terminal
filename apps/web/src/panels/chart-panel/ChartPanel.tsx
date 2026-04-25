@@ -16,6 +16,7 @@ import { PanelSkeleton } from '@terminal/ui-components';
 import { PanelError } from '@terminal/ui-components';
 
 import { useChartData } from './use-chart-data';
+import { useRealtimePrice } from '@/hooks/use-realtime-price';
 
 /** Timeframes available in the selector. Ordered from shortest to longest. */
 const TIMEFRAME_OPTIONS: Timeframe[] = ['1D', '1W', '1M'];
@@ -82,6 +83,10 @@ export function ChartPanel({
     timeframe,
     isActive,
   );
+
+  // Real-time last-bar update: each WS tick updates the close of the current candle.
+  // Only active on the 1D timeframe (intraday tick = within the current day's bar).
+  const { price: rtPrice } = useRealtimePrice(timeframe === '1D' ? symbol : '');
 
   /** Void-wrapped refetch for use as a callback where Promise return is unexpected. */
   const handleRetry = useCallback((): void => {
@@ -156,6 +161,24 @@ export function ChartPanel({
     series.setData(chartBars);
     chartRef.current?.timeScale().fitContent();
   }, [chartBars]);
+
+  // Real-time last-bar update — applies each WS tick to the current day's candle.
+  // `series.update()` merges into the existing bar when the time matches.
+  useEffect(() => {
+    const series = seriesRef.current;
+    if (series === null || rtPrice === null || rtPrice === undefined) return;
+
+    const lastBar = chartBars.at(-1);
+    if (lastBar === undefined) return;
+
+    series.update({
+      time: lastBar.time,
+      open: lastBar.open,
+      high: Math.max(lastBar.high, rtPrice.price),
+      low: Math.min(lastBar.low, rtPrice.price),
+      close: rtPrice.price,
+    });
+  }, [rtPrice, chartBars]);
 
   const handleTimeframeChange = useCallback(
     (tf: Timeframe) => {

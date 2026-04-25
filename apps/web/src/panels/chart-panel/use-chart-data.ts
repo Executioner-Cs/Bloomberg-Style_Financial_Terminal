@@ -175,11 +175,12 @@ export function useChartData(
 
   const chartBars = useMemo(() => (query.data?.bars ?? []).map(toChartBar), [query.data?.bars]);
 
-  // Stable refetch reference — useCallback with [query] would re-create on every
-  // render since query is a new object each render. query.refetch is stable.
+  // Destructure refetch before useCallback so the linter sees a stable
+  // primitive dep (the function reference) rather than the query object.
+  const { refetch: queryRefetch } = query;
   const refetch = useCallback(async (): Promise<void> => {
-    await query.refetch();
-  }, [query.refetch]);
+    await queryRefetch();
+  }, [queryRefetch]);
 
   return {
     chartBars,

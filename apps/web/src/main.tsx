@@ -10,8 +10,29 @@ import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { routeTree } from './router';
+import { registerPanelApp } from '@/workspace/panel-registry';
+import {
+  chartPanelApp,
+  quotePanelApp,
+  watchlistPanelApp,
+  macroPanelApp,
+  newsPanelApp,
+  filingPanelApp,
+} from '@/panels';
 
 import './index.css';
+
+// ------------------------------------------------------------------
+// Panel registration — all panels must be registered before the router
+// mounts. The registry is frozen after the first getPanelApp/listPanelApps
+// call so order only matters within this block.
+// ------------------------------------------------------------------
+registerPanelApp(chartPanelApp);
+registerPanelApp(quotePanelApp);
+registerPanelApp(watchlistPanelApp);
+registerPanelApp(macroPanelApp);
+registerPanelApp(newsPanelApp);
+registerPanelApp(filingPanelApp);
 
 const queryClient = new QueryClient({
   defaultOptions: {
