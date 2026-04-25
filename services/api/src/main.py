@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import Awaitable
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,32 +19,6 @@ from .db.clickhouse import ping_clickhouse
 from .db.postgres import ping_postgres
 from .db.redis import ping_redis
 from .middleware.request_id import RequestIDMiddleware
-
-logger = logging.getLogger(__name__)
-
-# Maximum time in seconds to wait for each dependency health check.
-# Short enough to avoid blocking the load balancer probe; long enough for a
-# momentarily slow DB to respond. ADR-005 rationale: conservative ceiling.
-_HEALTH_CHECK_TIMEOUT_SECONDS = 2.0
-
-
-async def _bounded_ping(ping_fn: object) -> str:
-    """
-    Run a DB ping coroutine with a hard _HEALTH_CHECK_TIMEOUT_SECONDS ceiling.
-
-    Accepts the return value of a ping_*() coroutine function (i.e., an awaitable
-    that resolves to a status string). Returns "error: timed out after Xs" if the
-    dependency does not respond within the allowed window.
-
-    The `object` input type is used because mypy cannot statically express
-    "a coroutine that returns str" without a TypeVar in the caller — the actual
-    type is Coroutine[Any, Any, str].
-    """
-    try:
-        result: str = await asyncio.wait_for(ping_fn, _HEALTH_CHECK_TIMEOUT_SECONDS)  # type: ignore[arg-type]
-        return result
-    except TimeoutError:
-        return f"error: timed out after {_HEALTH_CHECK_TIMEOUT_SECONDS}s"
 from .routers import (
     alerts,
     filings,
@@ -60,6 +35,25 @@ from .routers import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Maximum time in seconds to wait for each dependency health check.
+# Short enough to avoid blocking the load balancer probe; long enough for a
+# momentarily slow DB to respond. ADR-005 rationale: conservative ceiling.
+_HEALTH_CHECK_TIMEOUT_SECONDS = 2.0
+
+
+async def _bounded_ping(ping_fn: Awaitable[str]) -> str:
+    """
+    Run a DB ping coroutine with a hard _HEALTH_CHECK_TIMEOUT_SECONDS ceiling.
+
+    Accepts the awaitable returned by a ping_*() coroutine function (resolves
+    to a status string). Returns "error: timed out after Xs" if the dependency
+    does not respond within the allowed window.
+    """
+    try:
+        return await asyncio.wait_for(ping_fn, _HEALTH_CHECK_TIMEOUT_SECONDS)
+    except TimeoutError:
+        return f"error: timed out after {_HEALTH_CHECK_TIMEOUT_SECONDS}s"
 
 
 def create_app() -> FastAPI:
@@ -119,8 +113,7 @@ def create_app() -> FastAPI:
         )
 
         all_ok = all(
-            s == "ok"
-            for s in (postgres_status, clickhouse_status, redis_status)
+            s == "ok" for s in (postgres_status, clickhouse_status, redis_status)
         )
 
         return {

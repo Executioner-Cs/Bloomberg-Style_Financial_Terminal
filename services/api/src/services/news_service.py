@@ -137,7 +137,8 @@ class NewsService:
         result = get_news(symbol=symbol, page=page)
         if not isinstance(result, NewsResponse):
             raise TypeError(
-                f"MockDataLoader.get_news returned {type(result)!r}, expected NewsResponse"
+                f"MockDataLoader.get_news returned {type(result)!r}, "
+                "expected NewsResponse"
             )
         return result
 

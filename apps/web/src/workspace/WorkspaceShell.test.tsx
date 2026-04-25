@@ -17,6 +17,16 @@ import { render, waitFor } from '@testing-library/react';
 import { WorkspaceShell } from './WorkspaceShell';
 import type { DockviewApi } from 'dockview-react';
 
+/**
+ * Upper bound for dockview to mount under jsdom and call onReady.
+ *
+ * The Part XII workspace-restore budget is 500 ms in real browsers; this
+ * test runs under jsdom on shared CI runners, so we allow 4× headroom for
+ * the slower environment. If a future regression makes mount slower than
+ * this, the test will surface it before the production budget is breached.
+ */
+const DOCKVIEW_MOUNT_TIMEOUT_MS = 2_000;
+
 describe('WorkspaceShell', () => {
   it('fires onReady with a DockviewApi that exposes the expected imperative surface', async () => {
     let receivedApi: DockviewApi | null = null;
@@ -33,8 +43,7 @@ describe('WorkspaceShell', () => {
       () => {
         expect(receivedApi).not.toBeNull();
       },
-      // 2 s: generous budget for a synchronous React state update in jsdom.
-      { timeout: 2000 }, // noqa: hardcoded
+      { timeout: DOCKVIEW_MOUNT_TIMEOUT_MS },
     );
 
     // Assert the api exposes the methods presets/palette/serializer

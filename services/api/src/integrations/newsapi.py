@@ -102,7 +102,11 @@ class NewsAPIClient(BaseIntegrationClient):
         published_raw = raw.get("publishedAt")
 
         # isinstance narrowing required: raw values are `object`, not str.
-        if not isinstance(title_raw, str) or not isinstance(url_raw, str) or not isinstance(published_raw, str):
+        if (
+            not isinstance(title_raw, str)
+            or not isinstance(url_raw, str)
+            or not isinstance(published_raw, str)
+        ):
             return None
 
         # NewsAPI marks removed articles with literal "[Removed]" values.
@@ -116,10 +120,14 @@ class NewsAPIClient(BaseIntegrationClient):
         source_raw = raw.get("source", {})
         source: dict[str, object] = source_raw if isinstance(source_raw, dict) else {}
         source_name_val = source.get("name")
-        source_name: str = source_name_val if isinstance(source_name_val, str) else "Unknown"
+        source_name: str = (
+            source_name_val if isinstance(source_name_val, str) else "Unknown"
+        )
 
         description_raw = raw.get("description")
-        description: str | None = description_raw if isinstance(description_raw, str) else None
+        description: str | None = (
+            description_raw if isinstance(description_raw, str) else None
+        )
 
         return NewsArticle(
             title=title_raw,
@@ -167,7 +175,9 @@ class NewsAPIClient(BaseIntegrationClient):
 
         raw_response = await self.get("/v2/top-headlines", params=params)
         if not isinstance(raw_response, dict):
-            raise IntegrationError(self.provider_name, 0, "Unexpected response shape from NewsAPI")
+            raise IntegrationError(
+                self.provider_name, 0, "Unexpected response shape from NewsAPI"
+            )
         data: dict[str, object] = raw_response
 
         articles: list[NewsArticle] = []

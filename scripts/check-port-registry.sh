@@ -41,8 +41,12 @@ fi
 # Matches "- HOST:CONTAINER" and "- HOST:CONTAINER/protocol" port mappings.
 # ---------------------------------------------------------------------------
 extract_compose_ports() {
-  # Match lines like:  - "9000:9000"  or  - 5432:5432  or  - "8123:8123/tcp"
-  grep -oE '^\s*-\s*"?([0-9]+):[0-9]+"?' "$COMPOSE_FILE" \
+  # Match lines like:  - "9000:9000"  or  - '5432:5432'  or  - 8123:8123/tcp.
+  # Quotes may be single, double, or absent — docker-compose accepts all three
+  # and our infrastructure/docker-compose.yml uses single quotes. The original
+  # regex only allowed double quotes, which silently produced an empty result
+  # under `set -o pipefail` and crashed the check.
+  grep -oE "^[[:space:]]*-[[:space:]]*['\"]?([0-9]+):[0-9]+" "$COMPOSE_FILE" \
     | grep -oE '[0-9]+:[0-9]+' \
     | cut -d: -f1 \
     | sort -u

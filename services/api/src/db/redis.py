@@ -12,6 +12,9 @@ configured in the worker service, not here.
 
 from __future__ import annotations
 
+from collections.abc import Awaitable
+from typing import cast
+
 import redis.asyncio as aioredis
 
 from src.config import settings
@@ -31,9 +34,15 @@ async def ping_redis() -> str:
     """
     try:
         client = get_redis()
-        await client.ping()
+        # redis-py 5.x stubs declare ping() as `Awaitable[bool] | bool` because
+        # the same Redis class is reused in pipeline mode (where commands are
+        # queued synchronously and return T directly). In our non-pipeline async
+        # client the return is always a coroutine — narrow with cast so mypy
+        # --strict accepts the await without a module-wide error suppression.
+        await cast("Awaitable[bool]", client.ping())
         return "ok"
-    except Exception as exc:  # noqa: BLE001 — health probe must not raise; callers check the string
+    except Exception as exc:
+        # Health probe must not raise; callers inspect the returned string.
         return f"error: {exc}"
 
 
@@ -51,7 +60,10 @@ def get_redis() -> aioredis.Redis:
     """
     global _client
     if _client is None:
-        _client = aioredis.from_url(
+        # Use the typed classmethod (Redis.from_url) instead of the
+        # module-level alias (redis.asyncio.from_url) — the module alias
+        # is unannotated and trips mypy's no-untyped-call under --strict.
+        _client = aioredis.Redis.from_url(
             settings.redis_url,
             decode_responses=True,
         )

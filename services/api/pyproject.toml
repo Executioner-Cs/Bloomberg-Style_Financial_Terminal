@@ -98,23 +98,10 @@ module = ["clickhouse_connect", "clickhouse_connect.*"]
 ignore_missing_imports = true
 
 # redis-py asyncio helpers (from_url, etc.) are not fully typed.
-# The redis package ships partial stubs; from_url is unannotated.
+# The redis package ships partial stubs.
 [[tool.mypy.overrides]]
 module = ["redis", "redis.*"]
 ignore_missing_imports = true
-
-# redis-py 5.x stubs type async commands (e.g. ping()) as returning
-# "Awaitable[T] | T" to accommodate pipeline mode, where the same method
-# returns T synchronously for command queueing. In non-pipeline async mode the
-# return is always a coroutine, but mypy --strict flags `await client.ping()`
-# with [misc] because T (bool) is not Awaitable. This is a known stubs
-# limitation (no overload separating pipeline vs. regular client).
-# disallow_untyped_calls = false suppresses "untyped call" noise;
-# disable_error_code silences the [misc] await error that is a stubs artefact.
-[[tool.mypy.overrides]]
-module = ["src.db.redis"]
-disallow_untyped_calls = false
-disable_error_code = ["misc"]
 
 # yfinance has no py.typed marker or stubs. Unofficial Yahoo Finance wrapper — ADR-005.
 [[tool.mypy.overrides]]

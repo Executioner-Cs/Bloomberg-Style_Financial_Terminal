@@ -103,7 +103,8 @@ class FilingsService:
         result = get_filings(symbol=symbol, form_type=form_type)
         if not isinstance(result, FilingsResponse):
             raise TypeError(
-                f"MockDataLoader.get_filings returned {type(result)!r}, expected FilingsResponse"
+                f"MockDataLoader.get_filings returned {type(result)!r}, "
+                "expected FilingsResponse"
             )
         return result
 

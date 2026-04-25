@@ -127,10 +127,14 @@ export function formatDate(isoString: string | null | undefined): string {
 export function formatTime(isoString: string | null | undefined): string {
   if (!isoString) return '—';
   try {
+    // hourCycle: 'h23' produces 00–23. Using `hour12: false` instead causes
+    // V8 to emit '24:00' at midnight UTC (a long-standing ICU quirk where
+    // it picks the 'h24' cycle implicitly). 'h23' is unambiguous and
+    // matches the format the rest of the terminal expects.
     return new Date(isoString).toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: false,
+      hourCycle: 'h23',
       timeZone: 'UTC',
     });
   } catch {

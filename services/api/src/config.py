@@ -50,10 +50,11 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     # Required — set API_BASE_URL in .env. No localhost default: fails fast if missing.
     api_base_url: str
-    # Required — set CORS_ALLOWED_ORIGINS in .env (comma-separated, no trailing slashes).
-    # Stored as a raw string because pydantic-settings 2.6 JSON-parses any
-    # `list[str]`-typed env var before field validators run. Access the parsed
-    # list via the cors_origins property below.
+    # Required — set CORS_ALLOWED_ORIGINS in .env (comma-separated,
+    # no trailing slashes). Stored as a raw string because
+    # pydantic-settings 2.6 JSON-parses any `list[str]`-typed env var
+    # before field validators run. Access the parsed list via the
+    # cors_origins property below.
     cors_allowed_origins: str
 
     # Auth — no defaults for secrets, will raise on missing in production
@@ -86,10 +87,20 @@ class Settings(BaseSettings):
     # ─── Mock data (ADR-006) ─────────────────────────────────────────────────
     # When true, all integration calls route to local JSON files in mock_data/.
     # Set to false in staging/production to use live providers.
-    use_mock_data: bool = Field(default=False, description="Route all integrations to mock_data/ instead of live APIs. ADR-006.")
+    use_mock_data: bool = Field(
+        default=False,
+        description=(
+            "Route all integrations to mock_data/ instead of live APIs. ADR-006."
+        ),
+    )
     # Empty string = auto-detect project root via .git walk (ADR-006).
     # Set MOCK_DATA_DIR to an absolute path to override (e.g. in CI without .git/).
-    mock_data_dir: str = Field(default="", description="Absolute path to mock_data/ directory. Empty = auto-detect. ADR-006.")
+    mock_data_dir: str = Field(
+        default="",
+        description=(
+            "Absolute path to mock_data/ directory. Empty = auto-detect. ADR-006."
+        ),
+    )
 
     # ─── Market data API keys ─────────────────────────────────────────────────
     # Empty default = optional. App does not fail to start if these are unset.
@@ -98,10 +109,29 @@ class Settings(BaseSettings):
     fmp_api_key: str = ""
     coingecko_api_key: str = ""
     stockdata_api_key: str = ""
-    fred_api_key: str = Field(default="", description="FRED API key — free at fred.stlouisfed.org. Required for live macro ingestion.")
-    # Field name matches env var NEWSAPI_API_KEY (pydantic-settings lowercases env vars).
-    newsapi_api_key: str = Field(default="", description="NewsAPI.org key — free tier: 100 req/day. Required for live news ingestion.")
-    finnhub_api_key: str = Field(default="", description="Finnhub.io key — free tier: 60 req/min. Supplemental quotes/news source.")
+    fred_api_key: str = Field(
+        default="",
+        description=(
+            "FRED API key — free at fred.stlouisfed.org. "
+            "Required for live macro ingestion."
+        ),
+    )
+    # Field name matches env var NEWSAPI_API_KEY (pydantic-settings
+    # lowercases env vars).
+    newsapi_api_key: str = Field(
+        default="",
+        description=(
+            "NewsAPI.org key — free tier: 100 req/day. "
+            "Required for live news ingestion."
+        ),
+    )
+    finnhub_api_key: str = Field(
+        default="",
+        description=(
+            "Finnhub.io key — free tier: 60 req/min. "
+            "Supplemental quotes/news source."
+        ),
+    )
 
     # CoinGecko
     # Base URL overridable via env so tests can point at a mock server.
@@ -132,42 +162,114 @@ class Settings(BaseSettings):
 
     # ─── yfinance (Yahoo Finance — unofficial, no API key, ADR-005) ──────────
     # Self-imposed rate limit. Yahoo has no published policy; 60/min is conservative.
-    yfinance_requests_per_minute: int = Field(default=60, description="Self-imposed yfinance rate limit. Yahoo has no published limit. ADR-005.")
+    yfinance_requests_per_minute: int = Field(
+        default=60,
+        description=(
+            "Self-imposed yfinance rate limit. "
+            "Yahoo has no published limit. ADR-005."
+        ),
+    )
     # 30s timeout. Yahoo has no published SLA; 30s is conservative per ADR-005.
-    yfinance_timeout_seconds: float = Field(default=30.0, description="yfinance network timeout. ADR-005.")
+    yfinance_timeout_seconds: float = Field(
+        default=30.0, description="yfinance network timeout. ADR-005."
+    )
     # Top 30 S&P constituents — Phase 1 equities scope per README.
     yfinance_equity_symbols: list[str] = Field(
         default_factory=lambda: [
-            "AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "TSLA", "JPM", "V", "JNJ",
-            "PG", "UNH", "MA", "HD", "CVX", "MRK", "ABBV", "KO", "PEP", "WMT",
-            "BAC", "XOM", "LLY", "AVGO", "COST", "DIS", "ADBE", "NFLX", "CRM", "AMD",
+            "AAPL",
+            "MSFT",
+            "GOOGL",
+            "AMZN",
+            "NVDA",
+            "META",
+            "TSLA",
+            "JPM",
+            "V",
+            "JNJ",
+            "PG",
+            "UNH",
+            "MA",
+            "HD",
+            "CVX",
+            "MRK",
+            "ABBV",
+            "KO",
+            "PEP",
+            "WMT",
+            "BAC",
+            "XOM",
+            "LLY",
+            "AVGO",
+            "COST",
+            "DIS",
+            "ADBE",
+            "NFLX",
+            "CRM",
+            "AMD",
         ],
-        description="Equity symbols to ingest via yfinance. Phase 1: top 30 S&P constituents.",
+        description=(
+            "Equity symbols to ingest via yfinance. "
+            "Phase 1: top 30 S&P constituents."
+        ),
     )
     # 1D ingestion schedule — 21:30 UTC = 4:30 PM ET (30 min after NYSE close).
-    yfinance_ingest_hour_utc: int = Field(default=21, description="Hour (UTC) for daily yfinance ingestion. 21:30 UTC = 4:30 PM ET.")
-    yfinance_ingest_minute_utc: int = Field(default=30, description="Minute (UTC) for daily yfinance ingestion. See yfinance_ingest_hour_utc.")
+    yfinance_ingest_hour_utc: int = Field(
+        default=21,
+        description=(
+            "Hour (UTC) for daily yfinance ingestion. " "21:30 UTC = 4:30 PM ET."
+        ),
+    )
+    yfinance_ingest_minute_utc: int = Field(
+        default=30,
+        description=(
+            "Minute (UTC) for daily yfinance ingestion. "
+            "See yfinance_ingest_hour_utc."
+        ),
+    )
 
     # ─── FRED (Federal Reserve Economic Data — free API key, ADR-005) ────────
     # 30s timeout. FRED has no published SLA; 30s is conservative per ADR-005.
-    fred_timeout_seconds: float = Field(default=30.0, description="FRED API request timeout. ADR-005.")
-    # Phase 1 scope: 5 core macro series covering growth, inflation, rates, employment.
+    fred_timeout_seconds: float = Field(
+        default=30.0, description="FRED API request timeout. ADR-005."
+    )
+    # Phase 1 scope: 5 core macro series covering growth, inflation, rates,
+    # employment.
     fred_series_ids: list[str] = Field(
         default_factory=lambda: ["GDP", "CPIAUCSL", "FEDFUNDS", "DGS10", "UNRATE"],
-        description="FRED series IDs to ingest. Phase 1: GDP, CPI, Fed Funds, 10Y Treasury, Unemployment.",
+        description=(
+            "FRED series IDs to ingest. Phase 1: GDP, CPI, Fed Funds, "
+            "10Y Treasury, Unemployment."
+        ),
     )
     # Weekly on Monday 08:00 UTC — macro releases are typically weekday AM.
-    fred_ingest_day_of_week: str = Field(default="1", description="Day of week for weekly FRED ingestion (1=Monday).")
-    fred_ingest_hour_utc: int = Field(default=8, description="Hour (UTC) for weekly FRED ingestion.")
-    fred_ingest_minute_utc: int = Field(default=0, description="Minute (UTC) for weekly FRED ingestion.")
+    fred_ingest_day_of_week: str = Field(
+        default="1",
+        description="Day of week for weekly FRED ingestion (1=Monday).",
+    )
+    fred_ingest_hour_utc: int = Field(
+        default=8, description="Hour (UTC) for weekly FRED ingestion."
+    )
+    fred_ingest_minute_utc: int = Field(
+        default=0, description="Minute (UTC) for weekly FRED ingestion."
+    )
 
     # ─── NewsAPI (100 req/day free tier, ADR-005) ─────────────────────────────
-    newsapi_timeout_seconds: float = Field(default=15.0, description="NewsAPI request timeout. ADR-005.")
-    # 300s (5 min) TTL: 100 req/day budget. 5-min cache limits calls while staying fresh.
-    news_cache_ttl_seconds: int = Field(default=300, description="News cache TTL. 300s respects NewsAPI 100 req/day free limit. ADR-005.")
+    newsapi_timeout_seconds: float = Field(
+        default=15.0, description="NewsAPI request timeout. ADR-005."
+    )
+    # 300s (5 min) TTL: 100 req/day budget. 5-min cache limits calls while
+    # staying fresh.
+    news_cache_ttl_seconds: int = Field(
+        default=300,
+        description=(
+            "News cache TTL. 300s respects NewsAPI 100 req/day free limit. " "ADR-005."
+        ),
+    )
 
     # ─── Finnhub (60 req/min free tier, ADR-005) ──────────────────────────────
-    finnhub_timeout_seconds: float = Field(default=15.0, description="Finnhub request timeout. ADR-005.")
+    finnhub_timeout_seconds: float = Field(
+        default=15.0, description="Finnhub request timeout. ADR-005."
+    )
 
     # ─── HTTP client identity ─────────────────────────────────────────────────
     # Sent as User-Agent in Finnhub and NewsAPI requests.
@@ -175,15 +277,28 @@ class Settings(BaseSettings):
     # Must include a valid contact email before production deployment.
     app_user_agent: str = Field(
         default="Bloomberg-Terminal/1.0 contact@example.com",
-        description="User-Agent for Finnhub and NewsAPI HTTP requests. Replace contact email before production.",
+        description=(
+            "User-Agent for Finnhub and NewsAPI HTTP requests. "
+            "Replace contact email before production."
+        ),
     )
 
     # ─── SEC EDGAR (unlimited, no key, US government, ADR-005) ───────────────
-    # REQUIRED by EDGAR ToS: https://www.sec.gov/developer — replace before production.
+    # REQUIRED by EDGAR ToS: https://www.sec.gov/developer — replace before
+    # production.
     edgar_user_agent: str
-    edgar_timeout_seconds: float = Field(default=30.0, description="EDGAR API request timeout. ADR-005.")
-    # 86400s = 24hr: filings are published quarterly — no need to re-fetch intraday.
-    edgar_cache_ttl_seconds: int = Field(default=86400, description="EDGAR filing cache TTL. 86400s (24hr): filings don't change intraday. ADR-005.")
+    edgar_timeout_seconds: float = Field(
+        default=30.0, description="EDGAR API request timeout. ADR-005."
+    )
+    # 86400s = 24hr: filings are published quarterly — no need to re-fetch
+    # intraday.
+    edgar_cache_ttl_seconds: int = Field(
+        default=86400,
+        description=(
+            "EDGAR filing cache TTL. 86400s (24hr): "
+            "filings don't change intraday. ADR-005."
+        ),
+    )
     # Cache TTL used by the FilingsService (HTTP-facing cache-aside). Mirrors
     # edgar_cache_ttl_seconds but exposed as its own field so the service
     # layer never references a source-specific constant.
@@ -194,7 +309,8 @@ class Settings(BaseSettings):
 
     # ─── WebSocket gateway ────────────────────────────────────────────────────
     ws_gateway_port: int = 3001
-    # Required — server-side call within Docker bridge. Set WS_GATEWAY_INTERNAL_API_URL in .env.
+    # Required — server-side call within Docker bridge.
+    # Set WS_GATEWAY_INTERNAL_API_URL in .env.
     ws_gateway_internal_api_url: str
     binance_ws_base_url: str = "wss://stream.binance.com:9443"
     coinbase_ws_base_url: str = "wss://advanced-trade-ws.coinbase.com"

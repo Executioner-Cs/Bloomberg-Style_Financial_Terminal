@@ -19,7 +19,12 @@ export default function RootLayout(): JSX.Element {
   return (
     <div className="terminal-shell flex flex-col h-full">
       <CommandPalette />
-      <main role="main" className="flex-1 overflow-hidden">
+      {/* h-full propagates the parent's measured height to dockview, which
+          requires a sized container to compute panel geometry. min-h-0 lets
+          this flex child shrink below the intrinsic min-content height of
+          its descendants — without it, a panel-heavy layout could refuse to
+          shrink and the workspace would render at height: 0. */}
+      <main role="main" className="flex-1 h-full min-h-0 overflow-hidden">
         {/* ErrorBoundary prevents a panel crash from blanking the terminal.
             CLAUDE.md Part XVII: panel crashes must not crash the terminal. */}
         <ErrorBoundary>

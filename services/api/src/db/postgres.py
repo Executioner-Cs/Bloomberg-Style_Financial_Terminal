@@ -50,7 +50,8 @@ async def ping_postgres() -> str:
         async with _engine.connect() as conn:
             await conn.execute(text("SELECT 1"))
         return "ok"
-    except Exception as exc:  # noqa: BLE001 — health probe must not raise; callers check the string
+    except Exception as exc:
+        # Health probe must not raise; callers inspect the returned string.
         return f"error: {exc}"
 
 

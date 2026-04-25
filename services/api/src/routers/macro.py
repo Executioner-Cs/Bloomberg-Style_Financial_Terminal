@@ -86,9 +86,7 @@ async def get_macro_series(
 ) -> MacroSeriesResponse:
     try:
         parsed_from = (
-            datetime.fromisoformat(from_date).replace(tzinfo=UTC)
-            if from_date
-            else None
+            datetime.fromisoformat(from_date).replace(tzinfo=UTC) if from_date else None
         )
         parsed_to = (
             datetime.fromisoformat(to_date).replace(tzinfo=UTC) if to_date else None
