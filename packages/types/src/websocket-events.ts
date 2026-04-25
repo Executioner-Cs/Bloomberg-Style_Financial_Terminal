@@ -65,10 +65,22 @@ export type WsErrorEvent = {
   message: string;
 };
 
+/**
+ * Emitted when no tick has been received for a symbol within STALE_THRESHOLD_SECONDS.
+ * The client should display a visual stale badge on any panel showing this symbol.
+ */
+export type StaleEvent = {
+  type: 'stale';
+  symbol: string;
+  /** Unix ms timestamp of the last tick received before staleness was declared */
+  lastTickTs: number;
+};
+
 export type ServerEvent =
   | PriceUpdateEvent
   | AlertFiredEvent
   | NewsEvent
   | ConnectedEvent
   | PongEvent
-  | WsErrorEvent;
+  | WsErrorEvent
+  | StaleEvent;

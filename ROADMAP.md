@@ -11,17 +11,17 @@
 
 ## Phase Summary
 
-| Phase | Status         | Theme                                                                                 | Exit signal                                               | Capability tier        |
-| ----- | -------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------- | ---------------------- |
-| 0     | ✅ Complete    | Foundation                                                                            | Terminal shell loads, Docker stack healthy                | pre-core               |
-| 1     | ✅ Complete    | Data ingestion + mock layer                                                           | 6 integrations operational, 134 tests green               | pre-core               |
-| 2     | 🚧 In Progress | Workspace shell + REST endpoints + first panel apps                                   | User opens Equities workspace, symbol-linking bus works   | Terminal core          |
-| 3     | Planned        | Real-time WS streaming + Screener + Movers + Earnings + Calendar + Alerts + Portfolio | Live ticks; screener < 2s; alert fires within 1 min       | Power features         |
-| 4     | Planned        | AI analyst (Why Moving / Compare / Summarizer / Brief / Ask Terminal)                 | Every panel has a one-click AI context action             | AI analyst             |
-| 5     | Planned        | Rust performance layer (stream/screener/risk/replay)                                  | WS fan-out P99 < 50ms, screener engine 10× throughput     | Rust performance       |
-| 6     | Planned        | Macro dashboard polish + accessibility + Lighthouse ≥ 90                              | Yield curve panel + full keyboard-only E2E                | Terminal core (polish) |
-| 7     | Planned        | Auth + multi-user + monetisation tiers                                                | JWT rotation; Free/Pro/Institutional rate limits enforced | Platform               |
-| 8     | Planned        | Plugin system + production deployment (ECS/CloudFront/OTel)                           | One sample plugin; rolling deploy green                   | Platform               |
+| Phase | Status      | Theme                                                                                 | Exit signal                                               | Capability tier        |
+| ----- | ----------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------- | ---------------------- |
+| 0     | ✅ Complete | Foundation                                                                            | Terminal shell loads, Docker stack healthy                | pre-core               |
+| 1     | ✅ Complete | Data ingestion + mock layer                                                           | 6 integrations operational, 134 tests green               | pre-core               |
+| 2     | ✅ Complete | Workspace shell + REST endpoints + first panel apps                                   | User opens Equities workspace, symbol-linking bus works   | Terminal core          |
+| 3     | Planned     | Real-time WS streaming + Screener + Movers + Earnings + Calendar + Alerts + Portfolio | Live ticks; screener < 2s; alert fires within 1 min       | Power features         |
+| 4     | Planned     | AI analyst (Why Moving / Compare / Summarizer / Brief / Ask Terminal)                 | Every panel has a one-click AI context action             | AI analyst             |
+| 5     | Planned     | Rust performance layer (stream/screener/risk/replay)                                  | WS fan-out P99 < 50ms, screener engine 10× throughput     | Rust performance       |
+| 6     | Planned     | Macro dashboard polish + accessibility + Lighthouse ≥ 90                              | Yield curve panel + full keyboard-only E2E                | Terminal core (polish) |
+| 7     | Planned     | Auth + multi-user + monetisation tiers                                                | JWT rotation; Free/Pro/Institutional rate limits enforced | Platform               |
+| 8     | Planned     | Plugin system + production deployment (ECS/CloudFront/OTel)                           | One sample plugin; rolling deploy green                   | Platform               |
 
 ---
 
@@ -66,7 +66,7 @@
 
 ---
 
-## Phase 2 — Workspace Shell + First Panel Apps 🚧
+## Phase 2 — Workspace Shell + First Panel Apps ✅
 
 **Intent:** The first shippable increment of the terminal. A workspace of docked, tabbed, resizable panels with saved layouts, symbol-linking, keyboard command palette, and six working panels (Chart, Quote, Watchlist, Macro, News, Filings) rendering from live or mock data. Delivers the **terminal core** capability tier.
 
@@ -122,7 +122,7 @@ _Visual language (Stage D, ADR-010):_
 
 ---
 
-## Phase 3 — Real-Time Prices
+## Phase 3 — Real-Time Prices 🚧
 
 **Intent:** Chart and watchlist tick in real time for crypto (Binance WS) and equities during market hours (Finnhub stream).
 
