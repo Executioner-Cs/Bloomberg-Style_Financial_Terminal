@@ -247,7 +247,7 @@ describe('getPresetSlugFromUrl', () => {
 describe('buildPresetUrl', () => {
   beforeEach(() => {
     Object.defineProperty(globalThis, 'window', {
-      value: { location: { href: 'http://localhost:5173/some/path?other=1' } },
+      value: { location: { href: 'http://localhost:5173/some/path?other=1' } }, // noqa: hardcoded
       writable: true,
       configurable: true,
     });
@@ -255,7 +255,7 @@ describe('buildPresetUrl', () => {
 
   it('sets only the ?ws param and strips other params', () => {
     const url = buildPresetUrl('macro');
-    expect(url).toBe('http://localhost:5173/some/path?ws=macro');
+    expect(url).toBe('http://localhost:5173/some/path?ws=macro'); // noqa: hardcoded
   });
 
   it('produces a different URL per slug', () => {

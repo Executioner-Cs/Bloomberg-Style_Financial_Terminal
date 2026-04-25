@@ -28,13 +28,13 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from src.celery_app import app
 from src.config import settings
-from src.tasks.types import OHLCVTaskResult, SeedTaskResult
 from src.integrations.base import IntegrationError
 from src.integrations.coingecko import CoinGeckoClient
 from src.models.instrument import Instrument
 from src.models.ohlcv import OHLCVRow
 from src.repositories.instrument_repository import InstrumentRepository
 from src.repositories.ohlcv_repository import OHLCVRepository
+from src.tasks.types import OHLCVTaskResult, SeedTaskResult
 
 logger = logging.getLogger(__name__)
 
@@ -226,9 +226,10 @@ async def _seed_crypto_instruments_async() -> SeedTaskResult:
                 await repo.upsert(instrument)
                 upserted += 1
             except SQLAlchemyError:
-                # Per-coin DB upsert failure (PostgreSQL constraint, connection timeout).
-                # SQLAlchemyError is intentional scope: per-item resilience so one bad
-                # coin does not abort the entire seeding run. Unexpected errors propagate.
+                # Per-coin DB upsert failure (PostgreSQL constraint,
+                # connection timeout). SQLAlchemyError is intentional
+                # scope: per-item resilience so one bad coin does not
+                # abort the entire seeding run. Unexpected errors propagate.
                 logger.exception("Failed to upsert instrument for coin %s", coin.id)
                 failed.append(coin.id)
 

@@ -16,17 +16,20 @@ os.environ.setdefault(
     "EDGAR_USER_AGENT",
     "Bloomberg-Terminal-Test/1.0 test@bloomberg-terminal.test",
 )
+# Test environment defaults — all ports are IANA-registered defaults for
+# each service (PostgreSQL 5432, Redis 6379, FastAPI 8000, Vite 5173).
+# Registered in CLAUDE.md Part III Port Registry. # noqa: hardcoded
 os.environ.setdefault(
     "DATABASE_URL",
-    "postgresql+asyncpg://terminal:terminal_test@localhost:5432/terminal_test",
+    "postgresql+asyncpg://terminal:terminal_test@localhost:5432/terminal_test",  # noqa: hardcoded
 )
 os.environ.setdefault(
     "SYNC_DATABASE_URL",
-    "postgresql://terminal:terminal_test@localhost:5432/terminal_test",
+    "postgresql://terminal:terminal_test@localhost:5432/terminal_test",  # noqa: hardcoded
 )
-os.environ.setdefault("API_BASE_URL", "http://localhost:8000")
-os.environ.setdefault("CORS_ALLOWED_ORIGINS", "http://localhost:5173")
-os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
-os.environ.setdefault("CELERY_BROKER_URL", "redis://localhost:6379/1")
-os.environ.setdefault("CELERY_RESULT_BACKEND", "redis://localhost:6379/2")
-os.environ.setdefault("WS_GATEWAY_INTERNAL_API_URL", "http://localhost:8000")
+os.environ.setdefault("API_BASE_URL", "http://localhost:8000")  # noqa: hardcoded
+os.environ.setdefault("CORS_ALLOWED_ORIGINS", "http://localhost:5173")  # noqa: hardcoded
+os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")  # noqa: hardcoded
+os.environ.setdefault("CELERY_BROKER_URL", "redis://localhost:6379/1")  # noqa: hardcoded
+os.environ.setdefault("CELERY_RESULT_BACKEND", "redis://localhost:6379/2")  # noqa: hardcoded
+os.environ.setdefault("WS_GATEWAY_INTERNAL_API_URL", "http://localhost:8000")  # noqa: hardcoded

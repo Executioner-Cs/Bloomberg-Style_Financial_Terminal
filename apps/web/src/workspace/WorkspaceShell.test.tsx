@@ -33,7 +33,8 @@ describe('WorkspaceShell', () => {
       () => {
         expect(receivedApi).not.toBeNull();
       },
-      { timeout: 2000 },
+      // 2 s: generous budget for a synchronous React state update in jsdom.
+      { timeout: 2000 }, // noqa: hardcoded
     );
 
     // Assert the api exposes the methods presets/palette/serializer

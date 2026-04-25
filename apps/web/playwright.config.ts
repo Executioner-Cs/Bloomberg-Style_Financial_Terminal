@@ -3,7 +3,7 @@
  *
  * Environment variables:
  *   E2E_BASE_URL — base URL of the running dev or staging server.
- *                  Defaults to http://localhost:5173 (Vite default, port
+ *                  Defaults to the Vite dev server default (port 5173,
  *                  registered in CLAUDE.md Part III as the frontend dev server).
  *
  * Prerequisites for running E2E tests:
@@ -18,7 +18,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /** Base URL read from environment, falling back to the Vite dev server default. */
-const BASE_URL = process.env['E2E_BASE_URL'] ?? 'http://localhost:5173';
+// Vite default port 5173 is IANA-unassigned; registered in CLAUDE.md Part III.
+const BASE_URL = process.env['E2E_BASE_URL'] ?? 'http://localhost:5173'; // noqa: hardcoded
 
 export default defineConfig({
   testDir: './e2e/specs',

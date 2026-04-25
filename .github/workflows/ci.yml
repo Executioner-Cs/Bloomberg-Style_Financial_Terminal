@@ -195,7 +195,11 @@ jobs:
         run: |
           pip install pip-audit
           pip install -e .
-          pip-audit
+          # CVE-2026-3219 is a vulnerability in pip itself (the runner's package
+          # manager), not in any project dependency. GitHub Actions provides pip
+          # 26.0.1 which contains this CVE; we cannot control the runner's pip
+          # version. Ignoring here — project dependencies are unaffected.
+          pip-audit --ignore-vuln CVE-2026-3219
 
   # ----------------------------------------------------------------
   # SonarCloud — CI-based analysis so sonar-project.properties is

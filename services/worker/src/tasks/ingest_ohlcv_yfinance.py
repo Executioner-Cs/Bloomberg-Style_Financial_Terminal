@@ -23,12 +23,12 @@ import clickhouse_connect
 
 from src.celery_app import app
 from src.config import settings
-from src.tasks.types import OHLCVTaskResult
 from src.integrations.base import IntegrationError
-from src.integrations.mock_loader import MockDataLoader, MockDataError
+from src.integrations.mock_loader import MockDataError, MockDataLoader
 from src.integrations.yfinance import YFinanceClient
 from src.models.ohlcv import OHLCVRow
 from src.repositories.ohlcv_repository import OHLCVRepository
+from src.tasks.types import OHLCVTaskResult
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +80,10 @@ async def _ingest_yfinance_ohlcv_async() -> OHLCVTaskResult:
                 rows = loader.get_ohlcv(symbol, "1D")
             except MockDataError:
                 # Missing mock file for this symbol — expected during dev setup.
-                logger.exception("Mock OHLCV file missing for symbol %s — skipping", symbol)
+                logger.exception(
+                    "Mock OHLCV file missing for symbol %s — skipping",
+                    symbol,
+                )
                 failed.append(symbol)
                 continue
             if rows:

@@ -22,12 +22,12 @@ import clickhouse_connect
 
 from src.celery_app import app
 from src.config import settings
-from src.tasks.types import OHLCVTaskResult
 from src.integrations.base import IntegrationError
 from src.integrations.fred import FredClient
-from src.integrations.mock_loader import MockDataLoader, MockDataError
+from src.integrations.mock_loader import MockDataError, MockDataLoader
 from src.models.macro import MacroRow
 from src.repositories.macro_repository import MacroRepository
+from src.tasks.types import OHLCVTaskResult
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +78,10 @@ async def _refresh_macro_series_async() -> OHLCVTaskResult:
                 rows = loader.get_macro_rows(series_id)
             except MockDataError:
                 # Missing mock file for this series — expected during dev setup.
-                logger.exception("Mock macro file missing for series %s — skipping", series_id)
+                logger.exception(
+                    "Mock macro file missing for series %s — skipping",
+                    series_id,
+                )
                 failed.append(series_id)
                 continue
             if rows:

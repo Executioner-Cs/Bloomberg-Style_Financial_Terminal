@@ -10,15 +10,22 @@ export default defineConfig(({ mode }) => {
   // VITE_DEV_* vars are consumed here at config time — never shipped to the client.
   const env = loadEnv(mode, resolve(__dirname, '../..'), '');
 
-  // Both proxy targets are required — no localhost fallback. Fail fast to prevent
-  // silent misconfiguration when running without a .env file.
-  const apiProxyTarget = env['VITE_DEV_API_PROXY_TARGET'];
-  const wsProxyTarget = env['VITE_DEV_WS_PROXY_TARGET'];
-  if (!apiProxyTarget) {
-    throw new Error('VITE_DEV_API_PROXY_TARGET is required in .env (e.g. http://localhost:8000)');
-  }
-  if (!wsProxyTarget) {
-    throw new Error('VITE_DEV_WS_PROXY_TARGET is required in .env (e.g. ws://localhost:3001)');
+  // Proxy targets are only required in serve/build mode, not during unit tests.
+  // Vitest sets mode='test'; throwing there would break `pnpm test:unit` in CI
+  // where no .env file is present. Fail fast in every other mode.
+  // Default to '' so apiProxyTarget/wsProxyTarget are typed as string (not
+  // string | undefined). Empty string is falsy — validation still triggers below.
+  const apiProxyTarget = env['VITE_DEV_API_PROXY_TARGET'] ?? '';
+  const wsProxyTarget = env['VITE_DEV_WS_PROXY_TARGET'] ?? '';
+  if (mode !== 'test') {
+    if (!apiProxyTarget) {
+      // noqa: hardcoded — example value in error message only; actual URL from env.
+      throw new Error('VITE_DEV_API_PROXY_TARGET is required in .env (e.g. http://localhost:8000)'); // noqa: hardcoded
+    }
+    if (!wsProxyTarget) {
+      // noqa: hardcoded — example value in error message only; actual URL from env.
+      throw new Error('VITE_DEV_WS_PROXY_TARGET is required in .env (e.g. ws://localhost:3001)'); // noqa: hardcoded
+    }
   }
 
   return {
@@ -32,21 +39,24 @@ export default defineConfig(({ mode }) => {
         '@terminal/ui-components': resolve(__dirname, '../../packages/ui-components/src'),
       },
     },
-    server: {
-      port: 5173, // noqa: hardcoded — Vite's assigned default. Falls within project frontend range (5100–5199). ADR-004.
-      https: true, // cert provided by @vitejs/plugin-basic-ssl (ADR-004)
-      proxy: {
-        '/api': {
-          target: apiProxyTarget,
-          changeOrigin: true,
-        },
-        '/ws': {
-          target: wsProxyTarget,
-          ws: true,
-          changeOrigin: true,
+    // Server config is irrelevant in test mode — Vitest uses its own runner.
+    ...(mode !== 'test' && {
+      server: {
+        port: 5173, // noqa: hardcoded — Vite's assigned default. Falls within project frontend range (5100–5199). ADR-004.
+        https: true, // cert provided by @vitejs/plugin-basic-ssl (ADR-004)
+        proxy: {
+          '/api': {
+            target: apiProxyTarget,
+            changeOrigin: true,
+          },
+          '/ws': {
+            target: wsProxyTarget,
+            ws: true,
+            changeOrigin: true,
+          },
         },
       },
-    },
+    }),
     build: {
       rollupOptions: {
         output: {

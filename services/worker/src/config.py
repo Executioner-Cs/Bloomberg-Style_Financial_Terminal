@@ -44,7 +44,8 @@ class WorkerSettings(BaseSettings):
     app_env: str = "development"
 
     # Celery broker and backend — separate Redis DBs to isolate task traffic.
-    # DB 1: broker (task queue), DB 2: results backend. All required; no localhost defaults.
+    # DB 1: broker (task queue), DB 2: results backend.
+    # All required; no localhost defaults.
     celery_broker_url: str
     celery_result_backend: str
     # DB 0: cache (shared with API service for quote snapshots). Required.
@@ -58,11 +59,17 @@ class WorkerSettings(BaseSettings):
     # Lightweight tasks (alert evaluator, quota report): 1 retry.
     celery_task_max_retries: int = Field(
         default=3,
-        description="Max retries for ingestion Celery tasks (FRED, yfinance, CoinGecko, EDGAR, news).",
+        description=(
+            "Max retries for ingestion Celery tasks"
+            " (FRED, yfinance, CoinGecko, EDGAR, news)."
+        ),
     )
     celery_lightweight_task_max_retries: int = Field(
         default=1,
-        description="Max retries for lightweight Celery tasks (alert evaluator, quota report).",
+        description=(
+            "Max retries for lightweight Celery tasks"
+            " (alert evaluator, quota report)."
+        ),
     )
 
     # ClickHouse — worker writes OHLCV rows via HTTP interface (port 8123).
@@ -131,8 +138,10 @@ class WorkerSettings(BaseSettings):
         """
         if "example.com" in v:
             raise ValueError(
-                "EDGAR_USER_AGENT must contain a real contact email (SEC ToS requirement). "
-                "Set EDGAR_USER_AGENT=<AppName>/<Version> <your@email.com> in your .env file."
+                "EDGAR_USER_AGENT must contain a real contact email"
+                " (SEC ToS requirement). "
+                "Set EDGAR_USER_AGENT=<AppName>/<Version>"
+                " <your@email.com> in your .env file."
             )
         return v
 
@@ -235,7 +244,10 @@ class WorkerSettings(BaseSettings):
     # EDGAR uses edgar_user_agent separately (SEC ToS mandates its own format).
     app_user_agent: str = Field(
         default="Bloomberg-Terminal/1.0 contact@example.com",
-        description="User-Agent for Finnhub and NewsAPI HTTP requests. Replace contact email before production.",
+        description=(
+            "User-Agent for Finnhub and NewsAPI HTTP requests."
+            " Replace contact email before production."
+        ),
     )
 
     # ─── EDGAR (ADR-005) ──────────────────────────────────────────────────────
